@@ -46,7 +46,7 @@ fi
 declare -A map
 map[\$ALLOWESCALATION]="$ALLOWESCALATION"
 map[\$NAMESERVERS]="$nameserver_str"
-use_manifest coredns apply "$(declare -p map)"
+use_manifest dns/coredns apply "$(declare -p map)"
 sleep 5
 
 echo "Restarting kubelet"

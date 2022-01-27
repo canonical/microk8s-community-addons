@@ -12,13 +12,9 @@ KUBECTL="$SNAP/kubectl --kubeconfig=${SNAP_DATA}/credentials/client.config"
 # We need to wait for the dns pods to terminate before we restart kubelet
 echo "Removing DNS manifest"
 pods_sys="$($KUBECTL get po -n kube-system 2>&1)"
-if echo "$pods_sys" | grep "kube-dns" &> /dev/null 
-then
-  use_manifest dns delete
-fi
 if echo "$pods_sys" | grep "coredns" &> /dev/null
 then
-  use_manifest coredns delete
+  use_manifest dns/coredns delete
 fi
 sleep 15
 dns=$(wait_for_service_shutdown "kube-system" "k8s-app=kube-dns")

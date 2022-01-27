@@ -36,6 +36,6 @@ declare -A map
 map[\$TAG]="$TAG"
 map[\$DEFAULT_CERT]="$DEFAULT_CERT"
 map[\$EXTRA_ARGS]="$EXTRA_ARGS"
-use_manifest ingress apply "$(declare -p map)"
+use_manifest ingress/ingress apply "$(declare -p map)"
 
 echo "Ingress is enabled"

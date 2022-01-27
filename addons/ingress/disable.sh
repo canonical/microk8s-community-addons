@@ -27,6 +27,6 @@ declare -A map
 map[\$TAG]="$TAG"
 map[\$DEFAULT_CERT]="$DEFAULT_CERT"
 map[\$EXTRA_ARGS]="$EXTRA_ARGS"
-use_manifest ingress delete "$(declare -p map)"
+use_manifest ingress/ingress delete "$(declare -p map)"
 
 echo "Ingress is disabled"
