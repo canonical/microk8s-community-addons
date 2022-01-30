@@ -73,9 +73,6 @@ class TestUpgrade(object):
         except CalledProcessError:
             print("Will not test ingress")
 
-        # AMD64 only tests
-        if platform.machine() == "x86_64" and under_time_pressure == "False":
-
         # Refresh the snap to the target
         if upgrade_to.endswith(".snap"):
             cmd = "sudo snap install {} --classic --dangerous".format(upgrade_to)
