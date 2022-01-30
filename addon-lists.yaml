@@ -26,3 +26,12 @@ microk8s-addons:
       supported_architectures:
         - arm64
         - amd64
+
+    - name: "metrics-server"
+      description: "K8s Metrics Server for API access to service metrics"
+      version: "0.5.0"
+      check_status: "pod/metrics-server"
+      supported_architectures:
+        - arm64
+        - amd64
+        - s390x
