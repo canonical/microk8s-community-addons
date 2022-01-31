@@ -59,12 +59,124 @@ class TestUpgrade(object):
             print("Will not test dns-dashboard")
 
         try:
+            enable = microk8s_enable("storage")
+            assert "Nothing to do for" not in enable
+            validate_storage()
+            test_matrix["storage"] = validate_storage
+        except CalledProcessError:
+            print("Will not test storage")
+
+        try:
             enable = microk8s_enable("ingress")
             assert "Nothing to do for" not in enable
             validate_ingress()
             test_matrix["ingress"] = validate_ingress
         except CalledProcessError:
             print("Will not test ingress")
+
+        try:
+            enable = microk8s_enable("gpu")
+            assert "Nothing to do for" not in enable
+            validate_gpu()
+            test_matrix["gpu"] = validate_gpu
+        except CalledProcessError:
+            print("Will not test gpu")
+
+        try:
+            enable = microk8s_enable("registry")
+            assert "Nothing to do for" not in enable
+            validate_registry()
+            test_matrix["registry"] = validate_registry
+        except CalledProcessError:
+            print("Will not test registry")
+
+        try:
+            validate_forward()
+            test_matrix["forward"] = validate_forward
+        except CalledProcessError:
+            print("Will not test port forward")
+
+        try:
+            enable = microk8s_enable("metrics-server")
+            assert "Nothing to do for" not in enable
+            validate_metrics_server()
+            test_matrix["metrics_server"] = validate_metrics_server
+        except CalledProcessError:
+            print("Will not test the metrics server")
+
+        # AMD64 only tests
+        if platform.machine() == "x86_64" and under_time_pressure == "False":
+            """
+            # Prometheus operator on our lxc is chashlooping disabling the test for now.
+            try:
+                enable = microk8s_enable("prometheus", timeout_insec=30)
+                assert "Nothing to do for" not in enable
+                validate_prometheus()
+                test_matrix['prometheus'] = validate_prometheus
+            except:
+                print('Will not test the prometheus')
+
+            # The kubeflow deployment is huge. It will not fit comfortably
+            # with the rest of the addons on the same machine during an upgrade
+            # we will need to find another way to test it.
+            try:
+                enable = microk8s_enable("kubeflow", timeout_insec=30)
+                assert "Nothing to do for" not in enable
+                validate_kubeflow()
+                test_matrix['kubeflow'] = validate_kubeflow
+            except:
+                print('Will not test kubeflow')
+            """
+
+            try:
+                enable = microk8s_enable("fluentd", timeout_insec=30)
+                assert "Nothing to do for" not in enable
+                validate_fluentd()
+                test_matrix["fluentd"] = validate_fluentd
+            except CalledProcessError:
+                print("Will not test the fluentd")
+
+            try:
+                enable = microk8s_enable("jaeger", timeout_insec=30)
+                assert "Nothing to do for" not in enable
+                validate_jaeger()
+                test_matrix["jaeger"] = validate_jaeger
+            except CalledProcessError:
+                print("Will not test the jaeger addon")
+
+            # We are not testing cilium because we want to test the upgrade of the default CNI
+            """
+            try:
+                enable = microk8s_enable("cilium", timeout_insec=300)
+                assert "Nothing to do for" not in enable
+                validate_cilium()
+                test_matrix['cilium'] = validate_cilium
+            except CalledProcessError:
+                print('Will not test the cilium addon')
+            """
+            try:
+                ip_ranges = (
+                    "192.168.0.105-192.168.0.105,192.168.0.110-192.168.0.111,192.168.1.240/28"
+                )
+                enable = microk8s_enable("{}:{}".format("metallb", ip_ranges), timeout_insec=500)
+                assert "MetalLB is enabled" in enable and "Nothing to do for" not in enable
+                validate_metallb_config(ip_ranges)
+                test_matrix["metallb"] = validate_metallb_config
+            except CalledProcessError:
+                print("Will not test the metallb addon")
+
+            # We will not be testing multus because it takes too long for cilium and multus
+            # to settle after the update and the multus test needs to be refactored so we do
+            # delete and recreate the networks configured.
+            """
+            try:
+                enable = microk8s_enable("multus", timeout_insec=150)
+                assert "Nothing to do for" not in enable
+                validate_multus()
+                test_matrix['multus'] = validate_multus
+            except CalledProcessError:
+                print('Will not test the multus addon')
+            """
 
         # Refresh the snap to the target
         if upgrade_to.endswith(".snap"):
