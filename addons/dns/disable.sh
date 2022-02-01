@@ -3,6 +3,8 @@
 set -e
 
 source $SNAP/actions/common/utils.sh
+CURRENT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
+source $CURRENT_DIR/../common/utils.sh
 
 echo "Disabling DNS"
 echo "Reconfiguring kubelet"
@@ -14,7 +16,7 @@ echo "Removing DNS manifest"
 pods_sys="$($KUBECTL get po -n kube-system 2>&1)"
 if echo "$pods_sys" | grep "coredns" &> /dev/null
 then
-  use_manifest dns/coredns delete
+  use_addon_manifest dns/coredns delete
 fi
 sleep 15
 dns=$(wait_for_service_shutdown "kube-system" "k8s-app=kube-dns")

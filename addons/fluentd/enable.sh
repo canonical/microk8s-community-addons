@@ -5,6 +5,7 @@ set -e
 export PATH="$SNAP/usr/sbin:$SNAP/usr/bin:$SNAP/sbin:$SNAP/bin:$PATH"
 
 source $SNAP/actions/common/utils.sh
+CURRENT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
 
 echo "Enabling Fluentd-Elasticsearch"
 
@@ -26,6 +27,6 @@ then
   sleep 5
 fi
 
-$KUBECTL apply -f "${SNAP}/addons/core/addons/fluentd/fluentd"
+$KUBECTL apply -f "${CURRENT_DIR}/fluentd"
 
 echo "Fluentd-Elasticsearch is enabled"

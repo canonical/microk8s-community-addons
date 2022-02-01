@@ -3,6 +3,7 @@
 set -e
 
 source "${SNAP}/actions/common/utils.sh"
+CURRENT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
 
 KUBECTL="${SNAP}/kubectl --kubeconfig=${SNAP_DATA}/credentials/client.config"
 CUR_DATA=$(dirname "${SNAP_DATA}")/current
@@ -17,7 +18,7 @@ else
   "${SNAP}/microk8s-status.wrapper" --wait-ready >/dev/null
 
   echo "Applying manifest for multus daemonset."
-  cat "${SNAP}/addons/core/addons/multus/multus.yaml" | "${SNAP}/bin/sed" "s#{{SNAP_DATA}}#${CUR_DATA}#g" | ${KUBECTL} apply -f -
+  cat "${CURRENT_DIR}/multus.yaml" | "${SNAP}/bin/sed" "s#{{SNAP_DATA}}#${CUR_DATA}#g" | ${KUBECTL} apply -f -
 
   echo -n "Waiting for multus daemonset to start."
   until [ -f "${SNAP_DATA}/opt/cni/bin/multus" ]; do

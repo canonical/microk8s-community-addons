@@ -3,6 +3,7 @@
 set -e
 
 source $SNAP/actions/common/utils.sh
+CURRENT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
 
 echo "Enabling Jaeger"
 
@@ -10,7 +11,7 @@ echo "Enabling Jaeger"
 
 read -ra ARGUMENTS <<< "$1"
 
-MANIFESTS_PATH="${SNAP}/addons/core/addons/jaeger/jaeger"
+MANIFESTS_PATH="${CURRENT_DIR}/jaeger"
 
 if [ ! -z "${ARGUMENTS[@]}" ]
 then

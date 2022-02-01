@@ -2,11 +2,12 @@
 
 set -e
 source $SNAP/actions/common/utils.sh
+CURRENT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
 echo "Disabling Jaeger"
 read -ra ARGUMENTS <<< "$1"
 
 KUBECTL="$SNAP/kubectl --kubeconfig=${SNAP_DATA}/credentials/client.config"
-MANIFESTS_PATH="${SNAP}/addons/core/addons/jaeger/jaeger"
+MANIFESTS_PATH="${CURRENT_DIR}/jaeger"
 
 if [ ! -z "${ARGUMENTS[@]}" ]
 then

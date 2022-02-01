@@ -3,6 +3,7 @@
 set -e
 
 source $SNAP/actions/common/utils.sh
+CURRENT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
 
 export OPENSSL_CONF="/snap/microk8s/current/etc/ssl/openssl.cnf"
 
@@ -54,5 +55,5 @@ do
 done
 echo "Applying Metallb manifest"
 
-cat $SNAP/addons/core/addons/metallb/metallb.yaml | $SNAP/bin/sed "s@{{member_list}}@$MEMBERLIST_SECRET@g" | $SNAP/bin/sed "s@{{allow_escalation}}@$ALLOWESCALATION@g" | $SNAP/bin/sed "s@{{addresses}}@$ip_range_str@g" | $KUBECTL apply -f -
+cat $CURRENT_DIR/metallb.yaml | $SNAP/bin/sed "s@{{member_list}}@$MEMBERLIST_SECRET@g" | $SNAP/bin/sed "s@{{allow_escalation}}@$ALLOWESCALATION@g" | $SNAP/bin/sed "s@{{addresses}}@$ip_range_str@g" | $KUBECTL apply -f -
 echo "MetalLB is enabled"

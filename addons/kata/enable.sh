@@ -27,7 +27,8 @@ def apply_runtime_manifest():
     """
     try:
         snap_path = os.environ.get("SNAP")
-        manifest = "{}/addons/core/addons/kata/kata/runtime.yaml".format(snap_path)
+        current_path = os.path.dirname(os.path.realpath(__file__)))
+        manifest = "{}/kata/runtime.yaml".format(current_path)
         subprocess.call(["{}/microk8s-kubectl.wrapper".format(snap_path), "apply", "-f", manifest])
     except (subprocess.CalledProcessError):
         print("Failed to apply the runtime manifest." )

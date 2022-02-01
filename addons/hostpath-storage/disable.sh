@@ -3,13 +3,15 @@
 set -e
 
 source $SNAP/actions/common/utils.sh
+CURRENT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
+source $CURRENT_DIR/../common/utils.sh
 
 echo "Disabling hostpath storage."
 read -ra ARGUMENTS <<< "$1"
 
 declare -A map
 map[\$SNAP_COMMON]="$SNAP_COMMON"
-use_manifest hostpath-storage/storage delete "$(declare -p map)"
+use_addon_manifest hostpath-storage/storage delete "$(declare -p map)"
 sleep 5
 echo "Storage removed."
 if [ ! -z "${ARGUMENTS[@]}" ] && [ "${ARGUMENTS[@]}" = "destroy-storage" ]

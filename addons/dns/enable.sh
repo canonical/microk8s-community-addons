@@ -3,6 +3,9 @@
 set -e
 
 source $SNAP/actions/common/utils.sh
+CURRENT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
+source $CURRENT_DIR/../common/utils.sh
+
 KUBECTL="$SNAP/kubectl --kubeconfig=${SNAP_DATA}/credentials/client.config"
 # Apply the dns yaml
 # We do not need to see dns pods running at this point just give some slack
@@ -46,7 +49,7 @@ fi
 declare -A map
 map[\$ALLOWESCALATION]="$ALLOWESCALATION"
 map[\$NAMESERVERS]="$nameserver_str"
-use_manifest dns/coredns apply "$(declare -p map)"
+use_addon_manifest dns/coredns apply "$(declare -p map)"
 sleep 5
 
 echo "Restarting kubelet"

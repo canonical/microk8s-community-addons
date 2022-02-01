@@ -3,6 +3,8 @@
 set -e
 
 source $SNAP/actions/common/utils.sh
+CURRENT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
+source $CURRENT_DIR/../common/utils.sh
 
 regex_args='([a-zA-Z]+=[a-zA-Z0-9]+(,|))'
 
@@ -14,7 +16,7 @@ if [ -z "${ARGUMENTS[@]}" ]; then
   map[\$DISKSIZE]="20Gi"
   "$SNAP/microk8s-enable.wrapper" hostpath-storage
   echo "Applying registry manifest"
-  use_manifest registry/registry apply "$(declare -p map)"
+  use_addon_manifest registry/registry apply "$(declare -p map)"
   echo "The registry is enabled"
 elif [[ ${ARGUMENTS[@]} =~ $regex_args ]]; then
 	IFS=',' read -ra args <<< ${ARGUMENTS[@]}
@@ -36,7 +38,7 @@ elif [[ ${ARGUMENTS[@]} =~ $regex_args ]]; then
   done
   echo "Enabling the private registry"
   echo "Applying registry manifest"
-  use_manifest registry/registry apply "$(declare -p map)"
+  use_addon_manifest registry/registry apply "$(declare -p map)"
   echo "The registry is enabled"
   echo "The size of the persistent volume is $value"
 else

@@ -3,6 +3,8 @@
 set -e
 
 source $SNAP/actions/common/utils.sh
+CURRENT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
+source $CURRENT_DIR/../common/utils.sh
 
 echo "Disabling Ingress"
 
@@ -27,6 +29,6 @@ declare -A map
 map[\$TAG]="$TAG"
 map[\$DEFAULT_CERT]="$DEFAULT_CERT"
 map[\$EXTRA_ARGS]="$EXTRA_ARGS"
-use_manifest ingress/ingress delete "$(declare -p map)"
+use_addon_manifest ingress/ingress delete "$(declare -p map)"
 
 echo "Ingress is disabled"

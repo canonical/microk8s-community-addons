@@ -3,6 +3,7 @@
 set -e
 
 source $SNAP/actions/common/utils.sh
+CURRENT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
 
 echo "Disabling Fluentd-Elasticsearch"
 
@@ -21,7 +22,7 @@ do
 done
 
 
-$KUBECTL delete -f "${SNAP}/addons/core/addons/fluentd/fluentd"
+$KUBECTL delete -f "${CURRENT_DIR}/fluentd"
 # Allow for a few seconds for the deletion to take place
 sleep 10
 
