@@ -24,7 +24,7 @@ def mark_kata_disabled():
 def delete_runtime_manifest():
     try:
         snap_path = os.environ.get("SNAP")
-        current_path = os.path.dirname(os.path.realpath(__file__)))
+        current_path = os.path.dirname(os.path.realpath(__file__))
         manifest = "{}/kata/runtime.yaml".format(current_path)
         subprocess.call(["{}/microk8s-kubectl.wrapper".format(snap_path), "delete", "-f", manifest])
     except (subprocess.CalledProcessError):
