@@ -6,7 +6,7 @@ echo "Disabling Jaeger"
 read -ra ARGUMENTS <<< "$1"
 
 KUBECTL="$SNAP/kubectl --kubeconfig=${SNAP_DATA}/credentials/client.config"
-MANIFESTS_PATH="${SNAP}/canonical/addons/jaeger/jaeger"
+MANIFESTS_PATH="${SNAP}/addons/core/addons/jaeger/jaeger"
 
 if [ ! -z "${ARGUMENTS[@]}" ]
 then

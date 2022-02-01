@@ -17,7 +17,7 @@ else
   "${SNAP}/microk8s-status.wrapper" --wait-ready >/dev/null
 
   echo "Applying manifest for multus daemonset."
-  cat "${SNAP}/canonical/addons/multus/multus.yaml" | "${SNAP}/bin/sed" "s#{{SNAP_DATA}}#${CUR_DATA}#g" | ${KUBECTL} apply -f -
+  cat "${SNAP}/addons/core/addons/multus/multus.yaml" | "${SNAP}/bin/sed" "s#{{SNAP_DATA}}#${CUR_DATA}#g" | ${KUBECTL} apply -f -
 
   echo -n "Waiting for multus daemonset to start."
   until [ -f "${SNAP_DATA}/opt/cni/bin/multus" ]; do

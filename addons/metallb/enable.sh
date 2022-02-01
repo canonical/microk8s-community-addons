@@ -54,5 +54,5 @@ do
 done
 echo "Applying Metallb manifest"
 
-cat $SNAP/canonical/addons/metallb/metallb.yaml | $SNAP/bin/sed "s@{{member_list}}@$MEMBERLIST_SECRET@g" | $SNAP/bin/sed "s@{{allow_escalation}}@$ALLOWESCALATION@g" | $SNAP/bin/sed "s@{{addresses}}@$ip_range_str@g" | $KUBECTL apply -f -
+cat $SNAP/addons/core/addons/metallb/metallb.yaml | $SNAP/bin/sed "s@{{member_list}}@$MEMBERLIST_SECRET@g" | $SNAP/bin/sed "s@{{allow_escalation}}@$ALLOWESCALATION@g" | $SNAP/bin/sed "s@{{addresses}}@$ip_range_str@g" | $KUBECTL apply -f -
 echo "MetalLB is enabled"

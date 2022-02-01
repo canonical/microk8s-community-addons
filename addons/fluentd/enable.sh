@@ -26,6 +26,6 @@ then
   sleep 5
 fi
 
-$KUBECTL apply -f "${SNAP}/canonical/addons/fluentd/fluentd"
+$KUBECTL apply -f "${SNAP}/addons/core/addons/fluentd/fluentd"
 
 echo "Fluentd-Elasticsearch is enabled"

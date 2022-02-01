@@ -12,6 +12,6 @@ echo "Enabling traefik ingress controller on port 8080"
 # make sure the "traefik" namespace exists
 $KUBECTL create namespace "$NAMESPACE_PTR" > /dev/null 2>&1 || true
 # load the CRD and wait for it to be installed
-$KUBECTL apply -f "${SNAP}/canonical/addons/traefik/traefik.yaml"
+$KUBECTL apply -f "${SNAP}/addons/core/addons/traefik/traefik.yaml"
 
 echo "traefik ingress controller has been installed on port 8080"

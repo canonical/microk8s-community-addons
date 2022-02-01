@@ -21,7 +21,7 @@ do
 done
 
 
-$KUBECTL delete -f "${SNAP}/canonical/addons/fluentd/fluentd"
+$KUBECTL delete -f "${SNAP}/addons/core/addons/fluentd/fluentd"
 # Allow for a few seconds for the deletion to take place
 sleep 10
 

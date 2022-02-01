@@ -10,7 +10,7 @@ echo "Enabling Jaeger"
 
 read -ra ARGUMENTS <<< "$1"
 
-MANIFESTS_PATH="${SNAP}/canonical/addons/jaeger/jaeger"
+MANIFESTS_PATH="${SNAP}/addons/core/addons/jaeger/jaeger"
 
 if [ ! -z "${ARGUMENTS[@]}" ]
 then
