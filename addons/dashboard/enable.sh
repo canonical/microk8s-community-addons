@@ -9,7 +9,7 @@ source $CURRENT_DIR/../common/utils.sh
 echo "Enabling Kubernetes Dashboard"
 "$SNAP/microk8s-enable.wrapper" metrics-server
 echo "Applying manifest"
-use_addons_manifest dashboard/dashboard apply
+use_addon_manifest dashboard/dashboard apply
 
 echo "
 If RBAC is not enabled access the dashboard using the default token retrieved with:

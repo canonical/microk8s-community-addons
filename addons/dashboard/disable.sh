@@ -26,6 +26,6 @@ $KUBECTL delete configmap -n kube-system heapster-config  > /dev/null 2>&1 || tr
 $KUBECTL delete configmap -n kube-system eventer-config  > /dev/null 2>&1 || true
 $KUBECTL delete serviceaccount -n kube-system heapster  > /dev/null 2>&1 || true 
 
-use_addons_manifest dashboard/dashboard delete 
+use_addon_manifest dashboard/dashboard delete 
 
 echo "Dashboard is disabled"
