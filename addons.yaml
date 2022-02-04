@@ -225,6 +225,13 @@ microk8s-addons:
         - arm64
         - amd64
 
+    - name: "kube-ovn"
+      description: "The Most Advanced Kubernetes Network Fabric for Enterprises"
+      version: "1.9"
+      check_status: "deployment/ovn-central"
+      supported_architectures:
+        - amd64
+
     - name: "kata"
       description: "Kata Containers is a secure runtime with lightweight VMS"
       version: "latest/stable"
