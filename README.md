@@ -1,5 +1,6 @@
 # microk8s-addons
-The add-ons shipped with MicroK8s
+
+This repository contains the core addons that ship along with MicroK8s.
 
 ## Directory structure
 
@@ -57,3 +58,7 @@ microk8s-addons:
       supported_architectures:
         - amd64
 ```
+
+## Adding new addons
+
+See [`HACKING.md`](./HACKING.md) for instructions on how to develop custom MicroK8s addons.
