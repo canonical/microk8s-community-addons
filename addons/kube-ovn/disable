@@ -4,9 +4,8 @@ set -e
 
 source $SNAP/actions/common/utils.sh
 
-VERSION=`cat ${SNAP_DATA}/../common/addons/core/addons.yaml  | grep ovn -A3 | grep version | cut -d ":" -f2- | tr -d '"' | cut -d ' ' -f2`
+VERSION=`cat ${SNAP_DATA}/../common/addons/core/addons.yaml | grep ovn -A3 | grep version | cut -d ":" -f2- | tr -d '"' | cut -d ' ' -f2`
 echo "$VERSION"
-KUBECTL="$SNAP/kubectl --kubeconfig=${SNAP_DATA}/credentials/client.config"
 REMOTE_PATH="https://raw.githubusercontent.com/kubeovn/kube-ovn/release-${VERSION}/dist/images/cleanup.sh"
 echo "$REMOTE_PATH"
 run_with_sudo mkdir -p "${SNAP_DATA}/tmp/kube-ovn"
