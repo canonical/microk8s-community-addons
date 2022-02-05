@@ -17,9 +17,10 @@ do_prerequisites() {
 
 do_prerequisites
 
-VERSION=`cat addons/core/addons.yaml  | grep ovn -A3 | grep version | cut -d ":" -f2- | tr -d '"' | cut -d ' ' -f2`
-echo "$VERSION"
-KUBECTL="$SNAP/kubectl --kubeconfig=${SNAP_DATA}/credentials/client.config"
+VERSION=`cat ${SNAP_DATA}/../common/addons/core/addons.yaml
+| grep ovn -A3 | grep version | cut -d ":" -f2- | tr -d '"'
+| cut -d ' ' -f2` echo "$VERSION" KUBECTL="$SNAP/kubectl
+--kubeconfig=${SNAP_DATA}/credentials/client.config"
 REMOTE_PATH="https://raw.githubusercontent.com/kubeovn/kube-ovn/release-${VERSION}/dist/images/install.sh"
 echo "$REMOTE_PATH"
 run_with_sudo mkdir -p "${SNAP_DATA}/tmp/kube-ovn"
