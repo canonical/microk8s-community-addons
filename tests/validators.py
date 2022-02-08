@@ -571,6 +571,13 @@ def validate_openfaas():
     wait_for_pod_state("", "openfaas", "running", label="app=gateway")
 
 
+def validate_argocd():
+    """
+    Validate argocd
+    """
+    wait_for_pod_state("", "argocd", "running", label="app.kubernetes.io/component=server")
+
+
 def validate_openebs():
     """
     Validate OpenEBS
