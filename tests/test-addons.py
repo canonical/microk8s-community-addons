@@ -75,7 +75,8 @@ class TestAddons(object):
         assert expected == {a["name"]: a["status"] for a in status["addons"]}
 
     @pytest.mark.skipif(
-        platform.machine() != "s390x", reason="This test is for the limited set of addons s390x has"
+        platform.machine() != "s390x",
+        reason="This test is for the limited set of addons s390x has",
     )
     def test_basic_s390x(self):
         """
@@ -164,7 +165,8 @@ class TestAddons(object):
         reason="Skipping GPU tests as we are under time pressure",
     )
     @pytest.mark.skipif(
-        platform.machine() != "x86_64", reason="GPU tests are only relevant in x86 architectures"
+        platform.machine() != "x86_64",
+        reason="GPU tests are only relevant in x86 architectures",
     )
     def test_gpu(self):
         """
@@ -191,7 +193,8 @@ class TestAddons(object):
         reason="Skipping FPGA because TEST_FPGA is not set",
     )
     @pytest.mark.skipif(
-        platform.machine() != "x86_64", reason="FPGA tests are only relevant in x86 architectures"
+        platform.machine() != "x86_64",
+        reason="FPGA tests are only relevant in x86 architectures",
     )
     def test_inaccel(self):
         """
@@ -210,7 +213,8 @@ class TestAddons(object):
         microk8s_disable("inaccel")
 
     @pytest.mark.skipif(
-        platform.machine() != "x86_64", reason="Istio tests are only relevant in x86 architectures"
+        platform.machine() != "x86_64",
+        reason="Istio tests are only relevant in x86 architectures",
     )
     @pytest.mark.skipif(
         os.environ.get("UNDER_TIME_PRESSURE") == "True",
@@ -283,12 +287,10 @@ class TestAddons(object):
         microk8s_reset()
 
     @pytest.mark.skipif(
-        platform.machine() != "x86_64", reason="Cilium tests are only relevant in x86 architectures"
+        platform.machine() != "x86_64",
+        reason="Cilium tests are only relevant in x86 architectures",
     )
-    @pytest.mark.skipif(
-        is_container(),
-        reason="Cilium tests are skipped in containers",
-    )
+    @pytest.mark.skipif(is_container(), reason="Cilium tests are skipped in containers")
     def test_cilium(self):
         """
         Sets up and validates Cilium.
@@ -346,7 +348,9 @@ class TestAddons(object):
     )
     def test_metallb_addon(self):
         addon = "metallb"
-        ip_ranges = "192.168.0.105-192.168.0.105,192.168.0.110-192.168.0.111,192.168.1.240/28"
+        ip_ranges = (
+            "192.168.0.105-192.168.0.105,192.168.0.110-192.168.0.111,192.168.1.240/28"
+        )
         print("Enabling metallb")
         microk8s_enable("{}:{}".format(addon, ip_ranges), timeout_insec=500)
         validate_metallb_config(ip_ranges)
@@ -375,7 +379,8 @@ class TestAddons(object):
         microk8s_disable("ambassador")
 
     @pytest.mark.skipif(
-        platform.machine() != "x86_64", reason="Multus tests are only relevant in x86 architectures"
+        platform.machine() != "x86_64",
+        reason="Multus tests are only relevant in x86 architectures",
     )
     @pytest.mark.skipif(
         os.environ.get("UNDER_TIME_PRESSURE") == "True",
@@ -432,7 +437,8 @@ class TestAddons(object):
         microk8s_disable("traefik")
 
     @pytest.mark.skipif(
-        platform.machine() != "x86_64", reason="KEDA tests are only relevant in x86 architectures"
+        platform.machine() != "x86_64",
+        reason="KEDA tests are only relevant in x86 architectures",
     )
     @pytest.mark.skipif(
         os.environ.get("UNDER_TIME_PRESSURE") == "True",
@@ -460,8 +466,7 @@ class TestAddons(object):
         check_call("/snap/bin/microk8s.dbctl --debug restore backupfile.tar.gz".split())
 
     @pytest.mark.skipif(
-        platform.machine() == "s390x",
-        reason="OpenEBS is not available on s390x",
+        platform.machine() == "s390x", reason="OpenEBS is not available on s390x"
     )
     def test_openebs(self):
         """
@@ -484,8 +489,7 @@ class TestAddons(object):
         reason="Kata tests are only relevant in x86 architectures",
     )
     @pytest.mark.skipif(
-        is_container(),
-        reason="Kata tests are only possible on real hardware",
+        is_container(), reason="Kata tests are only possible on real hardware"
     )
     def test_kata(self):
         """

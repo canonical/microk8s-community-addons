@@ -22,8 +22,12 @@ def validate_dns_dashboard():
     Validate the dashboard addon by trying to access the kubernetes dashboard.
     The dashboard will return an HTML indicating that it is up and running.
     """
-    wait_for_pod_state("", "kube-system", "running", label="k8s-app=kubernetes-dashboard")
-    wait_for_pod_state("", "kube-system", "running", label="k8s-app=dashboard-metrics-scraper")
+    wait_for_pod_state(
+        "", "kube-system", "running", label="k8s-app=kubernetes-dashboard"
+    )
+    wait_for_pod_state(
+        "", "kube-system", "running", label="k8s-app=dashboard-metrics-scraper"
+    )
     attempt = 30
     while attempt > 0:
         try:
@@ -55,7 +59,10 @@ def validate_dashboard_ingress():
             resp = requests.get(
                 "https://kubernetes-dashboard.127.0.0.1.nip.io/#/login", verify=False
             )
-            if resp.status_code == 200 and "Kubernetes Dashboard" in resp.content.decode("utf-8"):
+            if (
+                resp.status_code == 200
+                and "Kubernetes Dashboard" in resp.content.decode("utf-8")
+            ):
                 service_ok = True
                 break
         except requests.RequestException:
@@ -69,7 +76,9 @@ def validate_storage():
     """
     Validate storage by creating a PVC.
     """
-    wait_for_pod_state("", "kube-system", "running", label="k8s-app=hostpath-provisioner")
+    wait_for_pod_state(
+        "", "kube-system", "running", label="k8s-app=hostpath-provisioner"
+    )
     here = os.path.dirname(os.path.abspath(__file__))
     manifest = os.path.join(here, "templates", "pvc.yaml")
     kubectl("apply -f {}".format(manifest))
@@ -114,7 +123,9 @@ def common_ingress():
     while attempt >= 0:
         try:
             resp = requests.get("http://microbot.127.0.0.1.nip.io/")
-            if resp.status_code == 200 and "microbot.png" in resp.content.decode("utf-8"):
+            if resp.status_code == 200 and "microbot.png" in resp.content.decode(
+                "utf-8"
+            ):
                 service_ok = True
                 break
         except requests.RequestException:
@@ -131,9 +142,13 @@ def validate_ingress():
     daemonset = kubectl("get ds")
     if "nginx-ingress-microk8s-controller" in daemonset:
         wait_for_pod_state("", "default", "running", label="app=default-http-backend")
-        wait_for_pod_state("", "default", "running", label="name=nginx-ingress-microk8s")
+        wait_for_pod_state(
+            "", "default", "running", label="name=nginx-ingress-microk8s"
+        )
     else:
-        wait_for_pod_state("", "ingress", "running", label="name=nginx-ingress-microk8s")
+        wait_for_pod_state(
+            "", "ingress", "running", label="name=nginx-ingress-microk8s"
+        )
 
     here = os.path.dirname(os.path.abspath(__file__))
     manifest = os.path.join(here, "templates", "ingress.yaml")
@@ -164,7 +179,9 @@ def validate_ambassador():
     wait_for_pod_state("", "default", "running", label="app=microbot")
 
     # `Ingress`es must be annotatated for being recognized by Ambassador
-    kubectl("annotate ingress microbot-ingress-nip kubernetes.io/ingress.class=ambassador")
+    kubectl(
+        "annotate ingress microbot-ingress-nip kubernetes.io/ingress.class=ambassador"
+    )
 
     common_ingress()
 
@@ -180,7 +197,10 @@ def validate_gpu():
         return
 
     wait_for_pod_state(
-        "", "gpu-operator-resources", "running", label="app=nvidia-device-plugin-daemonset"
+        "",
+        "gpu-operator-resources",
+        "running",
+        label="app=nvidia-device-plugin-daemonset",
     )
     here = os.path.dirname(os.path.abspath(__file__))
     manifest = os.path.join(here, "templates", "cuda-add.yaml")
@@ -205,7 +225,9 @@ def validate_inaccel():
         print("FPGA tests are only relevant in x86 architectures")
         return
 
-    wait_for_pod_state("", "kube-system", "running", label="app.kubernetes.io/name=fpga-operator")
+    wait_for_pod_state(
+        "", "kube-system", "running", label="app.kubernetes.io/name=fpga-operator"
+    )
     here = os.path.dirname(os.path.abspath(__file__))
     manifest = os.path.join(here, "templates", "inaccel.yaml")
 
@@ -230,13 +252,11 @@ def validate_istio():
         return
 
     wait_for_installation()
-    istio_services = [
-        "pilot",
-        "egressgateway",
-        "ingressgateway",
-    ]
+    istio_services = ["pilot", "egressgateway", "ingressgateway"]
     for service in istio_services:
-        wait_for_pod_state("", "istio-system", "running", label="istio={}".format(service))
+        wait_for_pod_state(
+            "", "istio-system", "running", label="istio={}".format(service)
+        )
 
     cmd = "/snap/bin/microk8s.istioctl verify-install"
     return run_until_success(cmd, timeout_insec=900, err_out="no")
@@ -251,18 +271,18 @@ def validate_knative():
         return
 
     wait_for_installation()
-    knative_services = [
-        "activator",
-        "autoscaler",
-        "controller",
-    ]
+    knative_services = ["activator", "autoscaler", "controller"]
     for service in knative_services:
-        wait_for_pod_state("", "knative-serving", "running", label="app={}".format(service))
+        wait_for_pod_state(
+            "", "knative-serving", "running", label="app={}".format(service)
+        )
 
     here = os.path.dirname(os.path.abspath(__file__))
     manifest = os.path.join(here, "templates", "knative-helloworld.yaml")
     kubectl("apply -f {}".format(manifest))
-    wait_for_pod_state("", "default", "running", label="serving.knative.dev/service=helloworld-go")
+    wait_for_pod_state(
+        "", "default", "running", label="serving.knative.dev/service=helloworld-go"
+    )
     kubectl("delete -f {}".format(manifest))
 
 
@@ -341,7 +361,9 @@ def validate_prometheus():
         return
 
     wait_for_pod_state("prometheus-k8s-0", "monitoring", "running", timeout_insec=1200)
-    wait_for_pod_state("alertmanager-main-0", "monitoring", "running", timeout_insec=1200)
+    wait_for_pod_state(
+        "alertmanager-main-0", "monitoring", "running", timeout_insec=1200
+    )
 
 
 def validate_fluentd():
@@ -408,7 +430,9 @@ def validate_linkerd():
     here = os.path.dirname(os.path.abspath(__file__))
     manifest = os.path.join(here, "templates", "emojivoto.yaml")
     kubectl("apply -f {}".format(manifest))
-    wait_for_pod_state("", "emojivoto", "running", label="app=emoji-svc", timeout_insec=600)
+    wait_for_pod_state(
+        "", "emojivoto", "running", label="app=emoji-svc", timeout_insec=600
+    )
     kubectl("delete -f {}".format(manifest))
 
 
@@ -416,7 +440,9 @@ def validate_rbac():
     """
     Validate RBAC is actually on
     """
-    output = kubectl("auth can-i --as=system:serviceaccount:default:default view pod", err_out="no")
+    output = kubectl(
+        "auth can-i --as=system:serviceaccount:default:default view pod", err_out="no"
+    )
     assert "no" in output
     output = kubectl("auth can-i --as=admin --as-group=system:masters view pod")
     assert "yes" in output
@@ -525,7 +551,9 @@ def validate_portainer():
     """
     Validate portainer
     """
-    wait_for_pod_state("", "portainer", "running", label="app.kubernetes.io/name=portainer")
+    wait_for_pod_state(
+        "", "portainer", "running", label="app.kubernetes.io/name=portainer"
+    )
 
 
 def validate_openfaas():
@@ -554,7 +582,9 @@ def validate_openebs():
     wait_for_pod_state(
         "", "default", "running", label="app=openebs-test-busybox", timeout_insec=900
     )
-    output = kubectl("exec openebs-test-busybox -- ls /", timeout_insec=900, err_out="no")
+    output = kubectl(
+        "exec openebs-test-busybox -- ls /", timeout_insec=900, err_out="no"
+    )
     assert "my-data" in output
     kubectl("delete -f {}".format(manifest))
 
