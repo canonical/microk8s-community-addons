@@ -2,7 +2,7 @@ name: cla-check
 
 on:
   pull_request:
-    branches: [master, default]
+    branches: [main, default]
 
 jobs:
   cla-check:
