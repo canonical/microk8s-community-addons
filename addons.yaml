@@ -38,7 +38,7 @@ microk8s-addons:
 
     - name: "ingress"
       description: "Ingress controller for external access"
-      version: "1.0.0-alpha.2"
+      version: "1.1.0"
       check_status: "pod/nginx-ingress-microk8s-controller"
       supported_architectures:
         - arm64
@@ -46,7 +46,16 @@ microk8s-addons:
 
     - name: "hostpath-storage"
       description: "Storage class; allocates storage from host directory"
-      version: "1.0.0"
+      version: "1.1.0"
+      check_status: "pod/hostpath-provisioner"
+      supported_architectures:
+        - arm64
+        - amd64
+        - s390x
+
+    - name: "storage"
+      description: "Alias to hostpath-storage add-on, deprecated"
+      version: "1.1.0"
       check_status: "pod/hostpath-provisioner"
       supported_architectures:
         - arm64
