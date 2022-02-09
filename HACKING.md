@@ -8,7 +8,7 @@ This document describes the process of developing a new addon for MicroK8s. As a
   - [Overview](#overview)
   - [Develop addon](#develop-addon)
     - [1. Add entry in `addons.yaml`](#1-add-entry-in-addonsyaml)
-    - [2. Write `enable` script](#2-write-enable-script)
+    - [2. Write the `enable` script](#2-write-the-enable-script)
     - [3. Write `disable` script](#3-write-disable-script)
     - [4. Write unit tests](#4-write-unit-tests)
   - [Use addon](#use-addon)
@@ -36,20 +36,39 @@ microk8s-addons:
         - s390x
 ```
 
-### 2. Write `enable` script
+### 2. Write the `enable` script
 
 The `enable` script is called when running `microk8s enable demo-nginx`.
 
-Create an empty directory `addons/demo-nginx`, then save the following script as `addons/demo-nginx/enable`:
+Create an empty directory `addons/demo-nginx`, then create `addons/demo-nginx/enable`. The `enable` script can be written in either Python or Bash, and even supports command-line arguments. It is highly recommended to avoid Bash if any non-trivial amount of work is required for your addon.
 
-```bash
+For our simple addon, we only need to create a deployment with `nginx`. We will support an optional command-line parameter `--replicas`, which will allow users to configure the number of replicas when enabling the addon.
+
+In the example below, we use [Click](https://click.palletsprojects.com/en/8.0.x/) for simplicity.
+
+```python
+#!/usr/bin/env python3
 # addons/demo-nginx/enable
-#!/usr/bin/env bash
 
-microk8s kubectl create deploy --image nginx demo-nginx --replicas 3
+import os
+import subprocess
+
+import click
+
+KUBECTL = os.path.expandvars("$SNAP/microk8s-kubectl.wrapper")
+
+@click.command()
+@click.option("--replicas", required=False, default=3, type=int)
+def main(replicas):
+    click.echo("Enabling demo-nginx")
+    subprocess.check_call([
+        KUBECTL, "create", "deploy", "demo-nginx", "--image", "nginx", "--replicas", str(replicas),
+    ])
+    click.echo("Enabled demo-nginx")
+
+if __name__ == "__main__":
+    main()
 ```
-
-> *NOTE*: The `enable` script can be any Bash and/or Python3 script, as well as accept command-line arguments
 
 Make sure that the script is executable:
 
@@ -61,11 +80,23 @@ chmod +x ./addons/demo-nginx/enable
 
 The `disable` script is called when running `microk8s disable demo-nginx`.
 
-```bash
+```python
+#!/usr/bin/env python3
 # addons/demo-nginx/disable
-#!/usr/bin/env bash
 
-microk8s kubectl delete deploy demo-nginx
+import click
+import subprocess
+
+@click.command()
+def main():
+    click.echo("Disabling demo-nginx")
+    subprocess.check_call([
+        "microk8s", "kubectl", "delete", "deploy", "demo-nginx"
+    ])
+    click.echo("Disabled demo-nginx")
+
+if __name__ == "__main__":
+    main()
 ```
 
 Like previously, make sure the script is executable:
@@ -90,7 +121,10 @@ Install MicroK8s, copy the `addons/demo-nginx` folder under the `/var/snap/micro
 Then, enable the addon with:
 
 ```bash
+# simple ...
 microk8s enable demo-nginx
+# ... or, with command-line arguments
+microk8s enable demo-nginx --replicas 5
 ```
 
 You can check the status of the addon with the `microk8s status` command:
