@@ -100,7 +100,9 @@ def wait_for_pod_state(
     while True:
         if datetime.datetime.now() > deadline:
             raise TimeoutError(
-                "Pod {} not in {} after {} seconds.".format(pod, desired_state, timeout_insec)
+                "Pod {} not in {} after {} seconds.".format(
+                    pod, desired_state, timeout_insec
+                )
             )
         cmd = "po {} -n {}".format(pod, namespace)
         if label:
@@ -249,7 +251,9 @@ def is_container():
         return True
 
     try:
-        check_call("sudo grep -E (lxc|hypervisor) /proc/1/environ /proc/cpuinfo".split())
+        check_call(
+            "sudo grep -E (lxc|hypervisor) /proc/1/environ /proc/cpuinfo".split()
+        )
         print("Tests are running in an undetectable container")
         return True
     except CalledProcessError:
