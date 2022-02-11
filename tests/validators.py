@@ -7,6 +7,7 @@ import yaml
 import subprocess
 
 from utils import (
+    get_arch,
     kubectl,
     wait_for_pod_state,
     kubectl_get,
@@ -76,6 +77,13 @@ def validate_storage():
     """
     Validate storage by creating a PVC.
     """
+    output = kubectl("describe deployment hostpath-provisioner -n kube-system")
+    if "hostpath-provisioner-{}:1.0.0".format(get_arch()) in output:
+        # we are running with a hostpath-provisioner that is old and we need to patch it
+        kubectl(
+            "set image  deployment hostpath-provisioner -n kube-system hostpath-provisioner=cdkbot/hostpath-provisioner:1.1.0"
+        )
+
     wait_for_pod_state(
         "", "kube-system", "running", label="k8s-app=hostpath-provisioner"
     )
