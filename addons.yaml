@@ -146,7 +146,7 @@ microk8s-addons:
 
     - name: "helm3"
       description: "Helm 3 - Kubernetes package manager"
-      version: "3.0.2"
+      version: "3.8.0"
       check_status: "${SNAP_DATA}/bin/helm3"
       supported_architectures:
         - amd64
