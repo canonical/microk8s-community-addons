@@ -1,10 +1,16 @@
 name: Run tests
 
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+  - push
+  - pull_request
+
+### While we work on the strict feature we want the tests to run even if we do put PRs against the master.
+### When this work get merged into master the following should be commented in.
+# on:
+#   push:
+#     branches: [main]
+#   pull_request:
+#     branches: [main]
 
 jobs:
   run-tests:
@@ -24,7 +30,7 @@ jobs:
       - name: Running addons tests
         run: |
           set -x
-          sudo snap install microk8s --classic --channel=latest/edge
+          sudo snap install microk8s --channel=latest/edge/strict
           sudo microk8s status --wait-ready --timeout 600
           if sudo microk8s addons repo list | grep community
           then
