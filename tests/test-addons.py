@@ -190,6 +190,7 @@ class TestAddons(object):
         print("Disabling fluentd")
         microk8s_disable("fluentd")
 
+    @pytest.mark.skip("disabling the test because of the shared mount issue on strict")
     @pytest.mark.skipif(
         platform.machine() != "x86_64",
         reason="Cilium tests are only relevant in x86 architectures",
@@ -345,6 +346,10 @@ class TestAddons(object):
 
     @pytest.mark.skipif(
         platform.machine() == "s390x", reason="OpenEBS is not available on s390x"
+    )
+    @pytest.mark.skipif(
+        os.environ.get("SKIP_OPENEBS") == "True",
+        reason="Skipping OpenEBS.",
     )
     def test_openebs(self):
         """
