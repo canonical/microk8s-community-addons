@@ -575,7 +575,9 @@ def validate_argocd():
     """
     Validate argocd
     """
-    wait_for_pod_state("", "argocd", "running", label="app.kubernetes.io/component=server")
+    wait_for_pod_state(
+        "", "argocd", "running", label="app.kubernetes.io/component=server"
+    )
 
 
 def validate_openebs():
