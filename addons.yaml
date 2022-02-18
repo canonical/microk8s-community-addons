@@ -247,3 +247,10 @@ microk8s-addons:
       check_status: "daemonset.apps/fpga-operator"
       supported_architectures:
         - amd64
+
+    - name: "starboard"
+      description: "Kubernetes-native security toolkit"
+      version: "0.14.1"
+      check_status: ""
+      supported_architectures:
+        - amd64

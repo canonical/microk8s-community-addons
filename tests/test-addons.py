@@ -32,6 +32,7 @@ from validators import (
     validate_openfaas,
     validate_openebs,
     validate_kata,
+    validate_starboard,
 )
 from utils import (
     microk8s_enable,
@@ -423,6 +424,21 @@ class TestAddons(object):
         validate_openfaas()
         print("Disabling openfaas")
         microk8s_disable("openfaas")
+    
+    @pytest.mark.skipif(
+        platform.machine() != "x86_64",
+        reason="Starboard tests are only relevant in x86 architectures",
+    )
+    def test_starboard(self):
+        """
+        Sets up and validates Starboard.
+        """
+        print("Enabling starboard")
+        microk8s_enable("starboard")
+        print("Validating starboard")
+        validate_starboard()
+        print("Disabling starboard")
+        microk8s_disable("starboard")
 
     @pytest.mark.skipif(platform.machine() == "s390x", reason="Not available on s390x")
     def test_traefik(self):
