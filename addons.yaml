@@ -251,6 +251,6 @@ microk8s-addons:
     - name: "starboard"
       description: "Kubernetes-native security toolkit"
       version: "0.14.1"
-      check_status: ""
+      check_status: "deployment.apps/starboard-operator"
       supported_architectures:
         - amd64

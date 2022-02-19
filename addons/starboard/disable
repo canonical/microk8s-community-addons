@@ -12,7 +12,7 @@ KUBECTL_DELETE_ARGS="--wait=true --timeout=180s --ignore-not-found=true"
 
 echo "Disabling Starboard"
 
-$HELM uninstall starboard-operator -n $NAMESPACE_STARBOARD
+$HELM delete starboard-operator -n $NAMESPACE_STARBOARD
 
 $KUBECTL delete -f https://raw.githubusercontent.com/aquasecurity/starboard/v0.14.1/deploy/static/04-starboard-operator.deployment.yaml \
   -f https://raw.githubusercontent.com/aquasecurity/starboard/v0.14.1/deploy/static/03-starboard-operator.config.yaml \
