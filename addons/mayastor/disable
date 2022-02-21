@@ -30,4 +30,4 @@ $KUBECTL delete -f https://raw.githubusercontent.com/openebs/mayastor/master/dep
 
 # DEV_PATH=`losetup -a | grep mayastor-disk.img | cut -f1 -d":"`
 
-run_as_sudo losetuup -d /dev/loop666
+run_as_sudo losetup -d /dev/loop666
