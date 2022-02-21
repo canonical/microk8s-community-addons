@@ -6,7 +6,7 @@ source "$SNAP/actions/common/utils.sh"
 
 BLOCK_SIZE="1000M"
 KUBECTL="$SNAP/kubectl --kubeconfig=${SNAP_DATA}/credentials/client.config"
-
+CURRENT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
 if ! cat /sys/kernel/mm/transparent_hugepage/enabled | grep always &> /dev/null
 then
     echo "HugePages are not available or enabled. Please make sure HugePages are enabled"
@@ -18,14 +18,11 @@ fi
 "$SNAP/microk8s-enable.wrapper" dns
 
 # Create and mount the loopback device
-dd if=/dev/zero of=${SNAP_COMMON}/mayastor-disk.img bs=$BLOCK_SIZE count=10
-run_with_sudo losetup -fP mayastor-disk.img
+run_with_sudo dd if=/dev/zero of=${SNAP_COMMON}/mayastor-disk.img bs=$BLOCK_SIZE count=10
+run_with_sudo losetup -P /dev/loop666 ${SNAP_COMMON}/mayastor-disk.img
 # Fetch the loop device
-DEV_PATH=`losetup -a | grep mayastor-disk.img | cut -f1 -d":"`
-
 echo "Created local storage disk"
-
-$KUBECTL create namespace mayastor
+$KUBECTL create namespace mayastor || true
 $KUBECTL apply -f https://raw.githubusercontent.com/openebs/mayastor-control-plane/master/deploy/operator-rbac.yaml
 $KUBECTL apply -f https://raw.githubusercontent.com/openebs/mayastor-control-plane/master/deploy/mayastorpoolcrd.yaml
 $KUBECTL apply -f https://raw.githubusercontent.com/openebs/mayastor/master/deploy/nats-deployment.yaml
@@ -62,5 +59,5 @@ metadata:
   namespace:mayastor
 spec:
   name: $HOSTNAME
-  disks: [$DEV_PATH]
+  disks: ['/dev/loop666']
 "

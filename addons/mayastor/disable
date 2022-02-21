@@ -28,7 +28,6 @@ $KUBECTL delete -f https://raw.githubusercontent.com/openebs/mayastor/master/dep
 
 # Delete the underlying storage file
 
-DEV_PATH=`losetup -a | grep mayastor-disk.img | cut -f1 -d":"`
+# DEV_PATH=`losetup -a | grep mayastor-disk.img | cut -f1 -d":"`
 
-umount $DEV_PATH &> /dev/null 
-
+run_as_sudo losetuup -d /dev/loop666
