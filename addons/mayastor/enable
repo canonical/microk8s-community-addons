@@ -7,22 +7,13 @@ source "$SNAP/actions/common/utils.sh"
 BLOCK_SIZE="1000M"
 KUBECTL="$SNAP/kubectl --kubeconfig=${SNAP_DATA}/credentials/client.config"
 
-# Check if iscsid is installed 
-if ! systemctl is-enabled iscsid | grep enabled &> /dev/null
-  then
-    echo "iscsid is not available or enabled.  Make sure iscsi is installed on all nodes."
-    echo "To enable iscsid: "
-    echo "      sudo systemctl enable iscsid"
-    echo "Please refer to the OpenEBS prerequisites (https://docs.openebs.io/docs/next/prerequisites.html)"
-    exit   
-fi
-
 if ! cat /sys/kernel/mm/transparent_hugepage/enabled | grep always &> /dev/null
 then
     echo "HugePages are not available or enabled. Please make sure HugePages are enabled"
     echo "To enable HugePages:"
     echo "      echo vm.nr_hugepages = 1024 | sudo tee -a /etc/sysctl.conf"
     echo "Please restart your system after enablement."
+fi
 
 "$SNAP/microk8s-enable.wrapper" dns
 
@@ -34,7 +25,7 @@ DEV_PATH=`losetup -a | grep mayastor-disk.img | cut -f1 -d":"`
 
 echo "Created local storage disk"
 
-kubectl create namespace mayastor
+$KUBECTL create namespace mayastor
 $KUBECTL apply -f https://raw.githubusercontent.com/openebs/mayastor-control-plane/master/deploy/operator-rbac.yaml
 $KUBECTL apply -f https://raw.githubusercontent.com/openebs/mayastor-control-plane/master/deploy/mayastorpoolcrd.yaml
 $KUBECTL apply -f https://raw.githubusercontent.com/openebs/mayastor/master/deploy/nats-deployment.yaml
@@ -53,7 +44,7 @@ $KUBECTL apply -f https://raw.githubusercontent.com/openebs/mayastor-control-pla
 $KUBECTL apply -f https://raw.githubusercontent.com/openebs/mayastor-control-plane/master/deploy/msp-deployment.yaml
 $KUBECTL apply -f https://raw.githubusercontent.com/openebs/mayastor/master/deploy/mayastor-daemonset.yaml
 
-kubectl scale --replicas=1 sts/nats -n mayastor
+$KUBECTL scale --replicas=1 sts/nats -n mayastor
 
 
 echo "Mayastor is installed"
