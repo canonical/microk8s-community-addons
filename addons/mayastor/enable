@@ -16,7 +16,7 @@ then
 fi
 
 "$SNAP/microk8s-enable.wrapper" dns
-
+"$SNAP/microk8s-enable.wrapper" hostpath-storage 
 # Create and mount the loopback device
 run_with_sudo dd if=/dev/zero of=${SNAP_COMMON}/mayastor-disk.img bs=$BLOCK_SIZE count=10
 run_with_sudo losetup -P /dev/loop666 ${SNAP_COMMON}/mayastor-disk.img
