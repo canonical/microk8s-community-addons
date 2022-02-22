@@ -15,8 +15,8 @@ then
     echo "Please restart your system after enablement."
 fi
 
-"$SNAP/microk8s-enable.wrapper" dns
-"$SNAP/microk8s-enable.wrapper" hostpath-storage 
+"$SNAP/microk8s-enable.wrapper" core/dns
+"$SNAP/microk8s-enable.wrapper" core/hostpath-storage 
 # Create and mount the loopback device
 run_with_sudo dd if=/dev/zero of=${SNAP_COMMON}/mayastor-disk.img bs=$BLOCK_SIZE count=10
 run_with_sudo losetup -P /dev/loop666 ${SNAP_COMMON}/mayastor-disk.img
@@ -43,7 +43,7 @@ $KUBECTL apply -f https://raw.githubusercontent.com/openebs/mayastor/master/depl
 
 $KUBECTL scale --replicas=1 sts/nats -n mayastor
 
-
+HOST=`hostname`
 echo "Mayastor is installed"
 echo "" 
 echo "" 
@@ -59,7 +59,7 @@ metadata:
   name: pool-on-node-1
   namespace: mayastor
 spec:
-  node: <node name>
+  node: $HOST
   disks: ["/dev/loop666"]
 EOF
 "
