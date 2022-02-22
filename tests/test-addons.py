@@ -468,6 +468,10 @@ class TestAddons(object):
     @pytest.mark.skipif(
         platform.machine() == "s390x", reason="OpenEBS is not available on s390x"
     )
+    @pytest.mark.skipif(
+        os.environ.get("SKIP_OPENEBS") == "True",
+        reason="Skipping OpenEBS.",
+    )
     def test_openebs(self):
         """
         Sets up and validates openebs.
