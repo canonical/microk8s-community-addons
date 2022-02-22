@@ -52,12 +52,14 @@ echo ""
 echo "Next steps require a MayastorPool that uses the device you just created."
 echo "" 
 echo "" 
-echo "kind: MayastorPool
-apiVersion: v1
+echo "cat <<EOF | kubectl create -f -
+apiVersion: "openebs.io/v1alpha1"
+kind: MayastorPool
 metadata:
-  name: microk8s-control-plane-pool
-  namespace:mayastor
+  name: pool-on-node-1
+  namespace: mayastor
 spec:
-  name: $HOSTNAME
-  disks: ['/dev/loop666']
+  node: <your host name>
+  disks: ["/dev/loop666"]
+EOF
 "
