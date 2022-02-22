@@ -146,4 +146,4 @@ spec:
         resources:
           requests:
             storage: "2Gi"
-        storageClassName: manual
+        storageClassName: microk8s-hostpath
