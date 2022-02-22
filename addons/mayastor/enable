@@ -65,4 +65,4 @@ EOF
 "
 echo ""
 echo "In addition to this you will need to label your node:" 
-echo "kubectl label node $HOST openebs.io/engine=mayastor"
+echo "microk8s kubectl label node $HOST openebs.io/engine=mayastor"
