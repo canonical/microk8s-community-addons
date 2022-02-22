@@ -52,7 +52,7 @@ echo ""
 echo "Next steps require a MayastorPool that uses the device you just created."
 echo "" 
 echo "" 
-echo "cat <<EOF | kubectl create -f -
+echo "cat <<EOF | microk8s kubectl create -f -
 apiVersion: "openebs.io/v1alpha1"
 kind: MayastorPool
 metadata:
@@ -65,4 +65,4 @@ EOF
 "
 echo ""
 echo "In addition to this you will need to label your node:" 
-echo "kubectl label node <node name> openebs.io/engine=mayastor"
+echo "kubectl label node $HOST openebs.io/engine=mayastor"
