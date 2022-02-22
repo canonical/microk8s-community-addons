@@ -8,26 +8,25 @@ KUBECTL="$SNAP/kubectl --kubeconfig=${SNAP_DATA}/credentials/client.config"
 echo "Disabling Mayastor"
 
 # Delete the resources
-$KUBECTL delete -f https://raw.githubusercontent.com/openebs/mayastor-control-plane/master/deploy/operator-rbac.yaml
-$KUBECTL delete -f https://raw.githubusercontent.com/openebs/mayastor-control-plane/master/deploy/mayastorpoolcrd.yaml
-$KUBECTL delete -f https://raw.githubusercontent.com/openebs/mayastor/master/deploy/nats-deployment.yaml
-$KUBECTL delete -f https://raw.githubusercontent.com/openebs/mayastor/develop/deploy/etcd/storage/localpv.yaml
+$KUBECTL delete -f https://raw.githubusercontent.com/openebs/mayastor-control-plane/master/deploy/operator-rbac.yaml --force || true
+$KUBECTL delete -f https://raw.githubusercontent.com/openebs/mayastor-control-plane/master/deploy/mayastorpoolcrd.yaml --force || true
+$KUBECTL delete -f https://raw.githubusercontent.com/openebs/mayastor/master/deploy/nats-deployment.yaml --force || true
+$KUBECTL delete -f https://raw.githubusercontent.com/openebs/mayastor/develop/deploy/etcd/storage/localpv.yaml --force || true
 
 # Using our sts without affinity
-$KUBECTL delete -f "${CURRENT_DIR}/etcd.yaml"
+$KUBECTL delete -f "${CURRENT_DIR}/etcd.yaml" --force || true
 
-$KUBECTL delete -f https://raw.githubusercontent.com/openebs/mayastor/master/deploy/etcd/svc.yaml
-$KUBECTL delete -f https://raw.githubusercontent.com/openebs/mayastor/master/deploy/etcd/svc-headless.yaml
-$KUBECTL delete -f https://raw.githubusercontent.com/openebs/mayastor/master/deploy/csi-daemonset.yaml
-$KUBECTL delete -f https://raw.githubusercontent.com/openebs/mayastor-control-plane/master/deploy/core-agents-deployment.yaml
-$KUBECTL delete -f https://raw.githubusercontent.com/openebs/mayastor-control-plane/master/deploy/rest-deployment.yaml
-$KUBECTL delete -f https://raw.githubusercontent.com/openebs/mayastor-control-plane/master/deploy/rest-service.yaml
-$KUBECTL delete -f https://raw.githubusercontent.com/openebs/mayastor-control-plane/master/deploy/csi-deployment.yaml
-$KUBECTL delete -f https://raw.githubusercontent.com/openebs/mayastor-control-plane/master/deploy/msp-deployment.yaml
-$KUBECTL delete -f https://raw.githubusercontent.com/openebs/mayastor/master/deploy/mayastor-daemonset.yaml
+$KUBECTL delete -f https://raw.githubusercontent.com/openebs/mayastor/master/deploy/etcd/svc.yaml --force || true
+$KUBECTL delete -f https://raw.githubusercontent.com/openebs/mayastor/master/deploy/etcd/svc-headless.yaml --force || true
+$KUBECTL delete -f https://raw.githubusercontent.com/openebs/mayastor/master/deploy/csi-daemonset.yaml --force || true
+$KUBECTL delete -f https://raw.githubusercontent.com/openebs/mayastor-control-plane/master/deploy/core-agents-deployment.yaml --force || true
+$KUBECTL delete -f https://raw.githubusercontent.com/openebs/mayastor-control-plane/master/deploy/rest-deployment.yaml --force || true
+$KUBECTL delete -f https://raw.githubusercontent.com/openebs/mayastor-control-plane/master/deploy/rest-service.yaml --force || true
+$KUBECTL delete -f https://raw.githubusercontent.com/openebs/mayastor-control-plane/master/deploy/csi-deployment.yaml --force || true
+$KUBECTL delete -f https://raw.githubusercontent.com/openebs/mayastor-control-plane/master/deploy/msp-deployment.yaml --force || true
+$KUBECTL delete -f https://raw.githubusercontent.com/openebs/mayastor/master/deploy/mayastor-daemonset.yaml --force || true
 
 # Delete the underlying storage file
 
-# DEV_PATH=`losetup -a | grep mayastor-disk.img | cut -f1 -d":"`
-
 run_as_sudo losetup -d /dev/loop666
+run_as_sudo rm ${SNAP_COMMON}/mayastor-disk.img
