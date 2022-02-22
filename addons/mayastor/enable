@@ -59,7 +59,10 @@ metadata:
   name: pool-on-node-1
   namespace: mayastor
 spec:
-  node: <your host name>
+  node: <node name>
   disks: ["/dev/loop666"]
 EOF
 "
+echo ""
+echo "In addition to this you will need to label your node:" 
+echo "kubectl label node <node name> openebs.io/engine=mayastor"
