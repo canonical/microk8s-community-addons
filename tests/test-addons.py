@@ -32,6 +32,7 @@ from validators import (
     validate_openfaas,
     validate_openebs,
     validate_kata,
+    validate_argocd,
 )
 from utils import (
     microk8s_enable,
@@ -423,6 +424,21 @@ class TestAddons(object):
         validate_openfaas()
         print("Disabling openfaas")
         microk8s_disable("openfaas")
+
+    @pytest.mark.skipif(
+        platform.machine() != "x86_64",
+        reason="ArgoCD tests are only relevant in x86 architectures",
+    )
+    def test_argocd(self):
+        """
+        Sets up and validates ArgoCD.
+        """
+        print("Enabling argocd")
+        microk8s_enable("argocd")
+        print("Validating argocd")
+        validate_argocd()
+        print("Disabling argocd")
+        microk8s_disable("argocd")
 
     @pytest.mark.skipif(platform.machine() == "s390x", reason="Not available on s390x")
     def test_traefik(self):

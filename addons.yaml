@@ -247,3 +247,10 @@ microk8s-addons:
       check_status: "daemonset.apps/fpga-operator"
       supported_architectures:
         - amd64
+
+    - name: "argocd"
+      description: "Argo CD is a declarative continuous deployment for Kubernetes."
+      version: "2.2.5"
+      check_status: "deployment.apps/argo-cd-argocd-server"
+      supported_architectures:
+        - amd64

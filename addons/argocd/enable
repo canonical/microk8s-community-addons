@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+
+set -e
+
+source $SNAP/actions/common/utils.sh
+
+NAMESPACE_ARGOCD="argocd"
+
+ARGOCD_HELM_VERSION="3.33.5"
+
+KUBECTL="$SNAP/kubectl --kubeconfig=${SNAP_DATA}/credentials/client.config"
+
+"$SNAP/microk8s-enable.wrapper" helm3
+
+HELM="$SNAP_DATA/bin/helm3 --kubeconfig=$SNAP_DATA/credentials/client.config"
+
+VALUES=""
+
+# get the options
+while getopts ":f:h:" flag; do
+  case "${flag}" in
+          f) VALUES=${OPTARG}
+             ;;
+          *) echo "Usage: microk8s enable argocd"
+             echo ""
+             echo "With overwriting default values: microk8s enable argocd -f values.yaml"
+             echo ""
+             echo "See https://artifacthub.io/packages/helm/argo/argo-cd for more information about the values"
+             echo "You should enable the Ingress addon, if you want to use ArgoCD with an Ingress"
+             echo "microk8s enable ingress"
+             exit 0
+             ;;
+  esac
+done
+
+echo "Installing ArgoCD"
+
+if [ -n "$VALUES" ]; then
+    echo "Using values file: $VALUES"
+fi
+
+
+# make sure the "argocd" namespace exists
+$KUBECTL create namespace "$NAMESPACE_ARGOCD" > /dev/null 2>&1 || true
+
+# add the ArgoCD chart repository
+$HELM repo add argo https://argoproj.github.io/argo-helm
+
+# install the helm chart
+if [ -z "$VALUES" ]
+then
+    $HELM upgrade -i argo-cd argo/argo-cd \
+      --version $ARGOCD_HELM_VERSION \
+      --namespace "$NAMESPACE_ARGOCD"
+else
+    $HELM upgrade -i argo-cd argo/argo-cd \
+      --version $ARGOCD_HELM_VERSION \
+      --namespace "$NAMESPACE_ARGOCD" \
+      -f $VALUES
+fi
+
+echo "ArgoCD is installed"
