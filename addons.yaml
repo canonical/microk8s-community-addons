@@ -1,33 +1,6 @@
 microk8s-addons:
   description: "List of all addons included in Microk8s."
   addons:
-    - name: "dns"
-      description: "CoreDNS"
-      version: "1.8.0"
-      check_status: "pod/coredns"
-      supported_architectures:
-        - amd64
-        - arm64
-        - s390x
-
-    - name: "rbac"
-      description: "Role-Based Access Control for authorisation"
-      version: ""
-      check_status: "clusterrole.rbac.authorization.k8s.io/cluster-admin"
-      supported_architectures:
-        - arm64
-        - amd64
-        - s390x
-
-    - name: "dashboard"
-      description: "The Kubernetes dashboard"
-      version: "2.3.0"
-      check_status: "pod/kubernetes-dashboard"
-      supported_architectures:
-        - arm64
-        - amd64
-        - s390x
-
     - name: "dashboard-ingress"
       description: "Ingress definition for Kubernetes dashboard"
       version: "1.0.0"
@@ -36,17 +9,6 @@ microk8s-addons:
         - arm64
         - amd64
 
-    - name: "ingress"
-      description: "Ingress controller for external access"
-      version: "1.1.0"
-      check_status: "pod/nginx-ingress-microk8s-controller"
-      supported_architectures:
-        - arm64
-        - amd64
-
-    - name: "hostpath-storage"
-      description: "Storage class; allocates storage from host directory"
-      version: "1.1.0"
       check_status: "pod/hostpath-provisioner"
       supported_architectures:
         - arm64
@@ -56,29 +18,6 @@ microk8s-addons:
     - name: "storage"
       description: "Alias to hostpath-storage add-on, deprecated"
       version: "1.1.0"
-      check_status: "pod/hostpath-provisioner"
-      supported_architectures:
-        - arm64
-        - amd64
-        - s390x
-
-    - name: "registry"
-      description: "Private image registry exposed on localhost:32000"
-      version: "2.6"
-      check_status: "pod/registry"
-      supported_architectures:
-        - arm64
-        - amd64
-
-    - name: "metrics-server"
-      description: "K8s Metrics Server for API access to service metrics"
-      version: "0.5.0"
-      check_status: "pod/metrics-server"
-      supported_architectures:
-        - arm64
-        - amd64
-        - s390x
-
     - name: "istio"
       description: "Core Istio service mesh services"
       version: "1.10.3"
@@ -92,21 +31,6 @@ microk8s-addons:
       check_status: "deployment.apps/eventing-webhook"
       supported_architectures:
         - amd64
-
-    - name: "gpu"
-      description: "Automatic enablement of Nvidia CUDA"
-      version: "1.7.0"
-      check_status: "daemonset.apps/nvidia-device-plugin-daemonset"
-      supported_architectures:
-        - amd64
-
-    - name: "prometheus"
-      description: "Prometheus operator for monitoring and logging"
-      version: "v0.8.0"
-      check_status: "pod/prometheus-k8s-0"
-      supported_architectures:
-        - amd64
-        - arm64
 
     - name: "fluentd"
       description: "Elasticsearch-Fluentd-Kibana logging and monitoring"
@@ -144,57 +68,12 @@ microk8s-addons:
       supported_architectures:
         - amd64
 
-    - name: "helm"
-      description: "Helm 2 - the package manager for Kubernetes"
-      version: "2.16.0"
-      check_status: "${SNAP_DATA}/bin/helm"
-      supported_architectures:
-        - amd64
-        - arm64
-        - s390x
-
-    - name: "helm3"
-      description: "Helm 3 - Kubernetes package manager"
-      version: "3.8.0"
-      check_status: "${SNAP_DATA}/bin/helm3"
-      supported_architectures:
-        - amd64
-        - arm64
-        - s390x
-
-    - name: "metallb"
-      description: "Loadbalancer for your Kubernetes cluster"
-      version: "0.9.3"
-      check_status: "pod/speaker"
-      supported_architectures:
-        - amd64
-        - arm64
-        - s390x
-
-    - name: "host-access"
-      description: "Allow Pods connecting to Host services smoothly"
-      version: "1.0.0"
-      check_status: "${SNAP_DATA}/var/lock/host-access-enabled"
-      supported_architectures:
-        - amd64
-        - arm64
-        - s390x
-
     - name: "ambassador"
       description: "Ambassador API Gateway and Ingress"
       version: ""
       check_status: "deployment.apps/ambassador-operator"
       supported_architectures:
         - amd64
-
-    - name: "ha-cluster"
-      description: "Configure high availability on the current node"
-      version: "0.1.0"
-      check_status: "${SNAP_DATA}/var/lock/ha-cluster"
-      supported_architectures:
-        - arm64
-        - amd64
-        - s390x
 
     - name: "portainer"
       description: "Portainer UI for your Kubernetes cluster"
