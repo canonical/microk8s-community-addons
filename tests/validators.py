@@ -360,20 +360,6 @@ def validate_metrics_server():
     assert attempt > 0
 
 
-def validate_prometheus():
-    """
-    Validate the prometheus operator
-    """
-    if platform.machine() != "x86_64":
-        print("Prometheus tests are only relevant in x86 architectures")
-        return
-
-    wait_for_pod_state("prometheus-k8s-0", "monitoring", "running", timeout_insec=1200)
-    wait_for_pod_state(
-        "alertmanager-main-0", "monitoring", "running", timeout_insec=1200
-    )
-
-
 def validate_fluentd():
     """
     Validate fluentd
@@ -569,6 +555,15 @@ def validate_openfaas():
     Validate openfaas
     """
     wait_for_pod_state("", "openfaas", "running", label="app=gateway")
+
+
+def validate_argocd():
+    """
+    Validate argocd
+    """
+    wait_for_pod_state(
+        "", "argocd", "running", label="app.kubernetes.io/component=server"
+    )
 
 
 def validate_openebs():

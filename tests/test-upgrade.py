@@ -9,8 +9,6 @@ from validators import (
     validate_registry,
     validate_forward,
     validate_metrics_server,
-    validate_fluentd,
-    validate_jaeger,
     validate_metallb_config,
 )
 from subprocess import check_call, CalledProcessError
@@ -117,33 +115,6 @@ class TestUpgrade(object):
                 print('Will not test the prometheus')
 
             """
-
-            try:
-                enable = microk8s_enable("fluentd", timeout_insec=30)
-                assert "Nothing to do for" not in enable
-                validate_fluentd()
-                test_matrix["fluentd"] = validate_fluentd
-            except CalledProcessError:
-                print("Will not test the fluentd")
-
-            try:
-                enable = microk8s_enable("jaeger", timeout_insec=30)
-                assert "Nothing to do for" not in enable
-                validate_jaeger()
-                test_matrix["jaeger"] = validate_jaeger
-            except CalledProcessError:
-                print("Will not test the jaeger addon")
-
-            # We are not testing cilium because we want to test the upgrade of the default CNI
-            """
-            try:
-                enable = microk8s_enable("cilium", timeout_insec=300)
-                assert "Nothing to do for" not in enable
-                validate_cilium()
-                test_matrix['cilium'] = validate_cilium
-            except CalledProcessError:
-                print('Will not test the cilium addon')
-            """
             try:
                 ip_ranges = "192.168.0.105-192.168.0.105,192.168.0.110-192.168.0.111,192.168.1.240/28"
                 enable = microk8s_enable(
@@ -156,19 +127,6 @@ class TestUpgrade(object):
                 test_matrix["metallb"] = validate_metallb_config
             except CalledProcessError:
                 print("Will not test the metallb addon")
-
-            # We will not be testing multus because it takes too long for cilium and multus
-            # to settle after the update and the multus test needs to be refactored so we do
-            # delete and recreate the networks configured.
-            """
-            try:
-                enable = microk8s_enable("multus", timeout_insec=150)
-                assert "Nothing to do for" not in enable
-                validate_multus()
-                test_matrix['multus'] = validate_multus
-            except CalledProcessError:
-                print('Will not test the multus addon')
-            """
 
         # Refresh the snap to the target
         if upgrade_to.endswith(".snap"):
