@@ -9,15 +9,6 @@ microk8s-addons:
         - arm64
         - amd64
 
-      check_status: "pod/hostpath-provisioner"
-      supported_architectures:
-        - arm64
-        - amd64
-        - s390x
-
-    - name: "storage"
-      description: "Alias to hostpath-storage add-on, deprecated"
-      version: "1.1.0"
     - name: "istio"
       description: "Core Istio service mesh services"
       version: "1.10.3"
