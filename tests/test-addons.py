@@ -54,27 +54,6 @@ class TestAddons(object):
         yield
         microk8s_reset()
 
-    def test_invalid_addon(self):
-        with pytest.raises(sh.ErrorReturnCode_1):
-            sh.microk8s.enable.foo()
-
-    def test_help_text(self):
-        status = yaml.safe_load(sh.microk8s.status(format="yaml").stdout)
-        expected = {a["name"]: "disabled" for a in status["addons"]}
-        expected["ha-cluster"] = "enabled"
-
-        assert expected == {a["name"]: a["status"] for a in status["addons"]}
-
-        for addon in status["addons"]:
-            sh.microk8s.enable(addon["name"], "--", "--help")
-
-        assert expected == {a["name"]: a["status"] for a in status["addons"]}
-
-        for addon in status["addons"]:
-            sh.microk8s.disable(addon["name"], "--", "--help")
-
-        assert expected == {a["name"]: a["status"] for a in status["addons"]}
-
     @pytest.mark.skipif(
         platform.machine() != "s390x",
         reason="This test is for the limited set of addons s390x has",
@@ -90,20 +69,6 @@ class TestAddons(object):
         wait_for_pod_state("", "kube-system", "running", label="k8s-app=kube-dns")
         print("Validating DNS config")
         validate_coredns_config(ip_ranges)
-        print("Enabling metrics-server")
-        microk8s_enable("metrics-server")
-        print("Enabling dashboard")
-        microk8s_enable("dashboard")
-        print("Validating dashboard")
-        validate_dns_dashboard()
-        print("Validating Port Forward")
-        validate_forward()
-        print("Validating the Metrics Server")
-        validate_metrics_server()
-        print("Disabling metrics-server")
-        microk8s_disable("metrics-server")
-        print("Disabling dashboard")
-        microk8s_disable("dashboard")
 
     @pytest.mark.skipif(platform.machine() == "s390x", reason="Not available on s390x")
     def test_basic(self):
@@ -135,55 +100,16 @@ class TestAddons(object):
         validate_dashboard_ingress()
         print("Disabling dashboard-ingress")
         microk8s_disable("dashboard-ingress")
-        print("Enabling hostpath-storage")
-        microk8s_enable("hostpath-storage")
-        print("Validating hostpath-storage")
-        validate_storage()
-        microk8s_enable("registry")
-        print("Validating registry")
-        validate_registry()
-        print("Validating Port Forward")
-        validate_forward()
-        print("Validating the Metrics Server")
-        validate_metrics_server()
         print("Disabling metrics-server")
         microk8s_disable("metrics-server")
-        print("Disabling registry")
-        microk8s_disable("registry")
         print("Disabling dashboard")
         microk8s_disable("dashboard")
-        print("Disabling hostpath-storage")
-        microk8s_disable("hostpath-storage:destroy-storage")
         """
         We would disable DNS here but this freezes any terminating pods.
         We let microk8s reset to do the cleanup.
         print("Disabling DNS")
         microk8s_disable("dns")
         """
-
-    @pytest.mark.skipif(
-        os.environ.get("UNDER_TIME_PRESSURE") == "True",
-        reason="Skipping GPU tests as we are under time pressure",
-    )
-    @pytest.mark.skipif(
-        platform.machine() != "x86_64",
-        reason="GPU tests are only relevant in x86 architectures",
-    )
-    def test_gpu(self):
-        """
-        Sets up nvidia gpu in a gpu capable system. Skip otherwise.
-
-        """
-        try:
-            print("Enabling gpu")
-            microk8s_enable("gpu")
-        except CalledProcessError:
-            # Failed to enable gpu. Skip the test.
-            print("Could not enable GPU support")
-            return
-        validate_gpu()
-        print("Disable gpu")
-        microk8s_disable("gpu")
 
     @pytest.mark.skipif(
         os.environ.get("UNDER_TIME_PRESSURE") == "True",
@@ -226,7 +152,6 @@ class TestAddons(object):
         Sets up and validate istio.
 
         """
-
         print("Enabling Knative and Istio")
         microk8s_enable("knative")
         print("Validating Istio")
@@ -252,7 +177,6 @@ class TestAddons(object):
         Test jaeger, prometheus and fluentd.
 
         """
-
         print("Enabling fluentd")
         microk8s_enable("fluentd")
         print("Enabling jaeger")
@@ -265,27 +189,6 @@ class TestAddons(object):
         microk8s_disable("jaeger")
         print("Disabling fluentd")
         microk8s_disable("fluentd")
-
-    @pytest.mark.skipif(
-        platform.machine() != "x86_64",
-        reason="Prometheus is only relevant in x86 architectures",
-    )
-    @pytest.mark.skipif(
-        os.environ.get("SKIP_PROMETHEUS") == "True",
-        reason="Skipping prometheus if it crash loops on lxd",
-    )
-    def test_prometheus(self):
-        """
-        Test prometheus.
-        """
-
-        print("Enabling prometheus")
-        microk8s_enable("prometheus")
-        print("Validating Prometheus")
-        validate_prometheus()
-        print("Disabling prometheus")
-        microk8s_disable("prometheus")
-        microk8s_reset()
 
     @pytest.mark.skipif(
         platform.machine() != "x86_64",
@@ -326,37 +229,6 @@ class TestAddons(object):
         validate_linkerd()
         print("Disabling Linkerd")
         microk8s_disable("linkerd")
-
-    def test_rbac_addon(self):
-        """
-        Test RBAC.
-
-        """
-        print("Enabling RBAC")
-        microk8s_enable("rbac")
-        print("Validating RBAC")
-        validate_rbac()
-        print("Disabling RBAC")
-        microk8s_disable("rbac")
-
-    @pytest.mark.skipif(
-        platform.machine() != "x86_64",
-        reason="Metallb tests are only relevant in x86 architectures",
-    )
-    @pytest.mark.skipif(
-        os.environ.get("UNDER_TIME_PRESSURE") == "True",
-        reason="Skipping metallb test as we are under time pressure",
-    )
-    def test_metallb_addon(self):
-        addon = "metallb"
-        ip_ranges = (
-            "192.168.0.105-192.168.0.105,192.168.0.110-192.168.0.111,192.168.1.240/28"
-        )
-        print("Enabling metallb")
-        microk8s_enable("{}:{}".format(addon, ip_ranges), timeout_insec=500)
-        validate_metallb_config(ip_ranges)
-        print("Disabling metallb")
-        microk8s_disable("metallb")
 
     @pytest.mark.skip("disabling the test while we work on a 1.20 release")
     @pytest.mark.skipif(
@@ -470,16 +342,6 @@ class TestAddons(object):
         validate_keda()
         print("Disabling keda")
         microk8s_disable("keda")
-
-    def test_backup_restore(self):
-        """
-        Test backup and restore commands.
-        """
-        print("Checking dbctl backup and restore")
-        if os.path.exists("backupfile.tar.gz"):
-            os.remove("backupfile.tar.gz")
-        check_call("/snap/bin/microk8s.dbctl --debug backup -o backupfile".split())
-        check_call("/snap/bin/microk8s.dbctl --debug restore backupfile.tar.gz".split())
 
     @pytest.mark.skipif(
         platform.machine() == "s390x", reason="OpenEBS is not available on s390x"
