@@ -6,50 +6,25 @@ source $SNAP/actions/common/utils.sh
 
 NAMESPACE_PTR="portainer"
 
+MANIFEST_PTR="https://raw.githubusercontent.com/portainer/k8s/master/deploy/manifests/portainer/portainer.yaml"
+
 KUBECTL="$SNAP/kubectl --kubeconfig=${SNAP_DATA}/credentials/client.config"
 
+"$SNAP/microk8s-enable.wrapper" hostpath-storage
 "$SNAP/microk8s-enable.wrapper" dns
 
-"$SNAP/microk8s-enable.wrapper" helm3
-
 echo "Enabling portainer"
-VALUES="$@"
-for i in "$@"
-do
-case $i in
-    -sc=*|--values=*)
-    VALUES="${i#*=}"
-    shift # past argument=value
-    ;;
-    *)
-          # unknown option
-    ;;
-esac
-done
 
-HELM="$SNAP_DATA/bin/helm3 --kubeconfig=$SNAP_DATA/credentials/client.config"
-
-$HELM repo add portainer https://portainer.github.io/k8s/
-$HELM repo update
 
 # make sure the "portainer" namespace exists
-#$KUBECTL create namespace "$NAMESPACE_PTR" > /dev/null 2>&1 || true
+$KUBECTL create namespace "$NAMESPACE_PTR" > /dev/null 2>&1 || true
 
 # load the CRD and wait for it to be installed
-#$KUBECTL apply -f "$MANIFEST_PTR"
-
-if [ -z "$VALUES" ]
-then
-  "$SNAP/microk8s-enable.wrapper" hostpath-storage
-  sleep 3
-  SC=$($KUBECTL get sc | grep default | awk  '{print $1}')
-  $HELM upgrade --install  --create-namespace -n $NAMESPACE_PTR portainer portainer/portainer  --set persistence.storageClass=$SC
-else
-  $HELM upgrade --install  --create-namespace -n $NAMESPACE_PTR portainer portainer/portainer  --set persistence.storageClass=$2
-fi
-
+$KUBECTL apply -f "$MANIFEST_PTR"
 # change storage class that is default
 #PVCNAME= "$KUBECTL get pvc -n "$NAMESPACE_PTR"  -o jsonpath="{.items[0].metadata.name}""
+SC=$($KUBECTL get sc | grep default | awk  '{print $1}')
+$KUBECTL patch pvc portainer -n  "$NAMESPACE_PTR"    -p '{ "spec": { "storageClassName": "'${SC}'"}}'
 
 
 # print a final help message
