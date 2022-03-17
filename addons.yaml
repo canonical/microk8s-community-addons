@@ -124,3 +124,11 @@ microk8s-addons:
       check_status: "deployment.apps/argo-cd-argocd-server"
       supported_architectures:
         - amd64
+
+    - name: "wasmedge"
+      description: "Native WebAssembly support via crun runtime"
+      version: "0.9.1"
+      check_status: "${SNAP_DATA}/var/lock/wasmedge.enabled"
+      supported_architectures:
+        - arm64
+        - amd64

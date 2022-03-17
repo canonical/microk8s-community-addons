@@ -1,0 +1,48 @@
+#!/bin/bash
+
+source "$SNAP/actions/common/utils.sh"
+
+SNAP_CHANNEL="--edge --devmode"
+PATCH_DIR=`dirname "$0"`/patch
+
+echo "Enabling wasmedge via crun OCI runtime"
+
+echo "Install/Upgrade crun-wasmedge from snapstore"
+[ ! -d "/snap/crun-wasmedge/current" ] && run_with_sudo snap install $SNAP_CHANNEL crun-wasmedge || run_with_sudo snap refresh $SNAP_CHANNEL crun-wasmedge
+
+echo "Switching OCI runtime to crun with wasmedge support"
+run_with_sudo sed -i -f $PATCH_DIR/enable_crun_containerd-template.toml.sed $SNAP_DATA/args/containerd-template.toml
+run_with_sudo systemctl restart snap.microk8s.daemon-containerd
+
+run_with_sudo touch $SNAP_DATA/var/lock/wasmedge.enabled
+echo "Enabled wasmedge via crun OCI runtime"
+echo "" 
+echo "" 
+echo "-----------------------"
+echo "" 
+echo "" 
+echo "Crun is now the default oci runtime. It can run \"runtimeless\" WebAssembly images by using WasmEdge."
+echo "Container in a pod that is annotated with 'run.oci.handler: wasm' or 'module.wasm.image/variant: compat' are executed by the WebAsembly runtime."
+echo "If you are using hybrid containers like a pod with a WebAssembly image and an OCI container as sidecar you can use the *-smart variants of the annnotations."
+echo "To thest the installation you can run the demo pod:" 
+echo "" 
+echo ""
+echo "apiVersion: v1"
+echo "kind: Pod"
+echo "metadata:"
+echo "  annotations:"
+echo "    module.wasm.image/variant: compat-smart"
+echo "  labels:"
+echo "    run: wasi-demo"
+echo "  name: wasi-demo"
+echo "spec:"
+echo "  containers:"
+echo "  - args:"
+echo "    - /wasi_example_main.wasm"
+echo "    - \"50000000\""
+echo "    image: hydai/wasm-wasi-example:with-wasm-annotation"
+echo "    name: wasi-demo"
+echo "  restartPolicy: Never"
+echo "" 
+echo "" 
+echo "You can find more information in the Kubernetes section of the WasmEdge documentation: https://wasmedge.org/book/en/kubernetes.html" 

@@ -33,6 +33,7 @@ from validators import (
     validate_openebs,
     validate_kata,
     validate_argocd,
+    validate_wasmedge,
 )
 from utils import (
     microk8s_enable,
@@ -379,3 +380,18 @@ class TestAddons(object):
         validate_kata()
         print("Disabling kata")
         microk8s_disable("kata")
+
+    @pytest.mark.skipif(
+        platform.machine() == "s390x",
+        reason="Crun and wasmedge are not tested on s390x",
+    )
+    def test_wasmedge(self):
+        """
+        Sets up and validates wasmedge.
+        """
+        print("Enabling wasmedge")
+        microk8s_enable("wasmedge")
+        print("Validating wasmedge")
+        validate_wasmedge()
+        print("Disabling wasmedge")
+        microk8s_disable("wasmedge")

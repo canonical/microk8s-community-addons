@@ -616,3 +616,14 @@ def validate_kata():
     kubectl("apply -f {}".format(manifest))
     wait_for_pod_state("", "default", "running", label="app=kata")
     kubectl("delete -f {}".format(manifest))
+
+
+def validate_wasmedge():
+    """
+    Validate WasmEdge
+    """
+    wait_for_installation()
+    here = os.path.dirname(os.path.abspath(__file__))
+    manifest = os.path.join(here, "templates", "job-wasmedge-test.yaml")
+    kubectl("apply -f {}".format(manifest))
+    wait_for_pod_state("", "default", "terminated", "Completed", "app=wasi-demo", 120)
