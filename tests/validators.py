@@ -414,16 +414,12 @@ def validate_linkerd():
     """
     Validate Linkerd by deploying emojivoto.
     """
-    if platform.machine() != "x86_64":
-        print("Linkerd tests are only relevant in x86 architectures")
-        return
-
     wait_for_installation()
     wait_for_pod_state(
         "",
         "linkerd",
         "running",
-        label="linkerd.io/control-plane-component=controller",
+        label="linkerd.io/control-plane-component=destination",
         timeout_insec=300,
     )
     print("Linkerd controller up and running.")
@@ -441,6 +437,9 @@ def validate_linkerd():
     wait_for_pod_state(
         "", "emojivoto", "running", label="app=emoji-svc", timeout_insec=600
     )
+
+    cmd = "/snap/bin/microk8s.linkerd viz  list -n emojivoto"
+    run_until_success(cmd, timeout_insec=900, err_out="no")
     kubectl("delete -f {}".format(manifest))
 
 
