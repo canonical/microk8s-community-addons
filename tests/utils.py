@@ -9,6 +9,13 @@ from subprocess import check_output, CalledProcessError, check_call
 arch_translate = {"aarch64": "arm64", "x86_64": "amd64"}
 
 
+def get_arch():
+    """
+    Returns the architecture we are running on
+    """
+    return arch_translate[platform.machine()]
+
+
 def run_until_success(cmd, timeout_insec=60, err_out=None):
     """
     Run a command until it succeeds or times out.
@@ -93,7 +100,9 @@ def wait_for_pod_state(
     while True:
         if datetime.datetime.now() > deadline:
             raise TimeoutError(
-                "Pod {} not in {} after {} seconds.".format(pod, desired_state, timeout_insec)
+                "Pod {} not in {} after {} seconds.".format(
+                    pod, desired_state, timeout_insec
+                )
             )
         cmd = "po {} -n {}".format(pod, namespace)
         if label:
@@ -242,7 +251,9 @@ def is_container():
         return True
 
     try:
-        check_call("sudo grep -E (lxc|hypervisor) /proc/1/environ /proc/cpuinfo".split())
+        check_call(
+            "sudo grep -E (lxc|hypervisor) /proc/1/environ /proc/cpuinfo".split()
+        )
         print("Tests are running in an undetectable container")
         return True
     except CalledProcessError:
