@@ -437,9 +437,10 @@ def validate_linkerd():
     wait_for_pod_state(
         "", "emojivoto", "running", label="app=emoji-svc", timeout_insec=600
     )
-
-    cmd = "/snap/bin/microk8s.linkerd viz  list -n emojivoto"
-    run_until_success(cmd, timeout_insec=900, err_out="no")
+    print("Verify linkerd mesh is available in emojivoto pods")
+    cmd = "/snap/bin/microk8s.linkerd viz list -n emojivoto"
+    output = run_until_success(cmd, timeout_insec=900, err_out="no")
+    assert "emojivoto" in output
     kubectl("delete -f {}".format(manifest))
 
 

@@ -52,7 +52,7 @@ class TestAddons(object):
         Clean up after a test
         """
         yield
-        microk8s_reset()
+        #microk8s_reset()
 
     @pytest.mark.skipif(
         platform.machine() != "s390x",
@@ -223,11 +223,11 @@ class TestAddons(object):
 
         """
         print("Enabling Linkerd")
-        microk8s_enable("linkerd")
+        microk8s_enable("community/linkerd")
         print("Validating Linkerd")
         validate_linkerd()
         print("Disabling Linkerd")
-        microk8s_disable("linkerd")
+        microk8s_disable("community/linkerd")
 
     @pytest.mark.skip("disabling the test while we work on a 1.20 release")
     @pytest.mark.skipif(
