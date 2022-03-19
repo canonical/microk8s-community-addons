@@ -52,7 +52,7 @@ class TestAddons(object):
         Clean up after a test
         """
         yield
-        #microk8s_reset()
+        microk8s_reset()
 
     @pytest.mark.skipif(
         platform.machine() != "s390x",
