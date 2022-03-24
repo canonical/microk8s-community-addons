@@ -213,11 +213,11 @@ class TestAddons(object):
         microk8s_disable("cilium")
         microk8s_reset()
 
-    @pytest.mark.skip("disabling the test while we work on a 1.20 release")
     @pytest.mark.skipif(
         os.environ.get("UNDER_TIME_PRESSURE") == "True",
         reason="Skipping Linkerd tests as we are under time pressure",
     )
+    @pytest.mark.skipif(platform.machine() == "s390x", reason="Not available on s390x")
     def test_linkerd(self):
         """
         Sets up and validate linkerd
