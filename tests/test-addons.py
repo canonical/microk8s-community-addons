@@ -217,6 +217,10 @@ class TestAddons(object):
         os.environ.get("UNDER_TIME_PRESSURE") == "True",
         reason="Skipping Linkerd tests as we are under time pressure",
     )
+    @pytest.mark.skipif(
+        platform.machine() != "x86_64",
+        reason="Linkerd test is available for amd64",
+    )
     @pytest.mark.skipif(platform.machine() == "s390x", reason="Not available on s390x")
     def test_linkerd(self):
         """
