@@ -6,7 +6,7 @@ source $SNAP/actions/common/utils.sh
 
 NAMESPACE_STARBOARD="starboard-system"
 
-STARBOARD_HELM_VERSION="0.9.1"
+STARBOARD_HELM_VERSION="0.10.0"
 
 KUBECTL="$SNAP/kubectl --kubeconfig=${SNAP_DATA}/credentials/client.config"
 
