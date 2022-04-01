@@ -14,12 +14,6 @@ echo "Disabling Starboard"
 
 $HELM delete starboard-operator -n $NAMESPACE_STARBOARD
 
-$KUBECTL delete -f https://raw.githubusercontent.com/aquasecurity/starboard/v0.14.1/deploy/static/04-starboard-operator.deployment.yaml \
-  -f https://raw.githubusercontent.com/aquasecurity/starboard/v0.14.1/deploy/static/03-starboard-operator.config.yaml \
-  -f https://raw.githubusercontent.com/aquasecurity/starboard/v0.14.1/deploy/static/02-starboard-operator.rbac.yaml \
-  -f https://raw.githubusercontent.com/aquasecurity/starboard/v0.14.1/deploy/static/01-starboard-operator.ns.yaml
-
-
 $KUBECTL delete $KUBECTL_DELETE_ARGS namespace "$NAMESPACE_STARBOARD" > /dev/null 2>&1 || true
 
 echo "Starboard disabled"

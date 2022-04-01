@@ -123,8 +123,8 @@ microk8s-addons:
       version: "0.14.1"
       check_status: "deployment.apps/starboard-operator"
       supported_architectures:
-        - amd64
         - arm64
+        - amd64
 
     - name: "argocd"
       description: "Argo CD is a declarative continuous deployment for Kubernetes."
