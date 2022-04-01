@@ -57,14 +57,12 @@ get_starboard() {
       $HELM upgrade -i starboard-operator aqua/starboard-operator \
         --namespace "$NAMESPACE_STARBOARD" \
         --create-namespace \
-        --set="targetNamespaces=default" \
         --set="trivy.ignoreUnfixed=true" \
         --version $STARBOARD_HELM_VERSION
   else
       $HELM upgrade -i starboard-operator aqua/starboard-operator \
         --namespace "$NAMESPACE_STARBOARD" \
         --create-namespace \
-        --set="targetNamespaces=default" \
         --set="trivy.ignoreUnfixed=true" \
         --version $STARBOARD_HELM_VERSION \
         -f $VALUES
