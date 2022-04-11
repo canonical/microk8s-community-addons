@@ -301,7 +301,7 @@ class TestAddons(object):
         validate_openfaas()
         print("Disabling openfaas")
         microk8s_disable("openfaas")
-    
+
     @pytest.mark.skipif(
         platform.machine() != "x86_64",
         reason="Starboard tests are only relevant in x86 architectures",

@@ -605,13 +605,18 @@ def validate_openebs():
     assert "my-data" in output
     kubectl("delete -f {}".format(manifest))
 
+
 def validate_starboard():
     """
     Validate Starboard
     """
     wait_for_pod_state(
-        "", "starboard-system", "running", label="app.kubernetes.io/instance=starboard-operator"
+        "",
+        "starboard-system",
+        "running",
+        label="app.kubernetes.io/instance=starboard-operator",
     )
+
 
 def validate_kata():
     """
