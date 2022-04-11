@@ -610,7 +610,7 @@ def validate_starboard():
     Validate Starboard
     """
     wait_for_pod_state(
-        "", "starboard", "running", label="app.kubernetes.io/component=server"
+        "", "starboard-system", "running", label="app.kubernetes.io/instance=starboard-operator"
     )
 
 def validate_kata():
