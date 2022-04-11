@@ -120,7 +120,7 @@ microk8s-addons:
 
     - name: "argocd"
       description: "Argo CD is a declarative continuous deployment for Kubernetes."
-      version: "2.2.5"
+      version: "2.3.3"
       check_status: "deployment.apps/argo-cd-argocd-server"
       supported_architectures:
         - amd64
