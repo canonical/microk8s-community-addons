@@ -111,6 +111,14 @@ microk8s-addons:
       supported_architectures:
         - amd64
 
+    - name: "starboard"
+      description: "Kubernetes-native security toolkit"
+      version: "0.14.1"
+      check_status: "deployment.apps/starboard-operator"
+      supported_architectures:
+        - arm64
+        - amd64
+
     - name: "argocd"
       description: "Argo CD is a declarative continuous deployment for Kubernetes."
       version: "2.3.3"
