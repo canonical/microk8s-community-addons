@@ -59,13 +59,6 @@ microk8s-addons:
       supported_architectures:
         - amd64
 
-    - name: "ambassador"
-      description: "Ambassador API Gateway and Ingress"
-      version: ""
-      check_status: "deployment.apps/ambassador-operator"
-      supported_architectures:
-        - amd64
-
     - name: "portainer"
       description: "Portainer UI for your Kubernetes cluster"
       version: "2.0.0"
@@ -116,6 +109,14 @@ microk8s-addons:
       version: ""
       check_status: "daemonset.apps/fpga-operator"
       supported_architectures:
+        - amd64
+
+    - name: "starboard"
+      description: "Kubernetes-native security toolkit"
+      version: "0.14.1"
+      check_status: "deployment.apps/starboard-operator"
+      supported_architectures:
+        - arm64
         - amd64
 
     - name: "argocd"
