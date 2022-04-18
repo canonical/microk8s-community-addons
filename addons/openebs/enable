@@ -9,7 +9,7 @@ KUBECTL="$SNAP/kubectl --kubeconfig=${SNAP_DATA}/credentials/client.config"
 OPENEBS_NS="openebs"
 
 # Check if iscsid is installed 
-if ! systemctl is-enabled iscsid | grep enabled &> /dev/null
+if ! is_strict && ! systemctl is-enabled iscsid | grep enabled &> /dev/null
   then
     echo "iscsid is not available or enabled.  Make sure iscsi is installed on all nodes."
     echo "To enable iscsid: "
