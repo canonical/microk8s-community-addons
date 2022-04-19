@@ -4,10 +4,37 @@ import click
 import os
 import subprocess
 import sys
+import yaml
 from tempfile import mkstemp
 from shutil import move, copymode
 from os import fdopen, remove
 
+
+def exit_if_no_root():
+    """
+    Exit if the user is not root
+    """
+    if not os.geteuid() == 0:
+        print(
+            "Enabling kata requires you to have elevated permissions, please use sudo."
+        )
+        exit(50)
+
+def is_strict():
+    """
+    Are we running on a strict snap?    
+    """
+    try:
+        snap_path = os.environ.get("SNAP")
+        snapcraft = f"{snap_path}/snap/snapcraft.yaml"
+        with open(snapcraft, 'r') as f:
+            manifest = yaml.safe_load(f)
+            if manifest['confinement'] == 'strict':
+                return True
+        return False
+    except (subprocess.CalledProcessError):
+        print("Failed to identify snap confinement." )
+        sys.exit(6)
 
 def mark_kata_enabled():
     """
@@ -16,7 +43,7 @@ def mark_kata_enabled():
     try:
         snapdata_path = os.environ.get("SNAP_DATA")
         lock_fname = "{}/var/lock/kata.enabled".format(snapdata_path)
-        subprocess.call(['sudo', 'touch', lock_fname])
+        subprocess.call(['touch', lock_fname])
     except (subprocess.CalledProcessError):
         print("Failed to mark the kata addon as enabled." )
         sys.exit(4)
@@ -41,9 +68,9 @@ def restart_containerd():
     """
     try:
         print("Restarting containerd")
-        subprocess.call(['sudo', 'systemctl', 'restart', 'snap.microk8s.daemon-containerd'])
+        subprocess.call(['snapctl', 'restart', 'microk8s.daemon-containerd'])
     except (subprocess.CalledProcessError):
-        print("Failed to restart containerd. Please, yry to 'microk8s stop' and 'microk8s start' manually." )
+        print("Failed to restart containerd. Please, try to 'microk8s stop' and 'microk8s start' manually." )
         sys.exit(3)
 
 
@@ -72,6 +99,7 @@ def print_next_steps():
     print()
     print("To use the kata runtime set the 'kata' runtimeClassName, eg:")
     print()
+    print("apiVersion: v1")
     print("kind: Pod")
     print("metadata:")
     print("  name: nginx-kata")
@@ -94,7 +122,15 @@ def kata(runtime_path):
     Enable the kata runtime. Either snap install the kata binaries or use a path to already deployed
     kata binaries. Note the kata binary must be called kata-runtime
     """
-    if not runtime_path:
+    if not is_strict():
+        exit_if_no_root()
+
+    if not runtime_path and is_strict():
+        print("Please use '--runtime-path' to point to the location of the kata runtime.")
+        print("As this is a strictly confined MicroK8s deployment access is restricted to certain filesystem paths.")
+        print("We recommend you place the kata runtime binary under '/var/snap/microk8s/common/'")
+        sys.exit(1)
+    elif not runtime_path and not is_strict():
         try:
             print("Installing kata-containers snap")
             subprocess.call(['sudo', 'snap', 'install', 'kata-containers', '--classic'])
