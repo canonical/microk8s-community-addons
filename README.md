@@ -1,6 +1,6 @@
 # microk8s-addons
 
-This repository contains the core addons that ship along with MicroK8s.
+This repository contains the community addons that can be enabled along with MicroK8s.
 
 ## Directory structure
 
