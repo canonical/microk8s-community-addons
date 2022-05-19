@@ -62,7 +62,7 @@ def main(
 
     if ingress_addon:
         ensure_addon(ingress_addon)    
-    
+
     if metric_server_addon:
         ensure_addon(metric_server_addon)
 
