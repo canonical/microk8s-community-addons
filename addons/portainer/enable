@@ -53,7 +53,7 @@ def main(
 
     if dns_addon:
         ensure_addon(dns_addon)
-   
+
    if helm3_addon:
         ensure_addon(helm3_addon)
 
@@ -72,7 +72,7 @@ def main(
     subprocess.run([HELM, "repo", "update"])
     # Create portainer namespace. Ignore failures (e.g. if namespace exists)
     subprocess.run([KUBECTL, "create", "namespace", "portainer"])
-   #storageclass= subprocess.check_output([KUBECTL, "get", "sc", "|", "grep", "default", "|", "awk",  "{print $1}"])
+   # storageclass= subprocess.check_output([KUBECTL, "get", "sc", "|", "grep", "default", "|", "awk",  "{print $1}"])
     args = []
     if enable_ee:
         args.extend(["--set", "enterpriseEdition.enabled=true"])
