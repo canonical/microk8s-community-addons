@@ -53,20 +53,19 @@ def main(
 
     if dns_addon:
         ensure_addon(dns_addon)
-
-   if helm3_addon:
+    
+    if helm3_addon:
         ensure_addon(helm3_addon)
-
+    
     if rbac_addon:
         ensure_addon(rbac_addon)
-
+        
     if ingress_addon:
-        ensure_addon(ingress_addon)    
-
+        ensure_addon(ingress_addon) 
+    
     if metric_server_addon:
         ensure_addon(metric_server_addon)
-
-
+    
     subprocess.run([HELM, "repo", "add", "portainer",
                    "https://portainer.github.io/k8s/"])
     subprocess.run([HELM, "repo", "update"])
