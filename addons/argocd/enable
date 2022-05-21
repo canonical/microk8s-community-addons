@@ -6,7 +6,7 @@ source $SNAP/actions/common/utils.sh
 
 NAMESPACE_ARGOCD="argocd"
 
-ARGOCD_HELM_VERSION="4.5.0"
+ARGOCD_HELM_VERSION="4.6.3"
 
 KUBECTL="$SNAP/kubectl --kubeconfig=${SNAP_DATA}/credentials/client.config"
 
