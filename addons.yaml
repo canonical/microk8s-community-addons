@@ -59,6 +59,13 @@ microk8s-addons:
       supported_architectures:
         - amd64
 
+    - name: "nfs"
+      description: "NFS Server Provisioner"
+      version: "1.4.0"
+      check_status: "statefulset.apps/nfs-server-provisioner"
+      supported_architectures:
+        - amd64
+
     - name: "portainer"
       description: "Portainer UI for your Kubernetes cluster"
       version: "2.0.0"
