@@ -415,4 +415,3 @@ class TestAddons(object):
         validate_chaosmesh()
         print("Disabling chaosmesh")
         microk8s_disable("chaosmesh")
-
