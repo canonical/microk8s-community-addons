@@ -15,18 +15,9 @@ echo "Disabling ArgoCD"
 $HELM delete argo-cd -n $NAMESPACE_ARGOCD
 
 $KUBECTL delete customresourcedefinition applications.argoproj.io \
-                applicationsets.argoproj.io \
                 argocdextensions.argoproj.io  \
                 appprojects.argoproj.io
 
-if [[ "$1" == "--purge" ]]; then
-    $KUBECTL delete $KUBECTL_DELETE_ARGS namespace "$NAMESPACE_ARGOCD" > /dev/null 2>&1 || true
-else
-    echo ""
-    echo "WARNING: Deletion of \"$NAMESPACE_ARGOCD\" namespace must be enforced by: microk8s disable argocd --purge"
-    echo ""
-    echo "Purge only when sure, that \"$NAMESPACE_ARGOCD\" namespace is not hosting any other services from Argo stack."
-    echo ""
-fi
+$KUBECTL delete $KUBECTL_DELETE_ARGS namespace "$NAMESPACE_ARGOCD" > /dev/null 2>&1 || true
 
 echo "ArgoCD disabled"
