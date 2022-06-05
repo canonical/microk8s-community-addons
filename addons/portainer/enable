@@ -37,7 +37,7 @@ def ensure_addon(addon_name: str):
 @click.option("--dns-addon", default="core/dns")
 @click.option("--rbac-addon", default="core/rbac")
 @click.option("--ingress-addon", default="core/ingress")
-@click.option("--metric-server-addon", default="core/metric-server")
+@click.option("--metric-server-addon", default="core/metrics-server")
 @click.option("--storage-addon", default="core/hostpath-storage")
 @click.option('--storage-class', default=None)
 def main(
