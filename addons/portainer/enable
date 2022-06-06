@@ -35,11 +35,17 @@ def ensure_addon(addon_name: str):
 @click.option("--enable-ee", is_flag=True, default=False)
 @click.option("--helm3-addon", default="core/helm3")
 @click.option("--dns-addon", default="core/dns")
+@click.option("--rbac-addon", default="core/rbac")
+@click.option("--ingress-addon", default="core/ingress")
+@click.option("--metric-server-addon", default="core/metrics-server")
 @click.option("--storage-addon", default="core/hostpath-storage")
 @click.option('--storage-class', default=None)
 def main(
     helm3_addon: str,
     dns_addon: str,
+    rbac_addon: str,
+    ingress_addon: str,
+    metric_server_addon: str,
     storage_addon: str,
     enable_ee: bool,
     storage_class: str,
@@ -47,17 +53,25 @@ def main(
 
     if dns_addon:
         ensure_addon(dns_addon)
-    # if storage_addon:
-    #    ensure_addon(storage_addon)
+    
     if helm3_addon:
         ensure_addon(helm3_addon)
-
+    
+    if rbac_addon:
+        ensure_addon(rbac_addon)
+        
+    if ingress_addon:
+        ensure_addon(ingress_addon) 
+    
+    if metric_server_addon:
+        ensure_addon(metric_server_addon)
+    
     subprocess.run([HELM, "repo", "add", "portainer",
                    "https://portainer.github.io/k8s/"])
     subprocess.run([HELM, "repo", "update"])
     # Create portainer namespace. Ignore failures (e.g. if namespace exists)
     subprocess.run([KUBECTL, "create", "namespace", "portainer"])
-   #storageclass= subprocess.check_output([KUBECTL, "get", "sc", "|", "grep", "default", "|", "awk",  "{print $1}"])
+   # storageclass= subprocess.check_output([KUBECTL, "get", "sc", "|", "grep", "default", "|", "awk",  "{print $1}"])
     args = []
     if enable_ee:
         args.extend(["--set", "enterpriseEdition.enabled=true"])
