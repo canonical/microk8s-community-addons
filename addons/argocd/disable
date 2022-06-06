@@ -19,11 +19,29 @@ $KUBECTL delete customresourcedefinition applications.argoproj.io \
                 argocdextensions.argoproj.io  \
                 appprojects.argoproj.io
 
-if [[ "$1" == "--purge" ]]; then
+PURGE=false
+# get the options
+while getopts ":p" flag; do
+  case "${flag}" in
+          p) PURGE=true
+             ;;
+          *) echo "Usage: microk8s disable argocd [-p]"
+             echo ""
+             echo "WARNING: Final deletion of \"$NAMESPACE_ARGOCD\" namespace must be enforced by: \"microk8s disable argocd -p\""
+             echo ""
+             echo "Purge only when sure, that \"$NAMESPACE_ARGOCD\" namespace is not hosting any other services from Argo stack."
+             echo ""             
+             exit 0
+             ;;
+  esac
+done
+
+if $PURGE; then
+    echo "Final \"$NAMESPACE_ARGOCD\" namespace deletion"
     $KUBECTL delete $KUBECTL_DELETE_ARGS namespace "$NAMESPACE_ARGOCD" > /dev/null 2>&1 || true
 else
     echo ""
-    echo "WARNING: Deletion of \"$NAMESPACE_ARGOCD\" namespace must be enforced by: microk8s disable argocd --purge"
+    echo "WARNING: Final deletion of \"$NAMESPACE_ARGOCD\" namespace must be enforced by: \"microk8s disable argocd -p\""
     echo ""
     echo "Purge only when sure, that \"$NAMESPACE_ARGOCD\" namespace is not hosting any other services from Argo stack."
     echo ""
