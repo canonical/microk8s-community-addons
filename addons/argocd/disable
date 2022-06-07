@@ -10,15 +10,6 @@ KUBECTL="$SNAP/kubectl --kubeconfig=${SNAP_DATA}/credentials/client.config"
 HELM="$SNAP_DATA/bin/helm3 --kubeconfig=$SNAP_DATA/credentials/client.config"
 KUBECTL_DELETE_ARGS="--wait=true --timeout=180s --ignore-not-found=true"
 
-echo "Disabling ArgoCD"
-
-$HELM delete argo-cd -n $NAMESPACE_ARGOCD
-
-$KUBECTL delete customresourcedefinition applications.argoproj.io \
-                applicationsets.argoproj.io \
-                argocdextensions.argoproj.io  \
-                appprojects.argoproj.io
-
 PURGE=false
 # get the options
 while getopts ":p" flag; do
@@ -35,6 +26,15 @@ while getopts ":p" flag; do
              ;;
   esac
 done
+
+echo "Disabling ArgoCD"
+
+$HELM delete argo-cd -n $NAMESPACE_ARGOCD
+
+$KUBECTL delete customresourcedefinition applications.argoproj.io \
+                applicationsets.argoproj.io \
+                argocdextensions.argoproj.io  \
+                appprojects.argoproj.io
 
 if $PURGE; then
     echo "Final \"$NAMESPACE_ARGOCD\" namespace deletion"
