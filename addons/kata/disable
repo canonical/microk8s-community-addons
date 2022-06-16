@@ -9,6 +9,32 @@ from shutil import move, copymode
 from os import fdopen, remove
 
 
+def exit_if_no_root():
+    """
+    Exit if the user is not root
+    """
+    if not os.geteuid() == 0:
+        print(
+            "Disabling kata requires you to have elevated permissions, please use sudo."
+        )
+        exit(50)
+
+def is_strict():
+    """
+    Are we running on a strict snap?    
+    """
+    try:
+        snap_path = os.environ.get("SNAP")
+        snapcraft = f"{snap_path}/snap/snapcraft.yaml"
+        with open(snapcraft, 'r') as f:
+            manifest = yaml.safe_load(f)
+            if manifest['confinement'] == 'strict':
+                return True
+        return False
+    except (subprocess.CalledProcessError):
+        print("Failed to identify snap confinement." )
+        sys.exit(6)
+
 def mark_kata_disabled():
     """
     Mark the kata addon as enabled by removing the kata.enabled lock
@@ -16,7 +42,7 @@ def mark_kata_disabled():
     try:
         snapdata_path = os.environ.get("SNAP_DATA")
         lock_fname = "{}/var/lock/kata.enabled".format(snapdata_path)
-        subprocess.call(['sudo', 'rm', lock_fname])
+        subprocess.call(['rm', lock_fname])
     except (subprocess.CalledProcessError):
         print("Failed to mark the kata addon as disabled." )
         sys.exit(4)
@@ -35,9 +61,9 @@ def delete_runtime_manifest():
 def restart_containerd():
     try:
         print("Restarting containerd")
-        subprocess.call(['sudo', 'systemctl', 'restart', 'snap.microk8s.daemon-containerd'])
+        subprocess.call(['snapctl', 'restart', 'microk8s.daemon-containerd'])
     except (subprocess.CalledProcessError):
-        print("Failed to restart containerd. Please, yry to 'microk8s stop' and 'microk8s start' manually." )
+        print("Failed to restart containerd. Please, try to 'microk8s stop' and 'microk8s start' manually." )
         sys.exit(3)
 
 
@@ -67,6 +93,8 @@ def kata():
     Disable the kata runtime. Mark it as disabled, delete the runtimeClassName but do not remove the
     kata runtime because we do not know if it is used by any other application.
     """
+    if not is_strict():
+        exit_if_no_root()
     print("Configuring containerd")
     configure_containerd()
     restart_containerd()
