@@ -100,17 +100,19 @@ sudo microk8s enable gopaddle-lite -i 130.198.9.42 -v 4.2.3
 
 The following is a sample output for the above example:
 ```
-[kishore@sail ~]$ sudo microk8s enable gopaddle-lite -i 130.198.9.42 -v 4.2.3
+$ sudo microk8s enable gopaddle-lite -i 130.198.9.42 -v 4.2.3
 Infer repository gp-lite for addon gopaddle-lite
 static IP of the microk8s cluster: 130.198.9.42
 
+Infer repository core for addon host-access
+Addon core/host-access is already enabled
 storageclass.storage.k8s.io/microk8s-hostpath-gp-retain created
 Infer repository core for addon helm3
 Enabling Helm 3
 Fetching helm version v3.8.0.
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-100 12.9M  100 12.9M    0     0  9559k      0  0:00:01  0:00:01 --:--:-- 9553k
+100 12.9M  100 12.9M    0     0  5465k      0  0:00:02  0:00:02 --:--:-- 5465k
 Helm 3 is enabled
 Infer repository core for addon storage
 DEPRECIATION WARNING: 'storage' is deprecated and will soon be removed. Please use 'hostpath-storage' instead.
@@ -149,27 +151,39 @@ deployment.apps/metrics-server created
 apiservice.apiregistration.k8s.io/v1beta1.metrics.k8s.io created
 clusterrolebinding.rbac.authorization.k8s.io/microk8s-admin created
 Metrics-Server is enabled
-Hit:1 https://download.docker.com/linux/ubuntu bionic InRelease
-Hit:2 https://dl.yarnpkg.com/debian stable InRelease                                                                       
-Get:3 http://mirrors.adn.networklayer.com/ubuntu bionic InRelease [242 kB]                                                 
-Hit:4 https://deb.nodesource.com/node_14.x bionic InRelease                                                    
-Hit:5 https://apt.releases.hashicorp.com bionic InRelease                                                      
-Get:6 http://mirrors.adn.networklayer.com/ubuntu bionic-updates InRelease [88.7 kB]
-Get:7 http://mirrors.adn.networklayer.com/ubuntu bionic-backports InRelease [74.6 kB]
-Get:8 http://mirrors.adn.networklayer.com/ubuntu bionic-security InRelease [88.7 kB]
-Fetched 494 kB in 2s (226 kB/s)   
+Hit:1 https://dl.yarnpkg.com/debian stable InRelease
+Get:2 http://mirrors.adn.networklayer.com/ubuntu bionic InRelease [242 kB]
+Hit:3 https://download.docker.com/linux/ubuntu bionic InRelease
+Hit:4 https://deb.nodesource.com/node_14.x bionic InRelease
+Get:5 http://mirrors.adn.networklayer.com/ubuntu bionic-updates InRelease [88.7 kB]
+Get:6 http://mirrors.adn.networklayer.com/ubuntu bionic-backports InRelease [74.6 kB]
+Get:7 http://mirrors.adn.networklayer.com/ubuntu bionic-security InRelease [88.7 kB]
+Hit:8 https://apt.releases.hashicorp.com bionic InRelease
+Get:9 http://mirrors.adn.networklayer.com/ubuntu bionic-updates/main Sources [528 kB]
+Get:10 http://mirrors.adn.networklayer.com/ubuntu bionic-updates/main amd64 Packages [2646 kB]
+Get:11 http://mirrors.adn.networklayer.com/ubuntu bionic-updates/universe amd64 Packages [1826 kB]
+Get:12 http://mirrors.adn.networklayer.com/ubuntu bionic-security/restricted Sources [23.6 kB]
+Get:13 http://mirrors.adn.networklayer.com/ubuntu bionic-security/universe Sources [299 kB]
+Get:14 http://mirrors.adn.networklayer.com/ubuntu bionic-security/main Sources [274 kB]
+Get:15 http://mirrors.adn.networklayer.com/ubuntu bionic-security/main amd64 Packages [2304 kB]
+Get:16 http://mirrors.adn.networklayer.com/ubuntu bionic-security/main Translation-en [401 kB]
+Get:17 http://mirrors.adn.networklayer.com/ubuntu bionic-security/restricted amd64 Packages [786 kB]
+Get:18 http://mirrors.adn.networklayer.com/ubuntu bionic-security/restricted Translation-en [108 kB]
+Get:19 http://mirrors.adn.networklayer.com/ubuntu bionic-security/universe amd64 Packages [1212 kB]
+Get:20 http://mirrors.adn.networklayer.com/ubuntu bionic-security/universe Translation-en [279 kB]
+Fetched 11.2 MB in 11s (979 kB/s)                                                                              
 Reading package lists... Done
 Building dependency tree       
 Reading state information... Done
-51 packages can be upgraded. Run 'apt list --upgradable' to see them.
+59 packages can be upgraded. Run 'apt list --upgradable' to see them.
 Reading package lists... Done
 Building dependency tree       
 Reading state information... Done
 jq is already the newest version (1.5+dfsg-2).
-0 upgraded, 0 newly installed, 0 to remove and 51 not upgraded.
+0 upgraded, 0 newly installed, 0 to remove and 59 not upgraded.
 Enabling gopaddle lite
 WARNING: Kubernetes configuration file is group-readable. This is insecure. Location: /var/snap/microk8s/3272/credentials/client.config
-"gp-lite" already exists with the same configuration, skipping
+"gp-lite" has been added to your repositories
 WARNING: Kubernetes configuration file is group-readable. This is insecure. Location: /var/snap/microk8s/3272/credentials/client.config
 Hang tight while we grab the latest from your chart repositories...
 ...Successfully got an update from the "gp-lite" chart repository
@@ -181,54 +195,55 @@ Adding label 'gp-install-node=node1' to the node 'sail'
 node/sail labeled
 WARNING: Kubernetes configuration file is group-readable. This is insecure. Location: /var/snap/microk8s/3272/credentials/client.config
 NAME: gp-rabbitmq-4-2
-LAST DEPLOYED: Fri May 27 09:58:12 2022
+LAST DEPLOYED: Thu Jun 16 09:17:52 2022
 NAMESPACE: gp-lite
 STATUS: deployed
 REVISION: 1
 TEST SUITE: None
 WARNING: Kubernetes configuration file is group-readable. This is insecure. Location: /var/snap/microk8s/3272/credentials/client.config
 NAME: gp-core-4-2
-LAST DEPLOYED: Fri May 27 09:59:13 2022
+LAST DEPLOYED: Thu Jun 16 09:18:53 2022
 NAMESPACE: gp-lite
 STATUS: deployed
 REVISION: 1
 TEST SUITE: None
 
 Waiting for the gopaddle volume to move bound. This may take a while.
-persistentvolumeclaim/data-rabbitmq-0 condition met
-persistentvolumeclaim/data-mongodb-0 condition met
-persistentvolumeclaim/data-influxdb-0 condition met
+persistentvolumeclaim/data-rabbitmq-build-0 condition met
 persistentvolumeclaim/data-esearch-0 condition met
+persistentvolumeclaim/data-rabbitmq-0 condition met
+persistentvolumeclaim/data-influxdb-0 condition met
+persistentvolumeclaim/data-mongodb-0 condition met
 
 adding label to persistentvolume
-persistentvolume/pvc-e57b1e41-2a4e-4173-830b-c5ada3994ded patched
-persistentvolume/pvc-3b7295b5-e354-4480-aba3-be6f6bfdd8cf patched
-persistentvolume/pvc-9cf09d7d-3052-4829-b14a-fbc2a7afa795 patched
-persistentvolume/pvc-60456f0c-9085-4d2c-98f9-189051004175 patched
-persistentvolume/pvc-535469cf-4d62-4c36-b32e-cb067056fd14 patched
+persistentvolume/pvc-44a2ff61-b494-4fd5-a0f5-034d521f71a8 patched
+persistentvolume/pvc-5267b208-60e6-433f-ae59-a56f5ecdc706 patched
+persistentvolume/pvc-27e439d4-e04d-48ea-a700-8f17d8201bf9 patched
+persistentvolume/pvc-9dca9161-d705-4a85-a31c-47073995102e patched
+persistentvolume/pvc-02c5be89-5a31-4d7a-bc1f-6c5c698d8490 patched
 
 Waiting for the gopaddle services to move to running state. This may take a while.
-pod/deploymentmanager-85f55d549c-xpwzk condition met
-pod/usermanager-7c4d8c7787-vfr7b condition met
-pod/gateway-88b7f9dcf-xzps6 condition met
-pod/marketplace-7c96b6d5bd-448jf condition met
-pod/appworker-79ccbdfcd9-9gc4l condition met
-pod/activitymanager-6675d6567c-nd522 condition met
-pod/alertmanager-56ddf9644f-t46k8 condition met
-pod/appscanner-7975978bf-jxxns condition met
-pod/nodechecker-754785cd88-5wlkz condition met
-pod/clustermanager-d4d9bc954-648pv condition met
-pod/costmanager-69c6b5df4c-s8hrk condition met
-pod/redis-767b6468c6-5c8xg condition met
-pod/configmanager-7ff689677b-h4chg condition met
-pod/cloudmanager-65f854f76-7fcbr condition met
-pod/domainmanager-7bcd8dcdb7-fcq97 condition met
-pod/rabbitmq-0 condition met
-pod/mongodb-0 condition met
-pod/gpcore-774b96ccc7-ljm64 condition met
-pod/influxdb-0 condition met
-pod/webhook-7c6755b4-kdrzv condition met
+pod/gateway-9df8ddd9f-n67p4 condition met
+pod/deploymentmanager-85f55d549c-x52vc condition met
+pod/webhook-7c6755b4-7zc2c condition met
+pod/cloudmanager-65f854f76-zblhh condition met
+pod/nodechecker-754785cd88-fkbld condition met
+pod/domainmanager-7bcd8dcdb7-pt4ms condition met
+pod/gpcore-6798fbcf8-82k4n condition met
 pod/esearch-0 condition met
+pod/appworker-79ccbdfcd9-rhwfl condition met
+pod/costmanager-69c6b5df4c-fjpkb condition met
+pod/marketplace-7c96b6d5bd-6l5jr condition met
+pod/rabbitmq-0 condition met
+pod/influxdb-0 condition met
+pod/configmanager-7ff689677b-dbs7j condition met
+pod/mongodb-0 condition met
+pod/appscanner-7975978bf-qb4bx condition met
+pod/activitymanager-6675d6567c-sqskg condition met
+pod/redis-767b6468c6-nmvpr condition met
+pod/clustermanager-d4d9bc954-vxw28 condition met
+pod/usermanager-7c4d8c7787-nzrr4 condition met
+pod/alertmanager-56ddf9644f-mzm6b condition met
 
 
 gopaddle lite is enabled
