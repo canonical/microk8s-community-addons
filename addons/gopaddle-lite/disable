@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+
+set -e
+
+source $SNAP/actions/common/utils.sh
+
+KUBECTL="$SNAP/kubectl --kubeconfig=${SNAP_DATA}/credentials/client.config"
+HELM="$SNAP_DATA/bin/helm3 --kubeconfig=$SNAP_DATA/credentials/client.config"
+
+echo "Disabling gopaddle lite"
+#uninstall rabbitmq
+run_with_sudo $HELM delete gp-rabbitmq-4-2  -n gp-lite
+
+#uninstall gopaddle lite
+run_with_sudo $HELM delete gp-core-4-2 -n gp-lite
+
+# delete namespace
+run_with_sudo $KUBECTL delete ns gp-lite
+
+#remove gopaddle helm folder
+run_with_sudo rm -rf "$SNAP_DATA/tmp/gopaddle-lite"
+
+#remove gopaddle addons
+if $KUBECTL get ns gopaddle-servers >/dev/null 2>&1
+then
+run_with_sudo $KUBECTL delete ns gopaddle-servers
+
+if $KUBECTL get clusterrole gopaddle:prometheus-tool-kube-state-metrics >/dev/null 2>&1
+then
+run_with_sudo $KUBECTL delete clusterrole gopaddle:prometheus-tool-kube-state-metrics gopaddle:prometheus-tool-server
+fi
+
+if $KUBECTL get clusterrolebinding gopaddle:event-exporter-rb >/dev/null 2>&1
+then
+run_with_sudo $KUBECTL delete clusterrolebinding gopaddle:event-exporter-rb gopaddle:prometheus-tool-kube-state-metrics gopaddle:prometheus-tool-server
+fi
+
+if $KUBECTL get service default-http-backend >/dev/null 2>&1
+then
+run_with_sudo $KUBECTL delete service default-http-backend
+fi
+
+if $KUBECTL get deployment default-http-backend >/dev/null 2>&1
+then
+run_with_sudo $KUBECTL delete deployment default-http-backend
+fi
+
+fi
+
+#remove pv resourceVersion and uid
+echo ""
+echo "removing the resourceVersion and uid in persistentvolume"
+DATA=$(run_with_sudo $KUBECTL get pv  -l gp-install-pv=microk8s-hostpath-gp-retain -o json | jq '.items[].metadata.name')
+
+for i in $(echo $DATA | tr " " "\n")
+do
+	PVNAME=$(echo $i | cut -d '"' -f 2)
+    microk8s kubectl patch  pv $PVNAME  --type='merge' -p '{"spec":{"claimRef":{"resourceVersion":null,"uid":null}}}'
+
+done
+
+
+# remove helm repo
+run_with_sudo $HELM repo remove gp-lite
+
+echo "Disabled gopaddle lite"
