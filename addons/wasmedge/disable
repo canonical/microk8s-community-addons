@@ -1,0 +1,13 @@
+#!/bin/bash
+
+source "$SNAP/actions/common/utils.sh"
+
+PATCH_DIR=`dirname "$0"`/patch
+
+echo "Disabling crun with wasmedge support"
+echo "Switching OCI runtime back to default"
+run_with_sudo sed -i -f $PATCH_DIR/disable_crun_containerd-template.toml.sed $SNAP_DATA/args/containerd-template.toml
+run_with_sudo systemctl restart snap.microk8s.daemon-containerd
+
+run_with_sudo rm $SNAP_DATA/var/lock/wasmedge.enabled
+echo "Disabled crun with wasmedge support"
