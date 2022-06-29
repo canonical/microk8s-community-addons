@@ -123,12 +123,15 @@ spec:
       serviceAccountName: multus
       containers:
         - name: kube-multus
-          image: ghcr.io/k8snetworkplumbingwg/multus-cni:v3.8.1
-          command: ["/entrypoint.sh"]
+          image: ghcr.io/k8snetworkplumbingwg/multus-cni:v3.9-thick-amd64
+          command: ["/usr/src/multus-cni/bin/multus-daemon"]
           args:
-            - "--multus-conf-file=auto"
-            - "--multus-kubeconfig-file-host=$SNAP_DATA/args/cni-network/multus.d/multus.kubeconfig"
-            - "--cni-version=0.3.1"
+            - "-cni-version=0.3.1"
+            - "-cni-config-dir=/host/etc/cni/net.d"
+            - "-multus-autoconfig-dir=/host/etc/cni/net.d"
+            - "-multus-log-to-stderr=true"
+            - "-multus-log-level=verbose"
+            - "-multus-kubeconfig-file-host=$SNAP_DATA/args/cni-network/multus.d/multus.kubeconfig"
           resources:
             requests:
               cpu: "100m"
@@ -143,7 +146,7 @@ spec:
               mountPath: /host/opt/cni/bin
       initContainers:
         - name: install-multus-binary
-          image: ghcr.io/k8snetworkplumbingwg/multus-cni:v3.8.1
+          image: ghcr.io/k8snetworkplumbingwg/multus-cni:v3.9-thick-amd64
           command:
             - "cp"
             - "/usr/src/multus-cni/bin/multus"
@@ -157,6 +160,23 @@ spec:
           volumeMounts:
             - name: cnibin
               mountPath: /host/opt/cni/bin
+              mountPropagation: Bidirectional
+        - name: generate-kubeconfig
+          image: ghcr.io/k8snetworkplumbingwg/multus-cni:v3.9-thick-amd64
+          command:
+            - "/usr/src/multus-cni/bin/generate-kubeconfig"
+          args:
+            - "-k8s-service-host=$(KUBERNETES_SERVICE_HOST)"
+            - "-k8s-service-port=$(KUBERNETES_SERVICE_PORT)"
+          resources:
+            requests:
+              cpu: "10m"
+              memory: "15Mi"
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - name: cni
+              mountPath: /host/etc/cni/net.d
               mountPropagation: Bidirectional
       terminationGracePeriodSeconds: 10
       volumes:
