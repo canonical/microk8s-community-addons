@@ -20,6 +20,7 @@ else
   echo "Applying manifest for multus daemonset."
   declare -A map
   map[\$SNAP_DATA]="$CUR_DATA"
+  map[\$DS_NAME]="kube-multus-ds"
   use_addon_manifest multus/multus apply "$(declare -p map)"
 
   echo -n "Waiting for multus daemonset to start."
