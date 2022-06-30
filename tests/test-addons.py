@@ -192,6 +192,10 @@ class TestAddons(object):
         microk8s_disable("fluentd")
 
     @pytest.mark.skipif(
+        os.environ.get("STRICT") == "yes",
+        reason="Skipping cilium tests in strict confinement as they are expected to fail",
+    )
+    @pytest.mark.skipif(
         platform.machine() != "x86_64",
         reason="Cilium tests are only relevant in x86 architectures",
     )
@@ -256,6 +260,10 @@ class TestAddons(object):
         print("Disabling Ambassador")
         microk8s_disable("ambassador")
 
+    @pytest.mark.skipif(
+        os.environ.get("STRICT") == "yes",
+        reason="Skipping multus tests in strict confinement as they are expected to fail",
+    )
     @pytest.mark.skipif(
         platform.machine() != "x86_64",
         reason="Multus tests are only relevant in x86 architectures",
@@ -382,6 +390,10 @@ class TestAddons(object):
             print("Nothing to do, since iscsid is not available")
             return
 
+    @pytest.mark.skipif(
+        os.environ.get("STRICT") == "yes",
+        reason="Skipping kata tests in strict confinement as they are expected to fail",
+    )
     @pytest.mark.skipif(
         platform.machine() != "x86_64",
         reason="Kata tests are only relevant in x86 architectures",
