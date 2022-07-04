@@ -6,7 +6,7 @@ source $SNAP/actions/common/utils.sh
 
 echo "Disabling Cilium"
 
-"$SNAP/kubectl" "--kubeconfig=$SNAP_DATA/credentials/client.config" delete -f "$SNAP_DATA/actions/cilium.yaml"
+"$SNAP/microk8s-kubectl.wrapper" delete -f "$SNAP_DATA/actions/cilium.yaml"
 
 # Give K8s some time to process the deletion request
 sleep 15
@@ -35,12 +35,13 @@ then
   run_with_sudo $SNAP/sbin/ip link delete "cilium_vxlan"
 fi
 
-if [ -e "$SNAP_DATA/var/lock/ha-cluster" ] && [ -e "$SNAP_DATA/args/cni-network/cni.yaml.disabled" ]
+if [ -e "$SNAP_DATA/args/cni-network/cni.yaml.disabled" ]
 then
   echo "Restarting default cni"
   run_with_sudo mv "$SNAP_DATA/args/cni-network/cni.yaml.disabled" "$SNAP_DATA/args/cni-network/cni.yaml"
-  "$SNAP/kubectl" "--kubeconfig=$SNAP_DATA/credentials/client.config" apply -f "$SNAP_DATA/args/cni-network/cni.yaml"
-else
+  "$SNAP/microk8s-kubectl.wrapper" apply -f "$SNAP_DATA/args/cni-network/cni.yaml"
+elif [ ! -e "$SNAP_DATA/var/lock/ha-cluster" ]
+then
   echo "Restarting flanneld"
   set_service_expected_to_start flanneld
 
