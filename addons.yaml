@@ -5,6 +5,7 @@ microk8s-addons:
       description: "Ingress definition for Kubernetes dashboard"
       version: "1.0.0"
       check_status: "ingress.networking.k8s.io/kubernetes-dashboard-ingress"
+      confinement: "classic"
       supported_architectures:
         - arm64
         - amd64
@@ -56,6 +57,7 @@ microk8s-addons:
       description: "Multus CNI enables attaching multiple network interfaces to pods"
       version: "3.8.1"
       check_status: "${SNAP_DATA}/args/cni-network/00-multus.conf"
+      confinement: "classic"
       supported_architectures:
         - amd64
 
@@ -101,6 +103,7 @@ microk8s-addons:
       description: "Kata Containers is a secure runtime with lightweight VMS"
       version: "latest/stable"
       check_status: "${SNAP_DATA}/var/lock/kata.enabled"
+      confinement: "classic"
       supported_architectures:
         - amd64
 
