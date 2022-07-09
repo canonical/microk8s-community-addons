@@ -18,7 +18,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install python3-setuptools
+          sudo apt-get install -y python3-setuptools nfs-common
           sudo pip3 install --upgrade pip
           sudo pip3 install -U pytest sh
       - name: Running addons tests
