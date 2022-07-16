@@ -276,7 +276,7 @@ def validate_knative():
     """
 
     wait_for_installation()
-    knative_services = ["activator", "autoscaler", "controller"]
+    knative_services = ["activator", "autoscaler", "controller", "domain-mapping", "autoscaler-hpa", "domainmapping-webhook", "webhook", "net-kourier-controller", "app=3scale-kourier-gateway"]
     for service in knative_services:
         wait_for_pod_state(
             "", "knative-serving", "running", label="app={}".format(service)
