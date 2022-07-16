@@ -140,10 +140,7 @@ class TestAddons(object):
         print("Disable inaccel")
         microk8s_disable("inaccel")
 
-    @pytest.mark.skipif(
-        platform.machine() == "s390x",
-        reason="Not available on s390x"
-    )
+    @pytest.mark.skipif(platform.machine() == "s390x", reason="Not available on s390x")
     @pytest.mark.skipif(
         os.environ.get("UNDER_TIME_PRESSURE") == "True",
         reason="Skipping knative tests as we are under time pressure",
