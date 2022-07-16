@@ -285,7 +285,7 @@ def validate_knative():
         "domainmapping-webhook",
         "webhook",
         "net-kourier-controller",
-        "app=3scale-kourier-gateway",
+        "3scale-kourier-gateway",
     ]
     for service in knative_services:
         wait_for_pod_state(
