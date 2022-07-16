@@ -4,30 +4,111 @@ set -e
 
 source $SNAP/actions/common/utils.sh
 
-echo "Enabling Knative"
-
-"$SNAP/microk8s-enable.wrapper" istio
-
+KNATIVE_VERSION="1.6.0"
+KNATIVE_FUNC_VERSION="0.25.0"
+KNATIVE_SERVING=true
+KNATIVE_EVENTING=false
 KUBECTL="$SNAP/kubectl --kubeconfig=${SNAP_DATA}/credentials/client.config"
 
-declare -a yamls=("https://github.com/knative/serving/releases/download/v0.24.0/serving-crds.yaml"
-                  "https://github.com/knative/eventing/releases/download/v0.24.0/eventing-crds.yaml"
-                  "https://github.com/knative/serving/releases/download/v0.24.0/serving-core.yaml"
-                  "https://github.com/knative/net-istio/releases/download/v0.24.0/net-istio.yaml"
-                  "https://github.com/knative/serving/releases/download/v0.24.0/serving-default-domain.yaml"
-                  "https://github.com/knative/eventing/releases/download/v0.24.0/eventing-core.yaml"
-                  "https://github.com/knative/eventing/releases/download/v0.24.0/in-memory-channel.yaml"
-                  "https://github.com/knative/eventing/releases/download/v0.24.0/mt-channel-broker.yaml"
-                 )
-
-for yaml in "${yamls[@]}"
+for i in "$@"
 do
-   $KUBECTL apply -f "$yaml"
-   sleep 3
+case $i in
+    --no-serving)
+    KNATIVE_SERVING=false
+    shift # past argument
+    ;;
+    --eventing)
+    KNATIVE_EVENTING=true
+    shift # past argument
+    ;;
+    *)
+          # unknown option
+    ;;
+esac
 done
 
+#requirement
+"$SNAP/microk8s-enable.wrapper" dns
+
+echo "Enabling Knative ${KNATIVE_VERSION}"
+$KUBECTL apply -f https://github.com/knative/operator/releases/download/knative-v$KNATIVE_VERSION/operator.yaml
+
+if [ "$KNATIVE_SERVING" = "true" ]; then
+    echo "Installing Knative Serving ${KNATIVE_VERSION}"
+$KUBECTL apply -f- << EOF
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: knative-serving
+---
+apiVersion: operator.knative.dev/v1beta1
+kind: KnativeServing
+metadata:
+  name: knative-serving
+  namespace: knative-serving
+spec:
+  ingress:
+    kourier:
+      enabled: true
+  config:
+    network:
+      ingress-class: "kourier.ingress.networking.knative.dev"
+EOF
+fi
+
+if [ "$KNATIVE_EVENTING" = "true" ]; then
+   echo "Installing Knative Eventing ${KNATIVE_VERSION}"
+$KUBECTL apply -f- << EOF
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: knative-eventing
+---
+apiVersion: operator.knative.dev/v1beta1
+kind: KnativeEventing
+metadata:
+  name: knative-eventing
+  namespace: knative-eventing
+EOF
+fi
+
+# Handle Knative CLIs
+if [ ! -f "${SNAP_DATA}/bin/kn" ]; then
+  echo "Fetching Knative CLI version ${KNATIVE_VERSION} in $SNAP_DATA/bin/kn"
+  run_with_sudo mkdir -p "$SNAP_DATA/bin"
+  fetch_as https://github.com/knative/client/releases/download/knative-v${KNATIVE_VERSION}/kn-linux-${ARCH} "$SNAP_DATA/bin/kn"
+  run_with_sudo chmod uo+x "$SNAP_DATA/bin/kn"
+fi
+if [ ! -f "${SNAP_DATA}/bin/kn-admin" ]; then
+  echo "Fetching Knative CLI Admin plugin version ${KNATIVE_VERSION} in $SNAP_DATA/bin/kn-admin"
+  run_with_sudo mkdir -p "$SNAP_DATA/bin"
+  fetch_as https://github.com/knative-sandbox/kn-plugin-admin/releases/download/knative-v${KNATIVE_VERSION}/kn-admin-linux-${ARCH} "$SNAP_DATA/bin/kn-admin"
+  run_with_sudo chmod uo+x "$SNAP_DATA/bin/kn-admin"
+fi
+if [ ! -f "${SNAP_DATA}/bin/kn-event" ]; then
+  echo "Fetching Knative CLI Event plugin version ${KNATIVE_VERSION} in $SNAP_DATA/bin/kn-event"
+  run_with_sudo mkdir -p "$SNAP_DATA/bin"
+  fetch_as https://github.com/knative-sandbox/kn-plugin-event/releases/download/knative-v${KNATIVE_VERSION}/kn-event-linux-${ARCH} "$SNAP_DATA/bin/kn-event"
+  run_with_sudo chmod uo+x "$SNAP_DATA/bin/kn-event"
+fi
+if [ ! -f "${SNAP_DATA}/bin/kn-func" ] && [ "$ARCH" = "amd64" ]; then
+  echo "Fetching Knative Functions plugin version ${KNATIVE_FUNC_VERSION} in $SNAP_DATA/bin/kn-func"
+  run_with_sudo mkdir -p "$SNAP_DATA/bin"
+  fetch_as https://github.com/knative-sandbox/kn-plugin-func/releases/download/v${KNATIVE_FUNC_VERSION}/func_linux_${ARCH} "$SNAP_DATA/bin/kn-func"
+  run_with_sudo chmod uo+x "$SNAP_DATA/bin/kn-func"
+fi
+
+if [ "$KNATIVE_SERVING" = "true" ]; then
+    echo ""
+    echo ""
+    echo "Enable metalb addon to get a loadbalancer for Knative Serving, for example microk8s enable metallb:10.64.140.43-10.64.140.49"
+    echo ""
+    echo "Configure the domain for Knative services using:"
+    echo "kubectl get svc -n knative-serving kourier"
+    echo "kubectl patch configmap -n knative-serving config-domain -p '{"data": {"EXTERNAL-IP.sslip.io": ""}}'"
+    echo ""
+fi
 echo ""
 echo ""
-echo "Visit https://knative.dev/docs/admin/ to customize which broker channel"
-echo "implementation is used and to specify which configurations are used for which namespaces."
+echo "Visit https://knative.dev/docs/install/operator/knative-with-operators/ for more Knative customizations"
 echo ""
