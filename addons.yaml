@@ -114,10 +114,10 @@ microk8s-addons:
       supported_architectures:
         - amd64
 
-    - name: "starboard"
-      description: "Kubernetes-native security toolkit"
-      version: "0.14.1"
-      check_status: "deployment.apps/starboard-operator"
+    - name: "trivy"
+      description: "Kubernetes-native security scanner"
+      version: "0.0.8"
+      check_status: "deployment.apps/trivy-operator"
       supported_architectures:
         - arm64
         - amd64
