@@ -78,7 +78,7 @@ else
 
   # Generate the YAMLs for Cilium and apply them
   (cd "${SNAP_DATA}/tmp/cilium/$CILIUM_DIR/install/kubernetes"
-  ${SNAP_DATA}/bin/helm3 template cilium \
+  ${SNAP}/microk8s-helm3.wrapper template cilium \
       --namespace $NAMESPACE \
       --set cni.confPath="$SNAP_DATA/args/cni-network" \
       --set cni.binPath="$SNAP_DATA/opt/cni/bin" \
