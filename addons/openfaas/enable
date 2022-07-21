@@ -7,7 +7,8 @@ source $SNAP/actions/common/utils.sh
 OF_NAMESPACE="openfaas"
 FN_NAMESPACE="openfaas-fn"
 
-KUBECTL="$SNAP/kubectl --kubeconfig=${SNAP_DATA}/credentials/client.config"
+KUBECTL="$SNAP/microk8s-kubectl.wrapper"
+HELM="$SNAP/microk8s-helm3.wrapper"
 
 "$SNAP/microk8s-enable.wrapper" dns
 "$SNAP/microk8s-enable.wrapper" helm3
@@ -50,8 +51,6 @@ fi
 # make sure the "openfaas" and "openfaas-fn" namespaces exists
 $KUBECTL create namespace "$OF_NAMESPACE" > /dev/null 2>&1 || true
 $KUBECTL create namespace "$FN_NAMESPACE" > /dev/null 2>&1 || true
-
-HELM="$SNAP_DATA/bin/helm3 --kubeconfig=$SNAP_DATA/credentials/client.config"
 
 $HELM repo add openfaas https://openfaas.github.io/faas-netes/
 

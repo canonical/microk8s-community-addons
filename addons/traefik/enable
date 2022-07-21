@@ -9,7 +9,9 @@ CURRENT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
 "$SNAP/microk8s-enable.wrapper" hostpath-storage
 
 NAMESPACE_PTR="traefik"
-KUBECTL="$SNAP/kubectl --kubeconfig=${SNAP_DATA}/credentials/client.config"
+
+KUBECTL="$SNAP/microk8s-kubectl.wrapper"
+HELM="$SNAP/microk8s-helm3.wrapper"
 
 echo "Enabling traefik ingress controller on port 8080"
 echo "Enabling traefik ingress controller"
@@ -33,9 +35,6 @@ case $i in
     ;;
 esac
 done
-
-
-HELM="$SNAP_DATA/bin/helm3 --kubeconfig=$SNAP_DATA/credentials/client.config"
 
 $HELM repo add traefik https://helm.traefik.io/traefik
 $HELM repo update

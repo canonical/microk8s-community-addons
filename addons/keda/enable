@@ -4,7 +4,7 @@ set -e
 
 source $SNAP/actions/common/utils.sh
 
-KUBECTL="$SNAP/kubectl --kubeconfig=${SNAP_DATA}/credentials/client.config"
+KUBECTL="$SNAP/microk8s-kubectl.wrapper"
 
 do_prerequisites() {
   # enable dns service
@@ -24,7 +24,7 @@ get_keda () {
 
 enable_keda() {
   echo "Enabling KEDA"
-  $KUBECTL apply -f "${SNAP_DATA}/keda/keda.yaml" 
+  $KUBECTL apply -f "${SNAP_DATA}/keda/keda.yaml"
 }
 
 do_prerequisites
