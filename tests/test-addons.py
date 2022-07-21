@@ -101,6 +101,7 @@ class TestAddons(object):
         validate_dashboard_ingress()
         print("Disabling dashboard-ingress")
         microk8s_disable("dashboard-ingress")
+
         print("Disabling metrics-server")
         microk8s_disable("metrics-server")
         print("Disabling dashboard")
