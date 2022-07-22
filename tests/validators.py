@@ -272,14 +272,21 @@ def validate_istio():
 
 def validate_knative():
     """
-    Validate Knative by deploying the helloworld-go app.
+    Validate Knative by deploying the helloworld-go app supports both amd64 and arm64
     """
-    if platform.machine() != "x86_64":
-        print("Knative tests are only relevant in x86 architectures")
-        return
 
     wait_for_installation()
-    knative_services = ["activator", "autoscaler", "controller"]
+    knative_services = [
+        "activator",
+        "autoscaler",
+        "controller",
+        "domain-mapping",
+        "autoscaler-hpa",
+        "domainmapping-webhook",
+        "webhook",
+        "net-kourier-controller",
+        "3scale-kourier-gateway",
+    ]
     for service in knative_services:
         wait_for_pod_state(
             "", "knative-serving", "running", label="app={}".format(service)
