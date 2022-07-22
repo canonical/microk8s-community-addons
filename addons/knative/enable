@@ -4,11 +4,15 @@ set -e
 
 source $SNAP/actions/common/utils.sh
 
+
 KNATIVE_VERSION="1.6.0"
 KNATIVE_FUNC_VERSION="0.25.0"
 KNATIVE_SERVING=true
 KNATIVE_EVENTING=false
-KUBECTL="$SNAP/kubectl --kubeconfig=${SNAP_DATA}/credentials/client.config"
+KUBECTL="$SNAP/microk8s-kubectl.wrapper"
+
+echo "Enabling Knative"
+
 
 for i in "$@"
 do

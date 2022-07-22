@@ -9,7 +9,7 @@ CURRENT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
 
 echo "Enabling Fluentd-Elasticsearch"
 
-KUBECTL="$SNAP/kubectl --kubeconfig=${SNAP_DATA}/credentials/client.config"
+KUBECTL="$SNAP/microk8s-kubectl.wrapper"
 echo "Labeling nodes"
 NODENAME="$($KUBECTL get no -o yaml | grep " name:"| awk '{print $2}')"
 for NODE in $NODENAME

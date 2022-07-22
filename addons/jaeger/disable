@@ -6,7 +6,7 @@ CURRENT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
 echo "Disabling Jaeger"
 read -ra ARGUMENTS <<< "$1"
 
-KUBECTL="$SNAP/kubectl --kubeconfig=${SNAP_DATA}/credentials/client.config"
+KUBECTL="$SNAP/microk8s-kubectl.wrapper"
 MANIFESTS_PATH="${CURRENT_DIR}/jaeger"
 
 if [ ! -z "${ARGUMENTS[@]}" ]

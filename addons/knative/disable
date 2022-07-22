@@ -5,8 +5,7 @@ set -e
 source $SNAP/actions/common/utils.sh
 
 KNATIVE_VERSION="1.6.0"
-KUBECTL="$SNAP/kubectl --kubeconfig=${SNAP_DATA}/credentials/client.config"
-
+KUBECTL="$SNAP/microk8s-kubectl.wrapper"
 
 echo "Disabling Knative"
 
@@ -30,6 +29,7 @@ run_with_sudo rm -rf "${SNAP_COMMON}/plugins/kn"
 run_with_sudo rm -rf "${SNAP_COMMON}/plugins/kn-admin"
 run_with_sudo rm -rf "${SNAP_COMMON}/plugins/kn-event"
 run_with_sudo rm -rf "${SNAP_COMMON}/plugins/kn-func"
+
 
 
 

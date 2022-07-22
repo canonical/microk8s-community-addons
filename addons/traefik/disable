@@ -5,7 +5,7 @@ source $SNAP/actions/common/utils.sh
 CURRENT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
 
 NAMESPACE_PTR="traefik"
-KUBECTL="$SNAP/kubectl --kubeconfig=${SNAP_DATA}/credentials/client.config"
+KUBECTL="$SNAP/microk8s-kubectl.wrapper"
 KUBECTL_DELETE_ARGS="--wait=true --timeout=180s --ignore-not-found=true"
 echo "Disabling traefik ingress controller"
 
