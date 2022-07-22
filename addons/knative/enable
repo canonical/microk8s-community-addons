@@ -73,25 +73,25 @@ EOF
 fi
 
 # Handle Knative CLIs
-if [ ! -f "${SNAP_DATA}/bin/kn" ]; then
+if [ ! -f "${SNAP_COMMON}/plugins/kn" ]; then
   echo "Fetching Knative CLI version ${KNATIVE_VERSION} in $SNAP_DATA/bin/kn"
   run_with_sudo mkdir -p "$SNAP_DATA/bin"
   fetch_as https://github.com/knative/client/releases/download/knative-v${KNATIVE_VERSION}/kn-linux-${SNAP_ARCH} "$SNAP_DATA/bin/kn"
   run_with_sudo chmod uo+x "$SNAP_DATA/bin/kn"
 fi
-if [ ! -f "${SNAP_DATA}/bin/kn-admin" ]; then
+if [ ! -f "${SNAP_COMMON}/plugins/kn-admin" ]; then
   echo "Fetching Knative CLI Admin plugin version ${KNATIVE_VERSION} in $SNAP_DATA/bin/kn-admin"
   run_with_sudo mkdir -p "$SNAP_DATA/bin"
   fetch_as https://github.com/knative-sandbox/kn-plugin-admin/releases/download/knative-v${KNATIVE_VERSION}/kn-admin-linux-${SNAP_ARCH} "$SNAP_DATA/bin/kn-admin"
   run_with_sudo chmod uo+x "$SNAP_DATA/bin/kn-admin"
 fi
-if [ ! -f "${SNAP_DATA}/bin/kn-event" ]; then
+if [ ! -f "${SNAP_COMMON}/plugins/kn-event" ]; then
   echo "Fetching Knative CLI Event plugin version ${KNATIVE_VERSION} in $SNAP_DATA/bin/kn-event"
   run_with_sudo mkdir -p "$SNAP_DATA/bin"
   fetch_as https://github.com/knative-sandbox/kn-plugin-event/releases/download/knative-v${KNATIVE_VERSION}/kn-event-linux-${SNAP_ARCH} "$SNAP_DATA/bin/kn-event"
   run_with_sudo chmod uo+x "$SNAP_DATA/bin/kn-event"
 fi
-if [ ! -f "${SNAP_DATA}/bin/kn-func" ] && [ "${SNAP_ARCH}" = "amd64" ]; then
+if [ ! -f "${SNAP_COMMON}/plugins/kn-func" ] && [ "${SNAP_ARCH}" = "amd64" ]; then
   echo "Fetching Knative Functions plugin version ${KNATIVE_FUNC_VERSION} in $SNAP_DATA/bin/kn-func"
   run_with_sudo mkdir -p "$SNAP_DATA/bin"
   fetch_as https://github.com/knative-sandbox/kn-plugin-func/releases/download/v${KNATIVE_FUNC_VERSION}/func_linux_${SNAP_ARCH} "$SNAP_DATA/bin/kn-func"
@@ -109,6 +109,8 @@ if [ "$KNATIVE_SERVING" = "true" ]; then
     echo ""
 fi
 echo ""
+echo ""
+echo "To be able to use 'microk8s kn <plugin>' such as 'func' add to env PATH the value ${SNAP_COMMON}/plugins"
 echo ""
 echo "Visit https://knative.dev/docs/install/operator/knative-with-operators/ for more Knative customizations"
 echo ""

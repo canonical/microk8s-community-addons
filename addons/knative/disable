@@ -26,10 +26,10 @@ if $KUBECTL get deployment knative-operator -n default; then
     $KUBECTL delete -f https://github.com/knative/operator/releases/download/knative-v$KNATIVE_VERSION/operator.yaml
 fi
 
-run_with_sudo rm -rf "${SNAP_DATA}/bin/kn"
-run_with_sudo rm -rf "${SNAP_DATA}/bin/kn-admin"
-run_with_sudo rm -rf "${SNAP_DATA}/bin/kn-event"
-run_with_sudo rm -rf "${SNAP_DATA}/bin/kn-func"
+run_with_sudo rm -rf "${SNAP_COMMON}/plugins/kn"
+run_with_sudo rm -rf "${SNAP_COMMON}/plugins/kn-admin"
+run_with_sudo rm -rf "${SNAP_COMMON}/plugins/kn-event"
+run_with_sudo rm -rf "${SNAP_COMMON}/plugins/kn-func"
 
 
 
