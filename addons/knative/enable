@@ -76,25 +76,25 @@ fi
 if [ ! -f "${SNAP_DATA}/bin/kn" ]; then
   echo "Fetching Knative CLI version ${KNATIVE_VERSION} in $SNAP_DATA/bin/kn"
   run_with_sudo mkdir -p "$SNAP_DATA/bin"
-  fetch_as https://github.com/knative/client/releases/download/knative-v${KNATIVE_VERSION}/kn-linux-${ARCH} "$SNAP_DATA/bin/kn"
+  fetch_as https://github.com/knative/client/releases/download/knative-v${KNATIVE_VERSION}/kn-linux-${SNAP_ARCH} "$SNAP_DATA/bin/kn"
   run_with_sudo chmod uo+x "$SNAP_DATA/bin/kn"
 fi
 if [ ! -f "${SNAP_DATA}/bin/kn-admin" ]; then
   echo "Fetching Knative CLI Admin plugin version ${KNATIVE_VERSION} in $SNAP_DATA/bin/kn-admin"
   run_with_sudo mkdir -p "$SNAP_DATA/bin"
-  fetch_as https://github.com/knative-sandbox/kn-plugin-admin/releases/download/knative-v${KNATIVE_VERSION}/kn-admin-linux-${ARCH} "$SNAP_DATA/bin/kn-admin"
+  fetch_as https://github.com/knative-sandbox/kn-plugin-admin/releases/download/knative-v${KNATIVE_VERSION}/kn-admin-linux-${SNAP_ARCH} "$SNAP_DATA/bin/kn-admin"
   run_with_sudo chmod uo+x "$SNAP_DATA/bin/kn-admin"
 fi
 if [ ! -f "${SNAP_DATA}/bin/kn-event" ]; then
   echo "Fetching Knative CLI Event plugin version ${KNATIVE_VERSION} in $SNAP_DATA/bin/kn-event"
   run_with_sudo mkdir -p "$SNAP_DATA/bin"
-  fetch_as https://github.com/knative-sandbox/kn-plugin-event/releases/download/knative-v${KNATIVE_VERSION}/kn-event-linux-${ARCH} "$SNAP_DATA/bin/kn-event"
+  fetch_as https://github.com/knative-sandbox/kn-plugin-event/releases/download/knative-v${KNATIVE_VERSION}/kn-event-linux-${SNAP_ARCH} "$SNAP_DATA/bin/kn-event"
   run_with_sudo chmod uo+x "$SNAP_DATA/bin/kn-event"
 fi
-if [ ! -f "${SNAP_DATA}/bin/kn-func" ] && [ "$ARCH" = "amd64" ]; then
+if [ ! -f "${SNAP_DATA}/bin/kn-func" ] && [ "${SNAP_ARCH}" = "amd64" ]; then
   echo "Fetching Knative Functions plugin version ${KNATIVE_FUNC_VERSION} in $SNAP_DATA/bin/kn-func"
   run_with_sudo mkdir -p "$SNAP_DATA/bin"
-  fetch_as https://github.com/knative-sandbox/kn-plugin-func/releases/download/v${KNATIVE_FUNC_VERSION}/func_linux_${ARCH} "$SNAP_DATA/bin/kn-func"
+  fetch_as https://github.com/knative-sandbox/kn-plugin-func/releases/download/v${KNATIVE_FUNC_VERSION}/func_linux_${SNAP_ARCH} "$SNAP_DATA/bin/kn-func"
   run_with_sudo chmod uo+x "$SNAP_DATA/bin/kn-func"
 fi
 
