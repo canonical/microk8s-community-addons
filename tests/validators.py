@@ -145,7 +145,7 @@ def validate_storage_nfs():
     assert found2
     assert "pvc-nfs" in output
     assert "Bound" in output
-    # kubectl("delete -f {}".format(manifest))
+    kubectl("delete -f {}".format(manifest))
 
 
 def common_ingress():
