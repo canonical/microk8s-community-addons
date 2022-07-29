@@ -23,27 +23,27 @@ run_with_sudo rm -rf "$SNAP_DATA/tmp/gopaddle-lite"
 #remove gopaddle addons
 if $KUBECTL get ns gopaddle-servers >/dev/null 2>&1
 then
-run_with_sudo $KUBECTL delete ns gopaddle-servers
+  run_with_sudo $KUBECTL delete ns gopaddle-servers
 
-if $KUBECTL get clusterrole gopaddle:prometheus-tool-kube-state-metrics >/dev/null 2>&1
-then
-run_with_sudo $KUBECTL delete clusterrole gopaddle:prometheus-tool-kube-state-metrics gopaddle:prometheus-tool-server
-fi
+  if $KUBECTL get clusterrole gopaddle:prometheus-tool-kube-state-metrics >/dev/null 2>&1
+  then
+    run_with_sudo $KUBECTL delete clusterrole gopaddle:prometheus-tool-kube-state-metrics gopaddle:prometheus-tool-server
+  fi
 
-if $KUBECTL get clusterrolebinding gopaddle:event-exporter-rb >/dev/null 2>&1
-then
-run_with_sudo $KUBECTL delete clusterrolebinding gopaddle:event-exporter-rb gopaddle:prometheus-tool-kube-state-metrics gopaddle:prometheus-tool-server
-fi
+  if $KUBECTL get clusterrolebinding gopaddle:event-exporter-rb >/dev/null 2>&1
+  then
+    run_with_sudo $KUBECTL delete clusterrolebinding gopaddle:event-exporter-rb gopaddle:prometheus-tool-kube-state-metrics gopaddle:prometheus-tool-server
+  fi
 
-if $KUBECTL get service default-http-backend >/dev/null 2>&1
-then
-run_with_sudo $KUBECTL delete service default-http-backend
-fi
+  if $KUBECTL get service default-http-backend >/dev/null 2>&1
+  then
+    run_with_sudo $KUBECTL delete service default-http-backend
+  fi
 
-if $KUBECTL get deployment default-http-backend >/dev/null 2>&1
-then
-run_with_sudo $KUBECTL delete deployment default-http-backend
-fi
+  if $KUBECTL get deployment default-http-backend >/dev/null 2>&1
+  then
+    run_with_sudo $KUBECTL delete deployment default-http-backend
+  fi
 
 fi
 
@@ -54,9 +54,8 @@ DATA=$(run_with_sudo $KUBECTL get pv  -l gp-install-pv=microk8s-hostpath-gp-reta
 
 for i in $(echo $DATA | tr " " "\n")
 do
-	PVNAME=$(echo $i | cut -d '"' -f 2)
-    microk8s kubectl patch  pv $PVNAME  --type='merge' -p '{"spec":{"claimRef":{"resourceVersion":null,"uid":null}}}'
-
+  PVNAME=$(echo $i | cut -d '"' -f 2)
+  microk8s kubectl patch  pv $PVNAME  --type='merge' -p '{"spec":{"claimRef":{"resourceVersion":null,"uid":null}}}'
 done
 
 
