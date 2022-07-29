@@ -628,3 +628,25 @@ def validate_kata():
     kubectl("apply -f {}".format(manifest))
     wait_for_pod_state("", "default", "running", label="app=kata")
     kubectl("delete -f {}".format(manifest))
+
+def validate_osm_edge():
+    """
+    Validate osm-edge
+    """
+    wait_for_installation()
+    wait_for_pod_state(
+        "",
+        "osm-system",
+        "running",
+        label="app=osm-controller",
+        timeout_insec=300,
+    )
+    print("osm-edge controller up and running")
+    wait_for_pod_state(
+        "",
+        "osm-system",
+        "running",
+        label="app=osm-injector",
+        timeout_insec=300,
+    )
+    print("osm-edge proxy injector up and running.")

@@ -128,3 +128,11 @@ microk8s-addons:
       check_status: "deployment.apps/argo-cd-argocd-server"
       supported_architectures:
         - amd64
+
+    - name: "osm-edge"
+      description: "osm-edge is a lightweight SMI compatible service mesh for the edge-computing."
+      version: "1.1.0"
+      check_status: "pod/osm-controller"
+      supported_architectures:
+        - amd64
+        - arm64

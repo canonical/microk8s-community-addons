@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+
+set -e
+
+source $SNAP/actions/common/utils.sh
+
+read -ra ARGUMENTS <<< "$@"
+
+ARCH=$(arch)
+
+# check if osm-edge cli is already in the system.  Download if it doesn't exist.
+if [ ! -f "${SNAP_DATA}/bin/osm" ]; then
+  OSM_EDGE_VERSION="${OSM_EDGE_VERSION:-v1.1.0}"
+  echo "Fetching osm-edge version $OSM_EDGE_VERSION."
+
+  run_with_sudo mkdir -p "${SNAP_DATA}/tmp/osm-edge"
+  (cd "${SNAP_DATA}/tmp/osm-edge"
+  fetch_as https://github.com/flomesh-io/osm-edge/releases/download/${OSM_EDGE_VERSION}/osm-edge-${OSM_EDGE_VERSION}-linux-${ARCH}.tar.gz "$SNAP_DATA/tmp/osm-edge/osm-edge.tar.gz"
+  run_with_sudo gzip -q -d "$SNAP_DATA/tmp/osm-edge/osm-edge.tar.gz"
+  run_with_sudo tar -xvf "$SNAP_DATA/tmp/osm-edge/osm-edge.tar"
+  run_with_sudo chmod 777 "$SNAP_DATA/tmp/osm-edge/linux-${ARCH}/osm")
+  run_with_sudo mkdir -p "$SNAP_DATA/bin/"
+  run_with_sudo mv "$SNAP_DATA/tmp/osm-edge/linux-${ARCH}/osm" "$SNAP_DATA/bin/"
+  run_with_sudo chmod +x "$SNAP_DATA/bin/"
+
+  run_with_sudo rm -rf "$SNAP_DATA/tmp/osm-edge"
+fi
+
+echo "Enabling osm-edge"
+# enable dns service
+"$SNAP/microk8s-enable.wrapper" dns
+# Allow some time for the apiserver to start
+${SNAP}/microk8s-status.wrapper --wait-ready --timeout 30 >/dev/null
+
+OSM_MESH_NAME=${OSM_MESH_NAME:-"osm"}
+OSM_MESH_NS=${OSM_NAMESPACE:-"osm-system"}
+
+if [ ! -z "${ARGUMENTS[@]}"]
+then
+  echo "Installing osm-edge"
+  KUBECONFIG=$SNAP_DATA/credentials/client.config $SNAP_DATA/bin/osm install ${ARGUMENTS[@]}
+else
+  echo "Installing osm-edge with default settings"
+  KUBECONFIG=$SNAP_DATA/credentials/client.config $SNAP_DATA/bin/osm install --mesh-name "$OSM_MESH_NAME" \
+    --osm-namespace "$OSM_MESH_NS" \
+    --set=osm.enablePermissiveTrafficPolicy=true \
+    --set=osm.deployPrometheus=true \
+    --set=osm.deployGrafana=true \
+    --set=osm.deployJaeger=true
+fi
+
+echo "osm-edge is enabled"
