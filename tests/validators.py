@@ -628,3 +628,11 @@ def validate_kata():
     kubectl("apply -f {}".format(manifest))
     wait_for_pod_state("", "default", "running", label="app=kata")
     kubectl("delete -f {}".format(manifest))
+
+def validate_gopaddle_lite():
+    """
+    Validate gopaddle-lite
+    """
+    wait_for_pod_state(
+        "", "gp-lite", "running", label="released-by=gopaddle"
+    )
