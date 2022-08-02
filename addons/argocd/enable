@@ -6,13 +6,12 @@ source $SNAP/actions/common/utils.sh
 
 NAMESPACE_ARGOCD="argocd"
 
-ARGOCD_HELM_VERSION="4.5.0"
-
-KUBECTL="$SNAP/kubectl --kubeconfig=${SNAP_DATA}/credentials/client.config"
+ARGOCD_HELM_VERSION="4.6.3"
 
 "$SNAP/microk8s-enable.wrapper" helm3
 
-HELM="$SNAP_DATA/bin/helm3 --kubeconfig=$SNAP_DATA/credentials/client.config"
+KUBECTL="$SNAP/microk8s-kubectl.wrapper"
+HELM="$SNAP/microk8s-helm3.wrapper"
 
 VALUES=""
 

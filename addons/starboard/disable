@@ -6,8 +6,8 @@ source $SNAP/actions/common/utils.sh
 
 NAMESPACE_STARBOARD="starboard-system"
 
-KUBECTL="$SNAP/kubectl --kubeconfig=${SNAP_DATA}/credentials/client.config"
-HELM="$SNAP_DATA/bin/helm3 --kubeconfig=$SNAP_DATA/credentials/client.config"
+KUBECTL="$SNAP/microk8s-kubectl.wrapper"
+HELM="$SNAP/microk8s-helm3.wrapper"
 KUBECTL_DELETE_ARGS="--wait=true --timeout=180s --ignore-not-found=true"
 
 echo "Disabling Starboard"

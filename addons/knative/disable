@@ -6,7 +6,7 @@ source $SNAP/actions/common/utils.sh
 
 echo "Disabling Knative"
 
-KUBECTL="$SNAP/kubectl --kubeconfig=${SNAP_DATA}/credentials/client.config"
+KUBECTL="$SNAP/microk8s-kubectl.wrapper"
 
 declare -a yamls=("https://github.com/knative/serving/releases/download/v0.24.0/serving-core.yaml"
                   "https://github.com/knative/net-istio/releases/download/v0.24.0/net-istio.yaml"

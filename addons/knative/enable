@@ -8,7 +8,7 @@ echo "Enabling Knative"
 
 "$SNAP/microk8s-enable.wrapper" istio
 
-KUBECTL="$SNAP/kubectl --kubeconfig=${SNAP_DATA}/credentials/client.config"
+KUBECTL="$SNAP/microk8s-kubectl.wrapper"
 
 declare -a yamls=("https://github.com/knative/serving/releases/download/v0.24.0/serving-crds.yaml"
                   "https://github.com/knative/eventing/releases/download/v0.24.0/eventing-crds.yaml"

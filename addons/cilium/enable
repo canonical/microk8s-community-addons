@@ -12,23 +12,34 @@ fi
 
 "$SNAP/microk8s-enable.wrapper" helm3
 
-echo "Restarting kube-apiserver"
-refresh_opt_in_config "allow-privileged" "true" kube-apiserver
-restart_service apiserver
-
-# Reconfigure kubelet/containerd to pick up the new CNI config and binary.
-echo "Restarting kubelet"
-refresh_opt_in_config "cni-bin-dir" "\${SNAP_DATA}/opt/cni/bin/" kubelet
-restart_service kubelet
+echo "Ensure kube-apiserver --allow-privileged=true flag"
+if ! grep -qE -- "--allow-privileged=true" "$SNAP_DATA/args/kube-apiserver"; then
+  echo "Adding kube-apiserver --allow-privileged=true flag"
+  refresh_opt_in_config "allow-privileged" "true" kube-apiserver
+  echo "Restarting kube-apiserver"
+  restart_service apiserver
+fi
 
 set_service_not_expected_to_start flanneld
 run_with_sudo preserve_env snapctl stop "${SNAP_NAME}.daemon-flanneld"
 remove_vxlan_interfaces
 
+echo "Ensure containerd cni bin_dir is OK"
 if grep -qE "bin_dir.*SNAP}\/" $SNAP_DATA/args/containerd-template.toml; then
-  echo "Restarting containerd"
+  echo "Configure cni bin dir"
   run_with_sudo "${SNAP}/bin/sed" -i 's;bin_dir = "${SNAP}/opt;bin_dir = "${SNAP_DATA}/opt;g' "$SNAP_DATA/args/containerd-template.toml"
+  echo "Restarting containerd"
   run_with_sudo preserve_env snapctl restart "${SNAP_NAME}.daemon-containerd"
+fi
+
+# Disable Calico CNI
+if [ -e "$SNAP_DATA/var/lock/ha-cluster" ] && [ -e "$SNAP_DATA/args/cni-network/cni.yaml" ]
+then
+  echo "Disabling Calico CNI"
+  "$SNAP/microk8s-kubectl.wrapper" delete -f "$SNAP_DATA/args/cni-network/cni.yaml"
+  # give a bit slack before moving the file out, sometimes it gives out this error "rpc error: code = Unknown desc = checkpoint in progress".
+  sleep 2s
+  run_with_sudo mv "$SNAP_DATA/args/cni-network/cni.yaml" "$SNAP_DATA/args/cni-network/cni.yaml.disabled"
 fi
 
 echo "Enabling Cilium"
@@ -67,7 +78,7 @@ else
 
   # Generate the YAMLs for Cilium and apply them
   (cd "${SNAP_DATA}/tmp/cilium/$CILIUM_DIR/install/kubernetes"
-  ${SNAP_DATA}/bin/helm3 template cilium \
+  ${SNAP}/microk8s-helm3.wrapper template cilium \
       --namespace $NAMESPACE \
       --set cni.confPath="$SNAP_DATA/args/cni-network" \
       --set cni.binPath="$SNAP_DATA/opt/cni/bin" \
@@ -77,25 +88,19 @@ else
       --set daemon.runPath="$SNAP_DATA/var/run/cilium" \
       --set operator.replicas=1 \
       --set keepDeprecatedLabels=true \
+      --set ipam.operator.clusterPoolIPv4PodCIDR=10.1.0.0/16 \
+      --set nodePort.enabled=true \
       | run_with_sudo tee "$SNAP_DATA/actions/cilium.yaml" >/dev/null)
 
   ${SNAP}/microk8s-status.wrapper --wait-ready >/dev/null
   echo "Deploying $SNAP_DATA/actions/cilium.yaml. This may take several minutes."
-  "$SNAP/kubectl" "--kubeconfig=$SNAP_DATA/credentials/client.config" apply -f "$SNAP_DATA/actions/cilium.yaml"
-  "$SNAP/kubectl" "--kubeconfig=$SNAP_DATA/credentials/client.config" -n $NAMESPACE rollout status ds/cilium
-
-  if [ -e "$SNAP_DATA/args/cni-network/cni.yaml" ]
-  then
-    "$SNAP/kubectl" "--kubeconfig=$SNAP_DATA/credentials/client.config" delete -f "$SNAP_DATA/args/cni-network/cni.yaml"
-    # give a bit slack before moving the file out, sometimes it gives out this error "rpc error: code = Unknown desc = checkpoint in progress".
-    sleep 2s
-    run_with_sudo mv "$SNAP_DATA/args/cni-network/cni.yaml" "$SNAP_DATA/args/cni-network/cni.yaml.disabled"
-  fi
+  "$SNAP/microk8s-kubectl.wrapper" apply -f "$SNAP_DATA/actions/cilium.yaml"
+  "$SNAP/microk8s-kubectl.wrapper" -n $NAMESPACE rollout status ds/cilium
 
   # Fetch the Cilium CLI binary and install
-  CILIUM_POD=$("$SNAP/kubectl" "--kubeconfig=$SNAP_DATA/credentials/client.config" -n $NAMESPACE get pod -l $CILIUM_LABELS -o jsonpath="{.items[0].metadata.name}")
+  CILIUM_POD=$("$SNAP/microk8s-kubectl.wrapper" -n $NAMESPACE get pod -l $CILIUM_LABELS -o jsonpath="{.items[0].metadata.name}")
   CILIUM_BIN=$(mktemp)
-  "$SNAP/kubectl" "--kubeconfig=$SNAP_DATA/credentials/client.config" -n $NAMESPACE cp $CILIUM_POD:/usr/bin/cilium $CILIUM_BIN >/dev/null
+  "$SNAP/microk8s-kubectl.wrapper" -n $NAMESPACE cp $CILIUM_POD:/usr/bin/cilium $CILIUM_BIN >/dev/null
   run_with_sudo mkdir -p "$SNAP_DATA/bin/"
   run_with_sudo mv $CILIUM_BIN "$SNAP_DATA/bin/cilium-$CILIUM_ERSION"
   run_with_sudo chmod +x "$SNAP_DATA/bin/"

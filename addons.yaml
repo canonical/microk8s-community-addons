@@ -39,7 +39,7 @@ microk8s-addons:
 
     - name: "linkerd"
       description: "Linkerd is a service mesh for Kubernetes and other frameworks"
-      version: "2.11.1"
+      version: "2.11.3"
       check_status: "pod/linkerd-destination"
       supported_architectures:
         - amd64
@@ -49,13 +49,15 @@ microk8s-addons:
       description: "SDN, fast with full network policy"
       version: "1.10"
       check_status: "pod/cilium"
+      confinement: "classic"
       supported_architectures:
         - amd64
 
     - name: "multus"
       description: "Multus CNI enables attaching multiple network interfaces to pods"
-      version: "3.4.2"
+      version: "3.8.1"
       check_status: "${SNAP_DATA}/args/cni-network/00-multus.conf"
+      confinement: "classic"
       supported_architectures:
         - amd64
 
@@ -108,6 +110,7 @@ microk8s-addons:
       description: "Kata Containers is a secure runtime with lightweight VMS"
       version: "latest/stable"
       check_status: "${SNAP_DATA}/var/lock/kata.enabled"
+      confinement: "classic"
       supported_architectures:
         - amd64
 

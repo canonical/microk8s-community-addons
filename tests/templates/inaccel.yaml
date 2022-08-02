@@ -3,7 +3,7 @@ kind: Pod
 metadata:
   annotations:
     inaccel/cli: |
-      bitstream install https://store.inaccel.com/artifactory/bitstreams/xilinx/aws-vu9p-f1/shell-v04261818_201920.2/aws/vector/1/1addition
+      bitstream install https://store.inaccel.com/artifactory/bitstreams/xilinx/aws-vu9p-f1/dynamic-shell/aws/vector/1/1addition
   labels:
     inaccel/fpga: enabled
   name: inaccel-vadd
@@ -15,5 +15,5 @@ spec:
         limits:
           xilinx/aws-vu9p-f1: 1
   nodeSelector:
-    xilinx/aws-vu9p-f1: shell-v04261818_201920.2
-  restartPolicy: OnFailure
+    xilinx/aws-vu9p-f1: dynamic-shell
+  restartPolicy: Never

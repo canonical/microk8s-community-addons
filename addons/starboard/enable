@@ -8,7 +8,8 @@ NAMESPACE_STARBOARD="starboard-system"
 
 STARBOARD_HELM_VERSION="0.10.0"
 
-KUBECTL="$SNAP/kubectl --kubeconfig=${SNAP_DATA}/credentials/client.config"
+KUBECTL="$SNAP/microk8s-kubectl.wrapper"
+HELM="$SNAP/microk8s-helm3.wrapper"
 
 do_prerequisites() {
   "$SNAP/microk8s-enable.wrapper" helm3
@@ -18,8 +19,6 @@ do_prerequisites() {
   sleep 5
   ${SNAP}/microk8s-status.wrapper --wait-ready --timeout 30 >/dev/null
 }
-
-HELM="$SNAP_DATA/bin/helm3 --kubeconfig=$SNAP_DATA/credentials/client.config"
 
 VALUES=""
 
