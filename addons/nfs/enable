@@ -13,7 +13,7 @@ NAMESPACE="nfs-server-provisioner"
 
 CHART_VERSION="1.4.0"
 
-KUBECTL="$SNAP/kubectl --kubeconfig=${SNAP_DATA}/credentials/client.config"
+KUBECTL="$SNAP/microk8s-kubectl.wrapper"
 "$SNAP/microk8s-enable.wrapper" helm3
 HELM="$SNAP/microk8s-helm3.wrapper"
 
