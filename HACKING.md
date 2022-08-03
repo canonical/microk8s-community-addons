@@ -1,6 +1,6 @@
 # Develop a new MicroK8s addon
 
-This document describes the process of developing a new addon for MicroK8s. As an example, we will create a simple addon `demo-nginx`, which creates a simple nginx deployment on our cluster.
+This document describes the process of developing a new addon for MicroK8s. As an example, we will create a simple addon `demo-nginx`, which creates a simple nginx deployment on our cluster. We will also show how to extend the `microk8s` CLI with new commands that work in tandem with the enabled addons. 
 
 ## Overview
 
@@ -142,17 +142,15 @@ microk8s disable demo-nginx
 
 ## Custom commands
 
-MicroK8s supports extending the `microk8s` command with extra plugins. These plugins are executed within the MicroK8s snap environment, effectively running confined from the rest of the system.
+Addons may need to enhance the MicroK8s CLI with custom commands for management actions and day 2 operations. To this end the `microk8s` command can be extended via executable scritps or binaries called plugins. Plugins are found under `$SNAP_COMMON/plugins`, which is typically `/var/snap/microk8s/common/plugins/`. These plugins are executed within the MicroK8s snap environment, effectively running confined from the rest of the system.
 
-Plugins may be added by placing executable binaries or scripts under the `$SNAP_COMMON/plugins`, which is typically `/var/snap/microk8s/common/plugins/`.
+Let's assume the `demo-nginx` addon needs to be paired with a `microk8s nginxctl` command to print a friendly message. In what follows we implement an `nginxctl` plugin to extend the `microk8s` command.
 
-MicroK8s addons may use this feature to extend the MicroK8s CLI with custom commands for management actions, day 2 operations, etc.
+### Create an example `nginxctl` plugin
 
-### Create an example hello-world plugin
+The `nginxctl` plugin simply prints some information about the environment and lists the pods running in the cluster.
 
-This section describes the process of creating a simple MicroK8s plugin, that simply prints some information about the environment and lists the pods running in the cluster.
-
-1.  Create `/var/snap/microk8s/common/plugins/hello-world` as a simple bash script and mark it as executable:
+1.  Create `/var/snap/microk8s/common/plugins/nginxctl` as a simple bash script and mark it as executable:
 
     ```bash
     echo '#!/bin/bash
@@ -162,18 +160,18 @@ This section describes the process of creating a simple MicroK8s plugin, that si
     echo "SNAP is at ${SNAP}"
 
     $SNAP/microk8s-kubectl.wrapper get pods -A
-    ' | sudo tee /var/snap/microk8s/common/plugins/hello-world
-    sudo chmod +x /var/snap/microk8s/common/plugins/hello-world
+    ' | sudo tee /var/snap/microk8s/common/plugins/nginxctl
+    sudo chmod +x /var/snap/microk8s/common/plugins/nginxctl
     ```
 
 2.  Ensure MicroK8s knows about the plugin. Running `microk8s` should print the available commands, including a section looking like this:
 
     ```bash
     Available subcommands from addons are:
-	    hello-world
+	    nginxctl
     ```
 
-3.  Execute the plugin with `microk8s hello-world`:
+3.  Execute the plugin by calling the `microk8s nginxctl` command:
 
     ```bash
     Hello microk8s plugins!
