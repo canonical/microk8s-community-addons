@@ -142,7 +142,7 @@ microk8s disable demo-nginx
 
 ## Custom commands
 
-Addons may need to enhance the MicroK8s CLI with custom commands for management actions and day 2 operations. To this end the `microk8s` command can be extended via executable scritps or binaries called plugins. Plugins are found under `$SNAP_COMMON/plugins`, which is typically `/var/snap/microk8s/common/plugins/`. These plugins are executed within the MicroK8s snap environment, effectively running confined from the rest of the system.
+Addons may need to enhance the MicroK8s CLI with custom commands for management actions and day 2 operations. To this end the `microk8s` command can be extended via executable scripts or binaries called plugins. Plugins are found under `$SNAP_COMMON/plugins`, which is typically `/var/snap/microk8s/common/plugins/`. These plugins are executed within the MicroK8s snap environment, effectively running confined from the rest of the system.
 
 Let's assume the `demo-nginx` addon needs to be paired with a `microk8s nginxctl` command to print a friendly message. In what follows we implement an `nginxctl` plugin to extend the `microk8s` command.
 
