@@ -12,6 +12,7 @@ This document describes the process of developing a new addon for MicroK8s. As a
     - [3. Write `disable` script](#3-write-disable-script)
     - [4. Write unit tests](#4-write-unit-tests)
   - [Use addon](#use-addon)
+  - [Custom commands](#custom-commands)
 
 
 ## Develop addon
@@ -138,3 +139,47 @@ And disable the addon:
 ```bash
 microk8s disable demo-nginx
 ```
+
+## Custom commands
+
+MicroK8s supports extending the `microk8s` command with extra plugins. These plugins are executed within the MicroK8s snap environment, effectively running confined from the rest of the system.
+
+Plugins may be added by placing executable binaries or scripts under the `$SNAP_COMMON/plugins`, which is typically `/var/snap/microk8s/common/plugins/`.
+
+MicroK8s addons may use this feature to extend the MicroK8s CLI with custom commands for management actions, day 2 operations, etc.
+
+### Create an example hello-world plugin
+
+This section describes the process of creating a simple MicroK8s plugin, that simply prints some information about the environment and lists the pods running in the cluster.
+
+1.  Create `/var/snap/microk8s/common/plugins/hello-world` as a simple bash script and mark it as executable:
+
+    ```bash
+    echo '#!/bin/bash
+
+    echo "Hello ${SNAP_NAME} plugins!"
+    echo "SNAP_DATA is at ${SNAP_DATA}"
+    echo "SNAP is at ${SNAP}"
+
+    $SNAP/microk8s-kubectl.wrapper get pods -A
+    ' | sudo tee /var/snap/microk8s/common/plugins/hello-world
+    sudo chmod +x /var/snap/microk8s/common/plugins/hello-world
+    ```
+
+2.  Ensure MicroK8s knows about the plugin. Running `microk8s` should print the available commands, including a section looking like this:
+
+    ```bash
+    Available subcommands from addons are:
+	    hello-world
+    ```
+
+3.  Execute the plugin with `microk8s hello-world`:
+
+    ```bash
+    Hello microk8s plugins!
+    SNAP_DATA is at /var/snap/microk8s/x2
+    Snap is at /snap/microk8s/x2
+    NAMESPACE     NAME                                      READY   STATUS    RESTARTS   AGE
+    kube-system   calico-node-rbbpz                         1/1     Running   0          16h
+    kube-system   calico-kube-controllers-9969d55bb-7fdn9   1/1     Running   0          16h
+    ```
