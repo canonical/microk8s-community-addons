@@ -115,6 +115,10 @@ class TestAddons(object):
         """
 
     @pytest.mark.skipif(
+        os.environ.get("STRICT") == "yes",
+        reason="Skipping nfs tests in strict confinement as they are expected to fail",
+    )
+    @pytest.mark.skipif(
         platform.machine() != "x86_64",
         reason="NFS tests are only relevant in x86 architectures",
     )
