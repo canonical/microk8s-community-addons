@@ -629,6 +629,7 @@ def validate_kata():
     wait_for_pod_state("", "default", "running", label="app=kata")
     kubectl("delete -f {}".format(manifest))
 
+
 def validate_osm_edge():
     """
     Validate osm-edge
