@@ -7,7 +7,7 @@ CURRENT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
 
 echo "Enabling Jaeger"
 
-"$SNAP/microk8s-enable.wrapper" dns ingress
+"$SNAP/microk8s-enable.wrapper" dns ingress cert-manager
 
 read -ra ARGUMENTS <<< "$1"
 
@@ -15,34 +15,15 @@ MANIFESTS_PATH="${CURRENT_DIR}/jaeger"
 
 if [ ! -z "${ARGUMENTS[@]}" ]
 then
-
   KUBECTL="$SNAP/kubectl --kubeconfig=${SNAP_DATA}/credentials/client.config -n ${ARGUMENTS[0]}"
-  $KUBECTL apply -f "${MANIFESTS_PATH}/crds"
-
-  manifests="service_account.yaml role.yaml role_binding.yaml operator.yaml simplest.yaml"
-  for yaml in $manifests
-  do
-    sed "s/namespace: default/namespace: ${ARGUMENTS[0]}/g" $MANIFESTS_PATH/$yaml | $KUBECTL apply -f -
-    sleep 3
-  done
-
+  sed "s/namespace: default/namespace: ${ARGUMENTS[0]}/g;s/default\.svc/${ARGUMENTS[0]}\.svc/g;s/default\/jaeger-operator-serving-cert/${ARGUMENTS[0]}\/jaeger-operator-serving-cert/g" $MANIFESTS_PATH/operator.yaml | $KUBECTL apply -f -
 else
-
   KUBECTL="$SNAP/kubectl --kubeconfig=${SNAP_DATA}/credentials/client.config"
-  $KUBECTL apply -f "${MANIFESTS_PATH}/crds"
-
-  n=0
-  until [ $n -ge 10 ]
-  do
-    sleep 3
-    ($KUBECTL apply -f "${MANIFESTS_PATH}/") && break
-    n=$[$n+1]
-    if [ $n -ge 10 ]; then
-      echo "Jaeger operator failed to install"
-      exit 1
-    fi
-  done
-
+  $KUBECTL apply -f "${MANIFESTS_PATH}/operator.yaml"
 fi
+
+echo "Waiting for Jaeger Operator to be ready"
+$KUBECTL wait pods -n default -l name=jaeger-operator --for condition=Ready --timeout=90s
+$KUBECTL apply -f "${MANIFESTS_PATH}/simplest.yaml" 
 
 echo "Jaeger is enabled"

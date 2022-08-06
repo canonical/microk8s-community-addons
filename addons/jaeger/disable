@@ -12,19 +12,13 @@ MANIFESTS_PATH="${CURRENT_DIR}/jaeger"
 if [ ! -z "${ARGUMENTS[@]}" ]
 then
 
-  $KUBECTL delete -f "${MANIFESTS_PATH}/crds" || true
-  manifests="service_account.yaml role.yaml role_binding.yaml operator.yaml"
   KUBECTL="$SNAP/kubectl --kubeconfig=${SNAP_DATA}/credentials/client.config -n ${ARGUMENTS[0]}"
-  for yaml in $manifests
-  do
-    sed "s/namespace: default/namespace: ${ARGUMENTS[0]}/g" $MANIFESTS_PATH/$yaml | $KUBECTL delete -f - || true
-    sleep 3
-  done
+  sed "s/namespace: default/namespace: ${ARGUMENTS[0]}/g; s/default\.svc/${ARGUMENTS[0]}\.svc/g; s/default\/jaeger-operator-serving-cert/${ARGUMENTS[0]}\jaeger-operator-serving-cert/g" $MANIFESTS_PATH/operator.yaml | $KUBECTL delete -f -
 
 else
 
-  $KUBECTL delete -f "${MANIFESTS_PATH}" || true
-  $KUBECTL delete -f "${MANIFESTS_PATH}/crds" || true
+  $KUBECTL delete -f "${MANIFESTS_PATH}/simplest.yaml" || true
+  $KUBECTL delete -f "${MANIFESTS_PATH}/operator.yaml" || true
 
 fi
 echo "The Jaeger operator is disabled"
