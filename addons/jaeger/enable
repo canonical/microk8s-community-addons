@@ -13,7 +13,7 @@ read -ra ARGUMENTS <<< "$1"
 
 MANIFESTS_PATH="${CURRENT_DIR}"
 NAMESPACE="default"
-KUBECTL="$SNAP/kubectl --kubeconfig=${SNAP_DATA}/credentials/client.config"
+KUBECTL="$SNAP/microk8s-kubectl.wrapper"
 
 if [ ! -z "${ARGUMENTS[@]}" ]
 then
