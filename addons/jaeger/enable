@@ -11,14 +11,18 @@ echo "Enabling Jaeger"
 
 read -ra ARGUMENTS <<< "$1"
 
-MANIFESTS_PATH="${CURRENT_DIR}/jaeger"
+MANIFESTS_PATH="${CURRENT_DIR}"
 NAMESPACE="default"
 KUBECTL="$SNAP/kubectl --kubeconfig=${SNAP_DATA}/credentials/client.config"
 
 if [ ! -z "${ARGUMENTS[@]}" ]
 then
   NAMESPACE=${ARGUMENTS[0]}
-  sed "s/namespace: default/namespace: ${ARGUMENTS[0]}/g;s/default\.svc/${ARGUMENTS[0]}\.svc/g;s/default\/jaeger-operator-serving-cert/${ARGUMENTS[0]}\/jaeger-operator-serving-cert/g" $MANIFESTS_PATH/operator.yaml | $KUBECTL apply -f -
+  $KUBECTL create ns "${NAMESPACE}"
+  sed "s/namespace: default/namespace: ${NAMESPACE}/g; \
+       s/default\.svc/${NAMESPACE}\.svc/g;\
+       s/default\/jaeger-operator-serving-cert/${NAMESPACE}\/jaeger-operator-serving-cert/g" $MANIFESTS_PATH/operator.yaml |\
+       $KUBECTL apply -f -
 else
   $KUBECTL apply -f "${MANIFESTS_PATH}/operator.yaml"
 fi

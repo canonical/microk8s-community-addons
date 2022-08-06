@@ -7,12 +7,16 @@ echo "Disabling Jaeger"
 read -ra ARGUMENTS <<< "$1"
 
 KUBECTL="$SNAP/kubectl --kubeconfig=${SNAP_DATA}/credentials/client.config"
-MANIFESTS_PATH="${CURRENT_DIR}/jaeger"
+MANIFESTS_PATH="${CURRENT_DIR}"
+NAMESPACE="default"
 
 if [ ! -z "${ARGUMENTS[@]}" ]
 then
-  KUBECTL="$SNAP/kubectl --kubeconfig=${SNAP_DATA}/credentials/client.config -n ${ARGUMENTS[0]}"
-  sed "s/namespace: default/namespace: ${ARGUMENTS[0]}/g; s/default\.svc/${ARGUMENTS[0]}\.svc/g; s/default\/jaeger-operator-serving-cert/${ARGUMENTS[0]}\jaeger-operator-serving-cert/g" $MANIFESTS_PATH/operator.yaml | $KUBECTL delete -f -
+  NAMESPACE=${ARGUMENTS[0]}
+  sed "s/namespace: default/namespace: ${NAMESPACE}/g; \
+       s/default\.svc/${NAMESPACE}\.svc/g; \
+       s/default\/jaeger-operator-serving-cert/${NAMESPACE}\jaeger-operator-serving-cert/g" $MANIFESTS_PATH/operator.yaml |\
+       $KUBECTL delete -f -
 else
   $KUBECTL delete -f "${MANIFESTS_PATH}/simplest.yaml" || true
   $KUBECTL delete -f "${MANIFESTS_PATH}/operator.yaml" || true
