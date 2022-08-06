@@ -18,7 +18,7 @@ KUBECTL="$SNAP/microk8s-kubectl.wrapper"
 if [ ! -z "${ARGUMENTS[@]}" ]
 then
   NAMESPACE=${ARGUMENTS[0]}
-  $KUBECTL create ns "${NAMESPACE}"
+  $KUBECTL create ns "${NAMESPACE}" || true
   sed "s/namespace: default/namespace: ${NAMESPACE}/g; \
        s/default\.svc/${NAMESPACE}\.svc/g;\
        s/default\/jaeger-operator-serving-cert/${NAMESPACE}\/jaeger-operator-serving-cert/g" $MANIFESTS_PATH/operator.yaml |\
