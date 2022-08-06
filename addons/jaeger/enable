@@ -12,18 +12,19 @@ echo "Enabling Jaeger"
 read -ra ARGUMENTS <<< "$1"
 
 MANIFESTS_PATH="${CURRENT_DIR}/jaeger"
+NAMESPACE="default"
+KUBECTL="$SNAP/kubectl --kubeconfig=${SNAP_DATA}/credentials/client.config"
 
 if [ ! -z "${ARGUMENTS[@]}" ]
 then
-  KUBECTL="$SNAP/kubectl --kubeconfig=${SNAP_DATA}/credentials/client.config -n ${ARGUMENTS[0]}"
+  NAMESPACE=${ARGUMENTS[0]}
   sed "s/namespace: default/namespace: ${ARGUMENTS[0]}/g;s/default\.svc/${ARGUMENTS[0]}\.svc/g;s/default\/jaeger-operator-serving-cert/${ARGUMENTS[0]}\/jaeger-operator-serving-cert/g" $MANIFESTS_PATH/operator.yaml | $KUBECTL apply -f -
 else
-  KUBECTL="$SNAP/kubectl --kubeconfig=${SNAP_DATA}/credentials/client.config"
   $KUBECTL apply -f "${MANIFESTS_PATH}/operator.yaml"
 fi
 
 echo "Waiting for Jaeger Operator to be ready"
-$KUBECTL wait pods -n default -l name=jaeger-operator --for condition=Ready --timeout=90s
+$KUBECTL wait pods -n "${NAMESPACE}" -l name=jaeger-operator --for condition=Ready --timeout=90s
 $KUBECTL apply -f "${MANIFESTS_PATH}/simplest.yaml" 
 
 echo "Jaeger is enabled"
