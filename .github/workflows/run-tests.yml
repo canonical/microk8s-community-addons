@@ -47,5 +47,6 @@ jobs:
           sudo microk8s addons repo add community .
           export UNDER_TIME_PRESSURE="True"
           export SKIP_PROMETHEUS="False"
+          export STRICT="yes"
           sudo -E pytest -s -ra ./tests/test-addons.py
           sudo snap remove microk8s --purge
