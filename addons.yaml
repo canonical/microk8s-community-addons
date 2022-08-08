@@ -65,6 +65,7 @@ microk8s-addons:
       description: "NFS Server Provisioner"
       version: "1.4.0"
       check_status: "statefulset.apps/nfs-server-provisioner"
+      confinement: "classic"
       supported_architectures:
         - amd64
 
