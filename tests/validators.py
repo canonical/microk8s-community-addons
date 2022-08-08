@@ -100,7 +100,7 @@ def validate_storage():
         time.sleep(2)
         attempt -= 1
 
-    # Make sure the test pod writes data sto the storage
+    # Make sure the test pod writes data to the storage
     found = False
     for root, dirs, files in os.walk("/var/snap/microk8s/common/default-storage"):
         for file in files:
@@ -108,6 +108,42 @@ def validate_storage():
                 found = True
     assert found
     assert "myclaim" in output
+    assert "Bound" in output
+    kubectl("delete -f {}".format(manifest))
+
+
+def validate_storage_nfs():
+    """
+    Validate NFS Storage by creating two Pods mounting the same PVC. (optimal test would be on multinode-cluster)
+    """
+    wait_for_pod_state(
+        "", "nfs-server-provisioner", "running", label="app=nfs-server-provisioner"
+    )
+
+    here = os.path.dirname(os.path.abspath(__file__))
+    manifest = os.path.join(here, "templates", "pvc-nfs.yaml")
+    kubectl("apply -f {}".format(manifest))
+    wait_for_pod_state("", "default", "running", label="app=busybox-pvc-nfs")
+
+    attempt = 50
+    while attempt >= 0:
+        output = kubectl("get pvc -l vol=pvc-nfs")
+        if "Bound" in output:
+            break
+        time.sleep(2)
+        attempt -= 1
+
+    # Make sure the test pod writes data to the storage
+    found = False
+    for root, dirs, files in os.walk("/var/snap/microk8s/common/nfs-storage"):
+        for file in files:
+            if file == "dates1":
+                found1 = True
+            if file == "dates2":
+                found2 = True
+    assert found1
+    assert found2
+    assert "pvc-nfs" in output
     assert "Bound" in output
     kubectl("delete -f {}".format(manifest))
 
