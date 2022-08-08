@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+
+set -e
+
+source $SNAP/actions/common/utils.sh
+CURRENT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
+
+NAMESPACE="nfs-server-provisioner"
+
+KUBECTL="$SNAP/microk8s-kubectl.wrapper"
+HELM="$SNAP/microk8s-helm3.wrapper"
+KUBECTL_DELETE_ARGS="--wait=true --timeout=180s --ignore-not-found=true"
+
+echo "Disabling NFS Server Provisioner"
+
+echo "Checking NFS PVs in use..."
+echo ""
+readarray -t pv_array < <(${KUBECTL} get pv -o=jsonpath='{range .items[*]}pv={.metadata.name} uses storageClassName={.spec.storageClassName} => Claimed by: pvc={.spec.claimRef.name} in namespace={.spec.claimRef.namespace}{"\n"}{end}')
+
+NFS=false
+for i in "${pv_array[@]}"; do
+    if [[ $i =~ .*"storageClassName=nfs".* ]]; then
+        NFS=true
+        echo "$i"
+    fi
+done
+
+if $NFS; then
+    echo ""
+    echo "Please delete all PVs and PVCs using Storage Class \"nfs\" prior disabling the Addon."
+    exit 1
+fi
+
+$HELM delete nfs-server-provisioner -n $NAMESPACE
+$KUBECTL delete $KUBECTL_DELETE_ARGS namespace "$NAMESPACE" > /dev/null 2>&1 || true
+$KUBECTL delete pv data-nfs-server-provisioner-0 
+
+echo "NFS Server Provisioner is disabled"
