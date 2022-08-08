@@ -35,7 +35,7 @@ ${SNAP}/microk8s-status.wrapper --wait-ready --timeout 30 >/dev/null
 OSM_MESH_NAME=${OSM_MESH_NAME:-"osm"}
 OSM_MESH_NS=${OSM_NAMESPACE:-"osm-system"}
 
-if [ ! -z "${ARGUMENTS[@]}"]
+if [ ! -z "$#"  ]
 then
   echo "Installing osm-edge"
   KUBECONFIG=$SNAP_DATA/credentials/client.config $SNAP_DATA/bin/osm install ${ARGUMENTS[@]}
@@ -43,10 +43,7 @@ else
   echo "Installing osm-edge with default settings"
   KUBECONFIG=$SNAP_DATA/credentials/client.config $SNAP_DATA/bin/osm install --mesh-name "$OSM_MESH_NAME" \
     --osm-namespace "$OSM_MESH_NS" \
-    --set=osm.enablePermissiveTrafficPolicy=true \
-    --set=osm.deployPrometheus=true \
-    --set=osm.deployGrafana=true \
-    --set=osm.deployJaeger=true
+    --set=osm.enablePermissiveTrafficPolicy=true
 fi
 
 echo "osm-edge is enabled"
