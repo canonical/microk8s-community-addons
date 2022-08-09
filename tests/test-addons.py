@@ -123,6 +123,10 @@ class TestAddons(object):
         platform.machine() != "x86_64",
         reason="NFS tests are only relevant in x86 architectures",
     )
+    @pytest.mark.skipif(
+        os.environ.get("UNDER_TIME_PRESSURE") == "True",
+        reason="Skipping multus tests as we are under time pressure",
+    )
     def test_storage_nfs(self):
         """
         Sets up and validates NFS Server Provisioner.
@@ -314,6 +318,10 @@ class TestAddons(object):
         platform.machine() != "x86_64",
         reason="OpenFaaS tests are only relevant in x86 architectures",
     )
+    @pytest.mark.skipif(
+        os.environ.get("UNDER_TIME_PRESSURE") == "True",
+        reason="Skipping multus tests as we are under time pressure",
+    )
     def test_openfaas(self):
         """
         Sets up and validates OpenFaaS.
@@ -329,6 +337,10 @@ class TestAddons(object):
         platform.machine() != "x86_64",
         reason="Starboard tests are only relevant in x86 architectures",
     )
+    @pytest.mark.skipif(
+        os.environ.get("UNDER_TIME_PRESSURE") == "True",
+        reason="Skipping multus tests as we are under time pressure",
+    )
     def test_starboard(self):
         """
         Sets up and validates Starboard.
@@ -343,6 +355,10 @@ class TestAddons(object):
     @pytest.mark.skipif(
         platform.machine() != "x86_64",
         reason="ArgoCD tests are only relevant in x86 architectures",
+    )
+    @pytest.mark.skipif(
+        os.environ.get("UNDER_TIME_PRESSURE") == "True",
+        reason="Skipping multus tests as we are under time pressure",
     )
     def test_argocd(self):
         """
