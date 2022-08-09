@@ -1,0 +1,59 @@
+
+# PVC for the customer
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: pvc-nfs
+  labels:
+    vol: pvc-nfs
+  namespace: default
+spec:
+  storageClassName: "nfs"
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+kind: Pod
+apiVersion: v1
+metadata:
+  name: busybox-pvc-nfs1
+  labels:
+    app: busybox-pvc-nfs
+  namespace: default
+spec:
+  containers:
+    - name: busybox-pvc-nfs1
+      image: busybox
+      command: ["/bin/sh", "-c", "while true; do date >> /mount/dates1; sleep 2; done"]
+      volumeMounts:
+        - name: volume
+          mountPath: /mount
+  volumes:
+    - name: volume
+      persistentVolumeClaim:
+        claimName: pvc-nfs        
+
+---
+kind: Pod
+apiVersion: v1
+metadata:
+  name: busybox-pvc-nfs2
+  labels:
+    app: busybox-pvc-nfs
+  namespace: default
+spec:
+  containers:
+    - name: busybox-pvc-nfs2
+      image: busybox
+      command: ["/bin/sh", "-c", "while true; do date >> /mount/dates2; sleep 2; done"]
+      volumeMounts:
+        - name: volume
+          mountPath: /mount
+  volumes:
+    - name: volume
+      persistentVolumeClaim:
+        claimName: pvc-nfs        

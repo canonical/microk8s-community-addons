@@ -20,6 +20,7 @@ else
   echo "Applying manifest for multus daemonset."
   declare -A map
   map[\$SNAP_DATA]="$CUR_DATA"
+  map[\$DS_NAME]="kube-multus-ds"
   use_addon_manifest multus/multus apply "$(declare -p map)"
 
   echo -n "Waiting for multus daemonset to start."
@@ -44,7 +45,7 @@ echo "New CNI plugins can be installed in ${CUR_DATA}/opt/cni/bin/"
 echo
 echo "For information on configuration please refer to the multus documentation."
 echo "  First you need to create network definitions:"
-echo "    https://github.com/k8snetworkplumbingwg/multus-cni/blob/v3.8/docs/how-to-use.md#create-network-attachment-definition"
+echo "    https://github.com/k8snetworkplumbingwg/multus-cni/blob/v3.9/docs/how-to-use.md#create-network-attachment-definition"
 echo "  Then you need to tell your pods to use those networks via annotations"
-echo "    https://github.com/k8snetworkplumbingwg/multus-cni/blob/v3.8/docs/how-to-use.md#run-pod-with-network-annotation"
+echo "    https://github.com/k8snetworkplumbingwg/multus-cni/blob/v3.9/docs/how-to-use.md#run-pod-with-network-annotation"
 echo
