@@ -17,11 +17,14 @@ microk8s-addons:
         - amd64
 
     - name: "knative"
-      description: "The Knative framework on Kubernetes."
-      version: "0.24.0"
-      check_status: "deployment.apps/eventing-webhook"
+      description: "Knative Serverless and Event Driven Applications"
+      version: "1.6.0"
+      check_status: "deployment.apps/knative-operator"
       supported_architectures:
+        - arm64
         - amd64
+        - s390x
+        - ppc64le
 
     - name: "fluentd"
       description: "Elasticsearch-Fluentd-Kibana logging and monitoring"
@@ -49,6 +52,7 @@ microk8s-addons:
       description: "SDN, fast with full network policy"
       version: "1.10"
       check_status: "pod/cilium"
+      confinement: "classic"
       supported_architectures:
         - amd64
 
@@ -56,6 +60,14 @@ microk8s-addons:
       description: "Multus CNI enables attaching multiple network interfaces to pods"
       version: "3.8.1"
       check_status: "${SNAP_DATA}/args/cni-network/00-multus.conf"
+      confinement: "classic"
+      supported_architectures:
+        - amd64
+
+    - name: "nfs"
+      description: "NFS Server Provisioner"
+      version: "1.4.0"
+      check_status: "statefulset.apps/nfs-server-provisioner"
       confinement: "classic"
       supported_architectures:
         - amd64

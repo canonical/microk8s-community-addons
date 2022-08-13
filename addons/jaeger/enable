@@ -28,7 +28,7 @@ then
 
 else
 
-  KUBECTL="$SNAP/kubectl --kubeconfig=${SNAP_DATA}/credentials/client.config"
+  KUBECTL="$SNAP/microk8s-kubectl.wrapper"
   $KUBECTL apply -f "${MANIFESTS_PATH}/crds"
 
   n=0
