@@ -4,16 +4,25 @@ set -e
 
 source $SNAP/actions/common/utils.sh
 CURRENT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
+KUBECTL="$SNAP/microk8s-kubectl.wrapper"
 
 echo "Enabling Jaeger"
 
 "$SNAP/microk8s-enable.wrapper" dns ingress cert-manager
 
-read -ra ARGUMENTS <<< "$1"
+echo "Waiting for cert-manager to be ready."
+while ! $KUBECTL apply -f ${CURRENT_DIR}/cert-tester.yaml > /dev/null 2>&1
+do
+    echo -n "."
+    sleep 5
+done
+echo "ready"
+$KUBECTL delete -f ${CURRENT_DIR}/cert-tester.yaml > /dev/null 2>&1 || true
 
+read -ra ARGUMENTS <<< "$1"
 MANIFESTS_PATH="${CURRENT_DIR}"
 NAMESPACE="default"
-KUBECTL="$SNAP/microk8s-kubectl.wrapper"
+
 
 if [ ! -z "${ARGUMENTS[@]}" ]
 then
@@ -31,4 +40,4 @@ echo "Waiting for Jaeger Operator to be ready"
 $KUBECTL wait pods -n "${NAMESPACE}" -l name=jaeger-operator --for condition=Ready --timeout=90s
 $KUBECTL apply -f "${MANIFESTS_PATH}/simplest.yaml" 
 
-echo "Jaeger is enabled"
+echo "Jaeger is enabled, please allow sometime before the jaeger starts up"
