@@ -6,18 +6,45 @@ source $SNAP/actions/common/utils.sh
 
 NAMESPACE_ARGOCD="argocd"
 
-KUBECTL="$SNAP/kubectl --kubeconfig=${SNAP_DATA}/credentials/client.config"
-HELM="$SNAP_DATA/bin/helm3 --kubeconfig=$SNAP_DATA/credentials/client.config"
+KUBECTL="$SNAP/microk8s-kubectl.wrapper"
+HELM="$SNAP/microk8s-helm3.wrapper"
 KUBECTL_DELETE_ARGS="--wait=true --timeout=180s --ignore-not-found=true"
+
+PURGE=false
+# get the options
+while getopts ":p" flag; do
+  case "${flag}" in
+          p) PURGE=true
+             ;;
+          *) echo "Usage: microk8s disable argocd [-p]"
+             echo ""
+             echo "WARNING: Final deletion of \"$NAMESPACE_ARGOCD\" namespace must be enforced by: \"microk8s disable argocd -p\""
+             echo ""
+             echo "Purge only when sure, that \"$NAMESPACE_ARGOCD\" namespace is not hosting any other services from Argo stack."
+             echo ""
+             exit 0
+             ;;
+  esac
+done
 
 echo "Disabling ArgoCD"
 
 $HELM delete argo-cd -n $NAMESPACE_ARGOCD
 
 $KUBECTL delete customresourcedefinition applications.argoproj.io \
+                applicationsets.argoproj.io \
                 argocdextensions.argoproj.io  \
                 appprojects.argoproj.io
 
-$KUBECTL delete $KUBECTL_DELETE_ARGS namespace "$NAMESPACE_ARGOCD" > /dev/null 2>&1 || true
+if $PURGE; then
+    echo "Final \"$NAMESPACE_ARGOCD\" namespace deletion"
+    $KUBECTL delete $KUBECTL_DELETE_ARGS namespace "$NAMESPACE_ARGOCD" > /dev/null 2>&1 || true
+else
+    echo ""
+    echo "WARNING: Final deletion of \"$NAMESPACE_ARGOCD\" namespace must be enforced by: \"microk8s disable argocd -p\""
+    echo ""
+    echo "Purge only when sure, that \"$NAMESPACE_ARGOCD\" namespace is not hosting any other services from Argo stack."
+    echo ""
+fi
 
 echo "ArgoCD disabled"

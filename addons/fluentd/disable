@@ -7,7 +7,7 @@ CURRENT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
 
 echo "Disabling Fluentd-Elasticsearch"
 
-KUBECTL="$SNAP/kubectl --kubeconfig=${SNAP_DATA}/credentials/client.config"
+KUBECTL="$SNAP/microk8s-kubectl.wrapper"
 
 # This one deletes the old fluentd resources.
 $KUBECTL -n kube-system delete cm fluentd-es-config-v0.1.5 > /dev/null 2>&1 || true

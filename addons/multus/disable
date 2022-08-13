@@ -4,6 +4,7 @@ set -e
 
 source "${SNAP}/actions/common/utils.sh"
 CURRENT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
+source $CURRENT_DIR/../common/utils.sh
 
 KUBECTL="${SNAP}/kubectl --kubeconfig=${SNAP_DATA}/credentials/client.config"
 
@@ -14,7 +15,11 @@ then
   DS_CHECK=$(${KUBECTL} get pods -n kube-system --selector=app=multus -o name)
   if [ -n "${DS_CHECK}" ]; then
     echo "Found multus deamonset, removing it and cleaning up OS files"
-    cat "${CURRENT_DIR}/multus.yaml" | ${SNAP}/bin/sed "s#{{SNAP_DATA}}#${SNAP_DATA}#g" | ${KUBECTL} delete -f - 
+    declare -A map
+    map[\$SNAP_DATA]="$(dirname "${SNAP_DATA}")/current"
+    # Temporary work-around to stay backward-compatible with the previous daemonset name
+    map[\$DS_NAME]="$(microk8s.kubectl get daemonset -n kube-system --selector=app=multus -o name | sed 's:daemonset.apps/::')"
+    use_addon_manifest multus/multus delete "$(declare -p map)"
     run_with_sudo rm -f "${SNAP_DATA}/args/cni-network/00-multus.conf"
     run_with_sudo rm -rf "${SNAP_DATA}/args/cni-network/multus.d"
     run_with_sudo rm -f "${SNAP_DATA}/opt/cni/bin/multus"

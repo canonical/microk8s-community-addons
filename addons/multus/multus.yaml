@@ -18,12 +18,27 @@ spec:
       storage: true
       schema:
         openAPIV3Schema:
-          description:
-            "NetworkAttachmentDefinition is a CRD schema specified by the Network Plumbing
+          description: |
+            NetworkAttachmentDefinition is a CRD schema specified by the Network Plumbing
             Working Group to express the intent for attaching pods to one or more logical or physical
-            networks. More information available at: https://github.com/k8snetworkplumbingwg/multi-net-spec"
+            networks. More information available at: https://github.com/k8snetworkplumbingwg/multi-net-spec
           type: object
           properties:
+            apiVersion:
+              description: |
+                APIVersion defines the versioned schema of this represen
+                tation of an object. Servers should convert recognized schemas to the
+                latest internal value, and may reject unrecognized values. More info:
+                https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+              type: string
+            kind:
+              description: |
+                Kind is a string value representing the REST resource this
+                object represents. Servers may infer this from the endpoint the client
+                submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+              type: string
+            metadata:
+              type: object
             spec:
               description: "NetworkAttachmentDefinition spec defines the desired state of a network attachment"
               type: object
@@ -82,7 +97,7 @@ metadata:
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-  name: kube-multus-ds-amd64
+  name: $DS_NAME
   namespace: kube-system
   labels:
     tier: node
@@ -102,19 +117,17 @@ spec:
         name: multus
     spec:
       hostNetwork: true
-      nodeSelector:
-        kubernetes.io/arch: amd64
       tolerations:
         - operator: Exists
           effect: NoSchedule
       serviceAccountName: multus
       containers:
         - name: kube-multus
-          image: nfvpe/multus:v3.4.2
+          image: ghcr.io/k8snetworkplumbingwg/multus-cni:v3.9
           command: ["/entrypoint.sh"]
           args:
             - "--multus-conf-file=auto"
-            - "--multus-kubeconfig-file-host={{SNAP_DATA}}/args/cni-network/multus.d/multus.kubeconfig"
+            - "--multus-kubeconfig-file-host=$SNAP_DATA/args/cni-network/multus.d/multus.kubeconfig"
             - "--cni-version=0.3.1"
           resources:
             requests:
@@ -123,17 +136,33 @@ spec:
             limits:
               cpu: "100m"
               memory: "50Mi"
-          securityContext:
-            allowPrivilegeEscalation: true
           volumeMounts:
             - name: cni
               mountPath: /host/etc/cni/net.d
             - name: cnibin
               mountPath: /host/opt/cni/bin
+      initContainers:
+        - name: install-multus-binary
+          image: ghcr.io/k8snetworkplumbingwg/multus-cni:v3.9
+          command:
+            - "cp"
+            - "/usr/src/multus-cni/bin/multus"
+            - "/host/opt/cni/bin/multus"
+          resources:
+            requests:
+              cpu: "10m"
+              memory: "15Mi"
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - name: cnibin
+              mountPath: /host/opt/cni/bin
+              mountPropagation: Bidirectional
+      terminationGracePeriodSeconds: 10
       volumes:
         - name: cni
           hostPath:
-            path: "{{SNAP_DATA}}/args/cni-network/"
+            path: "$SNAP_DATA/args/cni-network/"
         - name: cnibin
           hostPath:
-            path: "{{SNAP_DATA}}/opt/cni/bin/"
+            path: "$SNAP_DATA/opt/cni/bin/"

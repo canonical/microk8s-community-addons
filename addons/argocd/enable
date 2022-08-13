@@ -6,19 +6,20 @@ source $SNAP/actions/common/utils.sh
 
 NAMESPACE_ARGOCD="argocd"
 
-ARGOCD_HELM_VERSION="3.33.5"
-
-KUBECTL="$SNAP/kubectl --kubeconfig=${SNAP_DATA}/credentials/client.config"
+ARGOCD_HELM_VERSION="4.6.3"
 
 "$SNAP/microk8s-enable.wrapper" helm3
 
-HELM="$SNAP_DATA/bin/helm3 --kubeconfig=$SNAP_DATA/credentials/client.config"
+KUBECTL="$SNAP/microk8s-kubectl.wrapper"
+HELM="$SNAP/microk8s-helm3.wrapper"
 
 VALUES=""
 
 # get the options
-while getopts ":f:h:" flag; do
+while getopts ":v:f:h:" flag; do
   case "${flag}" in
+          v) ARGOCD_HELM_VERSION=${OPTARG}
+             ;;
           f) VALUES=${OPTARG}
              ;;
           *) echo "Usage: microk8s enable argocd"
@@ -33,7 +34,7 @@ while getopts ":f:h:" flag; do
   esac
 done
 
-echo "Installing ArgoCD"
+echo "Installing ArgoCD (Helm v${ARGOCD_HELM_VERSION})"
 
 if [ -n "$VALUES" ]; then
     echo "Using values file: $VALUES"
