@@ -17,11 +17,14 @@ microk8s-addons:
         - amd64
 
     - name: "knative"
-      description: "The Knative framework on Kubernetes."
-      version: "0.24.0"
-      check_status: "deployment.apps/eventing-webhook"
+      description: "Knative Serverless and Event Driven Applications"
+      version: "1.6.0"
+      check_status: "deployment.apps/knative-operator"
       supported_architectures:
+        - arm64
         - amd64
+        - s390x
+        - ppc64le
 
     - name: "fluentd"
       description: "Elasticsearch-Fluentd-Kibana logging and monitoring"
@@ -32,9 +35,10 @@ microk8s-addons:
 
     - name: "jaeger"
       description: "Kubernetes Jaeger operator with its simple config"
-      version: "1.24.0"
+      version: "1.36.0"
       check_status: "pod/jaeger-operator"
       supported_architectures:
+        - arm64
         - amd64
 
     - name: "linkerd"
@@ -55,11 +59,12 @@ microk8s-addons:
 
     - name: "multus"
       description: "Multus CNI enables attaching multiple network interfaces to pods"
-      version: "3.8.1"
+      version: "3.9"
       check_status: "${SNAP_DATA}/args/cni-network/00-multus.conf"
       confinement: "classic"
       supported_architectures:
         - amd64
+        - arm64
 
     - name: "nfs"
       description: "NFS Server Provisioner"
