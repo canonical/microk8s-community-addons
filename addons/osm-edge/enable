@@ -17,7 +17,7 @@ if [ ! -f "${SNAP_DATA}/bin/osm" ]; then
   (cd "${SNAP_DATA}/tmp/osm-edge"
   fetch_as https://github.com/flomesh-io/osm-edge/releases/download/${OSM_EDGE_VERSION}/osm-edge-${OSM_EDGE_VERSION}-linux-${ARCH}.tar.gz "$SNAP_DATA/tmp/osm-edge/osm-edge.tar.gz"
   run_with_sudo gzip -q -d "$SNAP_DATA/tmp/osm-edge/osm-edge.tar.gz"
-  run_with_sudo tar -xvf "$SNAP_DATA/tmp/osm-edge/osm-edge.tar")
+  run_with_sudo tar --no-overwrite-dir --no-same-owner -mxvf "$SNAP_DATA/tmp/osm-edge/osm-edge.tar")
   run_with_sudo mkdir -p "$SNAP_DATA/bin/"
   run_with_sudo mv "$SNAP_DATA/tmp/osm-edge/linux-${ARCH}/osm" "$SNAP_DATA/bin/"
   run_with_sudo chmod uo+x "$SNAP_DATA/bin/osm"
