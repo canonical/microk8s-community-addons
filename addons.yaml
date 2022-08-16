@@ -37,7 +37,6 @@ microk8s-addons:
       supported_architectures:
         - arm64
         - amd64
-        - s390x
 
     - name: "linkerd"
       description: "Linkerd is a service mesh for Kubernetes and other frameworks"
