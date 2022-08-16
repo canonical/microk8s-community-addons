@@ -8,6 +8,6 @@ echo "Disabling osm-edge"
 ${SNAP}/microk8s-status.wrapper --wait-ready --timeout 30 >/dev/null
 
 echo "Removing osm-edge control plane"
-"$SNAP_DATA/bin/osm" uninstall mesh -f
+KUBECONFIG=$SNAP_DATA/credentials/client.config $SNAP_DATA/bin/osm uninstall mesh -f
 echo "Deleting osm-edge binary."
 run_with_sudo rm -f "$SNAP_DATA/bin/osm"
