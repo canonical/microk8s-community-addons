@@ -36,6 +36,7 @@ from validators import (
     validate_starboard,
     validate_argocd,
     validate_osm_edge,
+    validate_gopaddle_lite,
 )
 from utils import (
     microk8s_enable,
@@ -455,3 +456,19 @@ class TestAddons(object):
         validate_osm_edge()
         print("Disabling osm-edge")
         microk8s_disable("osm-edge")
+    
+    @pytest.mark.skipif(
+        platform.machine() != "x86_64",
+        reason="gopaddle-lite tests are only relevant in x86 architectures",
+    )
+
+    def test_gopaddle_lite(self):
+        """
+        Sets up and validates gopaddle-lite.
+        """
+        print("Enabling gopaddle-lite")
+        microk8s_enable("gopaddle-lite")
+        print("Validating gopaddle-lite")
+        validate_gopaddle_lite()
+        print("Disabling gopaddle-lite")
+        microk8s_disable("gopaddle-lite")
