@@ -24,39 +24,38 @@ run_with_sudo rm -rf "$SNAP_DATA/tmp/gopaddle-lite"
 if $KUBECTL get ns gopaddle-servers >/dev/null 2>&1
 then
     run_with_sudo $KUBECTL delete ns gopaddle-servers
-
+    
     if $KUBECTL get clusterrole gopaddle:prometheus-tool-kube-state-metrics >/dev/null 2>&1
     then
         run_with_sudo $KUBECTL delete clusterrole gopaddle:prometheus-tool-kube-state-metrics gopaddle:prometheus-tool-server
     fi
-
+    
     if $KUBECTL get clusterrolebinding gopaddle:event-exporter-rb >/dev/null 2>&1
     then
         run_with_sudo $KUBECTL delete clusterrolebinding gopaddle:event-exporter-rb gopaddle:prometheus-tool-kube-state-metrics gopaddle:prometheus-tool-server
     fi
-
+    
     if $KUBECTL get service default-http-backend >/dev/null 2>&1
     then
         run_with_sudo $KUBECTL delete service default-http-backend
     fi
-
+    
     if $KUBECTL get deployment default-http-backend >/dev/null 2>&1
     then
         run_with_sudo $KUBECTL delete deployment default-http-backend
     fi
-
+    
 fi
 
 #remove pv resourceVersion and uid
 echo ""
 echo "removing the resourceVersion and uid in persistentvolume"
-DATA=$(run_with_sudo $KUBECTL get pv  -l gp-install-pv=microk8s-hostpath-gp-retain -o json | jq '.items[].metadata.name')
+DATA=$(run_with_sudo $KUBECTL get pv  -l gp-install-pv=microk8s-hostpath-gp-retain -o yaml| grep "name: pvc" | awk '{print $2}')
 
 for i in $(echo $DATA | tr " " "\n")
 do
-	PVNAME=$(echo $i | cut -d '"' -f 2)
-    microk8s kubectl patch  pv $PVNAME  --type='merge' -p '{"spec":{"claimRef":{"resourceVersion":null,"uid":null}}}'
-
+    #PVNAME=$(echo $i | cut -d '"' -f 2)
+    $KUBECTL patch  pv $i  --type='merge' -p '{"spec":{"claimRef":{"resourceVersion":null,"uid":null}}}'
 done
 
 
