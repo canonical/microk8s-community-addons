@@ -18,7 +18,6 @@ then
     echo "$KUBE_VERSION is not supported"
 fi
 
-
 STATICIP=""
 HELM_VERSION="4.2.4"
 STORAGECLASS=""
@@ -176,7 +175,6 @@ enable_gopaddle_lite() {
         IP=$(echo $NODEIP | cut -d ' ' -f 2)
         echo "http://$IP:30003"
     fi
-    
 }
 
 

@@ -702,3 +702,4 @@ def validate_gopaddle_lite():
         "", "gp-lite", "running", label="released-by=gopaddle"
     )
 
+
