@@ -127,6 +127,7 @@ class TestAddons(object):
         os.environ.get("UNDER_TIME_PRESSURE") == "True",
         reason="Skipping multus tests as we are under time pressure",
     )
+    @pytest.mark.skipif(is_container(), reason="NFS testing will need extra work")
     def test_storage_nfs(self):
         """
         Sets up and validates NFS Server Provisioner.
@@ -291,6 +292,7 @@ class TestAddons(object):
         os.environ.get("UNDER_TIME_PRESSURE") == "True",
         reason="Skipping multus tests as we are under time pressure",
     )
+    @pytest.mark.skipif(is_container(), reason="Multus fails in lxc with a shared mount error")
     def test_multus(self):
         """
         Sets up and validates Multus.
