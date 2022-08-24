@@ -35,6 +35,10 @@ from validators import (
     validate_kata,
     validate_starboard,
     validate_argocd,
+<<<<<<< HEAD
+=======
+    validate_osm_edge,
+>>>>>>> 5f7438e8924134214b5d48f21d95c208aaa60d7f
     validate_gopaddle_lite,
 )
 from utils import (
@@ -442,6 +446,19 @@ class TestAddons(object):
         validate_kata()
         print("Disabling kata")
         microk8s_disable("kata")
+
+    @pytest.mark.skipif(platform.machine() == "s390x", reason="Not available on s390x")
+    def test_osm_edge(self):
+        """
+        Sets up and validate osm-edge
+
+        """
+        print("Enabling osm-edge")
+        microk8s_enable("osm-edge")
+        print("Validate osm-edge installation")
+        validate_osm_edge()
+        print("Disabling osm-edge")
+        microk8s_disable("osm-edge")
     
     @pytest.mark.skipif(
         platform.machine() != "x86_64",
