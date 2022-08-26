@@ -701,3 +701,5 @@ def validate_gopaddle_lite():
     wait_for_pod_state(
         "", "gp-lite", "running", label="released-by=gopaddle"
     )
+
+

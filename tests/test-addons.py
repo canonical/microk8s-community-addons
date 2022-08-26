@@ -35,10 +35,7 @@ from validators import (
     validate_kata,
     validate_starboard,
     validate_argocd,
-<<<<<<< HEAD
-=======
     validate_osm_edge,
->>>>>>> 5f7438e8924134214b5d48f21d95c208aaa60d7f
     validate_gopaddle_lite,
 )
 from utils import (

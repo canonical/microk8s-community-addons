@@ -56,7 +56,6 @@ for i in $(echo $DATA | tr " " "\n")
 do
     #PVNAME=$(echo $i | cut -d '"' -f 2)
     $KUBECTL patch  pv $i  --type='merge' -p '{"spec":{"claimRef":{"resourceVersion":null,"uid":null}}}'
-    
 done
 
 
