@@ -698,7 +698,6 @@ def validate_gopaddle_lite():
     """
     Validate gopaddle-lite
     """
-    wait_for_installation()
     wait_for_pod_state(
         "", "gp-lite", "running", label="released-by=gopaddle"
     )
