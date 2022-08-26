@@ -127,7 +127,8 @@ class TestAddons(object):
         os.environ.get("UNDER_TIME_PRESSURE") == "True",
         reason="Skipping multus tests as we are under time pressure",
     )
-    @pytest.mark.skipif(is_container(), reason="NFS testing will need extra work")
+    # NFS addon requires elevated privileges, which fails in lxc due to seccomp.
+    @pytest.mark.skipif(is_container(), reason="NFS tests are skipped in containers")
     def test_storage_nfs(self):
         """
         Sets up and validates NFS Server Provisioner.
