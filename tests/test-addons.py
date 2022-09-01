@@ -456,12 +456,11 @@ class TestAddons(object):
         validate_osm_edge()
         print("Disabling osm-edge")
         microk8s_disable("osm-edge")
-    
+
     @pytest.mark.skipif(
         platform.machine() != "x86_64",
         reason="gopaddle-lite tests are only relevant in x86 architectures",
     )
-
     def test_gopaddle_lite(self):
         """
         Sets up and validates gopaddle-lite.

@@ -672,6 +672,7 @@ def validate_kata():
     wait_for_pod_state("", "default", "running", label="app=kata")
     kubectl("delete -f {}".format(manifest))
 
+
 def validate_osm_edge():
     """
     Validate osm-edge
@@ -694,12 +695,9 @@ def validate_osm_edge():
     )
     print("osm-edge proxy injector up and running.")
 
+
 def validate_gopaddle_lite():
     """
     Validate gopaddle-lite
     """
-    wait_for_pod_state(
-        "", "gp-lite", "running", label="released-by=gopaddle"
-    )
-
-
+    wait_for_pod_state("", "gp-lite", "running", label="released-by=gopaddle")
