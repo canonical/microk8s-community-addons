@@ -5,11 +5,11 @@ metadata:
   name: data-nfs-server-provisioner-0
 spec:
   capacity:
-    storage: {{disk_size}}
+    storage: { { disk_size } }
   accessModes:
     - ReadWriteOnce
   hostPath:
-    path: {{hostpath}}
+    path: { { hostpath } }
   claimRef:
     namespace: nfs-server-provisioner
-    name: {{claimref_name}}
+    name: { { claimref_name } }
