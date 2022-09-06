@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # This Addon does not use concept of submitted external values.yaml for parametrization. Addon rather offers abstraction and simplification.
-# Composing the values file gives more flexibility, however require client's knowledge of the undelying Addon code and Helm Chart in use.
+# Composing the values file gives more flexibility, however require client's knowledge of the underlying Addon code and Helm Chart in use.
 # If that knowledge is needed, it could be more convenient to deploy Helm Chart directly.
 
 set -e
@@ -52,7 +52,7 @@ $KUBECTL create namespace "$NAMESPACE" > /dev/null 2>&1 || true
 
 # HostPath PV has to be created to hook to NFS Server Provisioner's PVC
   # DISK_SIZE is a dummy value. NFS Server Provisioner consumes by default the complete Node disk space, unless LVM or similar technique is used.
-  # Same applies to customer's PVC storage requets.
+  # Same applies to customer's PVC storage requests.
 CLAIMREF_NAME="data-nfs-server-provisioner-0"
 DISK_SIZE=1Gi
 HOSTPATH="/var/snap/microk8s/common/nfs-storage"
