@@ -157,7 +157,6 @@ spec:
           volumeMounts:
             - name: cnibin
               mountPath: /host/opt/cni/bin
-              mountPropagation: Bidirectional
       terminationGracePeriodSeconds: 10
       volumes:
         - name: cni

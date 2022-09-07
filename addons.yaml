@@ -61,7 +61,6 @@ microk8s-addons:
       description: "Multus CNI enables attaching multiple network interfaces to pods"
       version: "3.9"
       check_status: "${SNAP_DATA}/args/cni-network/00-multus.conf"
-      confinement: "classic"
       supported_architectures:
         - amd64
         - arm64
