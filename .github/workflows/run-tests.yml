@@ -18,7 +18,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install python3-setuptools
+          sudo apt-get install -y python3-setuptools nfs-common
           sudo pip3 install --upgrade pip
           sudo pip3 install -U pytest sh
       - name: Running addons tests
@@ -47,5 +47,6 @@ jobs:
           sudo microk8s addons repo add community .
           export UNDER_TIME_PRESSURE="True"
           export SKIP_PROMETHEUS="False"
+          export STRICT="yes"
           sudo -E pytest -s -ra ./tests/test-addons.py
           sudo snap remove microk8s --purge

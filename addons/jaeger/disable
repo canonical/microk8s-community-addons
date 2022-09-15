@@ -6,25 +6,18 @@ CURRENT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
 echo "Disabling Jaeger"
 read -ra ARGUMENTS <<< "$1"
 
-KUBECTL="$SNAP/kubectl --kubeconfig=${SNAP_DATA}/credentials/client.config"
-MANIFESTS_PATH="${CURRENT_DIR}/jaeger"
-
+KUBECTL="$SNAP/microk8s-kubectl.wrapper"
+MANIFESTS_PATH="${CURRENT_DIR}"
+NAMESPACE="default"
 if [ ! -z "${ARGUMENTS[@]}" ]
 then
-
-  $KUBECTL delete -f "${MANIFESTS_PATH}/crds" || true
-  manifests="service_account.yaml role.yaml role_binding.yaml operator.yaml"
-  KUBECTL="$SNAP/kubectl --kubeconfig=${SNAP_DATA}/credentials/client.config -n ${ARGUMENTS[0]}"
-  for yaml in $manifests
-  do
-    sed "s/namespace: default/namespace: ${ARGUMENTS[0]}/g" $MANIFESTS_PATH/$yaml | $KUBECTL delete -f - || true
-    sleep 3
-  done
-
+  NAMESPACE=${ARGUMENTS[0]}
+  sed "s/namespace: default/namespace: ${NAMESPACE}/g; \
+       s/default\.svc/${NAMESPACE}\.svc/g; \
+       s/default\/jaeger-operator-serving-cert/${NAMESPACE}\jaeger-operator-serving-cert/g" $MANIFESTS_PATH/operator.yaml |\
+       $KUBECTL delete -f -
 else
-
-  $KUBECTL delete -f "${MANIFESTS_PATH}" || true
-  $KUBECTL delete -f "${MANIFESTS_PATH}/crds" || true
-
+  $KUBECTL delete -f "${MANIFESTS_PATH}/simplest.yaml" || true
+  $KUBECTL delete -f "${MANIFESTS_PATH}/operator.yaml" || true
 fi
 echo "The Jaeger operator is disabled"

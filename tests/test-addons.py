@@ -8,6 +8,7 @@ from validators import (
     validate_dns_dashboard,
     validate_dashboard_ingress,
     validate_storage,
+    validate_storage_nfs,
     validate_ingress,
     validate_ambassador,
     validate_gpu,
@@ -32,8 +33,9 @@ from validators import (
     validate_openfaas,
     validate_openebs,
     validate_kata,
-    validate_starboard,
+    validate_trivy,
     validate_argocd,
+    validate_osm_edge,
 )
 from utils import (
     microk8s_enable,
@@ -101,6 +103,7 @@ class TestAddons(object):
         validate_dashboard_ingress()
         print("Disabling dashboard-ingress")
         microk8s_disable("dashboard-ingress")
+
         print("Disabling metrics-server")
         microk8s_disable("metrics-server")
         print("Disabling dashboard")
@@ -111,6 +114,31 @@ class TestAddons(object):
         print("Disabling DNS")
         microk8s_disable("dns")
         """
+
+    @pytest.mark.skipif(
+        os.environ.get("STRICT") == "yes",
+        reason="Skipping nfs tests in strict confinement as they are expected to fail",
+    )
+    @pytest.mark.skipif(
+        platform.machine() != "x86_64",
+        reason="NFS tests are only relevant in x86 architectures",
+    )
+    @pytest.mark.skipif(
+        os.environ.get("UNDER_TIME_PRESSURE") == "True",
+        reason="Skipping multus tests as we are under time pressure",
+    )
+    # NFS addon requires elevated privileges, which fails in lxc due to seccomp.
+    @pytest.mark.skipif(is_container(), reason="NFS tests are skipped in containers")
+    def test_storage_nfs(self):
+        """
+        Sets up and validates NFS Server Provisioner.
+        """
+        print("Enabling NFS")
+        microk8s_enable("nfs")
+        print("Validating NFS")
+        validate_storage_nfs()
+        print("Disabling NFS")
+        microk8s_disable("nfs")
 
     @pytest.mark.skipif(
         os.environ.get("UNDER_TIME_PRESSURE") == "True",
@@ -140,30 +168,23 @@ class TestAddons(object):
         print("Disable inaccel")
         microk8s_disable("inaccel")
 
-    @pytest.mark.skipif(
-        platform.machine() != "x86_64",
-        reason="Istio tests are only relevant in x86 architectures",
-    )
+    @pytest.mark.skipif(platform.machine() == "s390x", reason="Not available on s390x")
     @pytest.mark.skipif(
         os.environ.get("UNDER_TIME_PRESSURE") == "True",
-        reason="Skipping istio and knative tests as we are under time pressure",
+        reason="Skipping knative tests as we are under time pressure",
     )
-    def test_knative_istio(self):
+    def test_knative(self):
         """
-        Sets up and validate istio.
+        Test knative
+        """
 
-        """
-        print("Enabling Knative and Istio")
+        print("Enabling Knative")
         microk8s_enable("knative")
-        print("Validating Istio")
-        validate_istio()
         print("Validating Knative")
         validate_knative()
         print("Disabling Knative")
         microk8s_disable("knative")
         wait_for_namespace_termination("knative-serving", timeout_insec=600)
-        print("Disabling Istio")
-        microk8s_disable("istio")
 
     @pytest.mark.skipif(
         platform.machine() != "x86_64",
@@ -272,6 +293,9 @@ class TestAddons(object):
         os.environ.get("UNDER_TIME_PRESSURE") == "True",
         reason="Skipping multus tests as we are under time pressure",
     )
+    @pytest.mark.skipif(
+        is_container(), reason="Multus fails in lxc with a shared mount error"
+    )
     def test_multus(self):
         """
         Sets up and validates Multus.
@@ -299,6 +323,10 @@ class TestAddons(object):
         platform.machine() != "x86_64",
         reason="OpenFaaS tests are only relevant in x86 architectures",
     )
+    @pytest.mark.skipif(
+        os.environ.get("UNDER_TIME_PRESSURE") == "True",
+        reason="Skipping multus tests as we are under time pressure",
+    )
     def test_openfaas(self):
         """
         Sets up and validates OpenFaaS.
@@ -312,22 +340,30 @@ class TestAddons(object):
 
     @pytest.mark.skipif(
         platform.machine() != "x86_64",
-        reason="Starboard tests are only relevant in x86 architectures",
+        reason="Trivy tests are only relevant in x86 architectures",
     )
-    def test_starboard(self):
+    @pytest.mark.skipif(
+        os.environ.get("UNDER_TIME_PRESSURE") == "True",
+        reason="Skipping multus tests as we are under time pressure",
+    )
+    def test_trivy(self):
         """
-        Sets up and validates Starboard.
+        Sets up and validates Trivy.
         """
-        print("Enabling starboard")
-        microk8s_enable("starboard")
-        print("Validating starboard")
-        validate_starboard()
-        print("Disabling starboard")
-        microk8s_disable("starboard")
+        print("Enabling Trivy")
+        microk8s_enable("trivy")
+        print("Validating Trivy")
+        validate_trivy()
+        print("Disabling Trivy")
+        microk8s_disable("trivy")
 
     @pytest.mark.skipif(
         platform.machine() != "x86_64",
         reason="ArgoCD tests are only relevant in x86 architectures",
+    )
+    @pytest.mark.skipif(
+        os.environ.get("UNDER_TIME_PRESSURE") == "True",
+        reason="Skipping multus tests as we are under time pressure",
     )
     def test_argocd(self):
         """
@@ -411,3 +447,16 @@ class TestAddons(object):
         validate_kata()
         print("Disabling kata")
         microk8s_disable("kata")
+
+    @pytest.mark.skipif(platform.machine() == "s390x", reason="Not available on s390x")
+    def test_osm_edge(self):
+        """
+        Sets up and validate osm-edge
+
+        """
+        print("Enabling osm-edge")
+        microk8s_enable("osm-edge")
+        print("Validate osm-edge installation")
+        validate_osm_edge()
+        print("Disabling osm-edge")
+        microk8s_disable("osm-edge")

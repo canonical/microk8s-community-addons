@@ -1,0 +1,81 @@
+#!/usr/bin/env bash
+
+# This Addon does not use concept of submitted external values.yaml for parametrization. Addon rather offers abstraction and simplification.
+# Composing the values file gives more flexibility, however require client's knowledge of the underlying Addon code and Helm Chart in use.
+# If that knowledge is needed, it could be more convenient to deploy Helm Chart directly.
+
+set -e
+
+source $SNAP/actions/common/utils.sh
+CURRENT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
+
+NAMESPACE="nfs-server-provisioner"
+
+CHART_VERSION="1.4.0"
+
+KUBECTL="$SNAP/microk8s-kubectl.wrapper"
+"$SNAP/microk8s-enable.wrapper" helm3
+HELM="$SNAP/microk8s-helm3.wrapper"
+
+# get the options
+while getopts ":n:" flag; do
+  case "${flag}" in
+          n) NODE_NAME=${OPTARG}
+             ;;
+          *) echo "Usage: microk8s enable nfs"
+             echo ""
+             echo "Select Microk8s Node name to host NFS Server on and run: microk8s enable nfs -n NODE_NAME"
+             echo "Lookup Microk8s Node name as: kubectl get node -o yaml | grep \'kubernetes.io/hostname\'"
+             echo ""
+             exit 0
+             ;;
+  esac
+done
+
+echo "Installing NFS Server Provisioner - Helm Chart ${CHART_VERSION}"
+
+if [ -z "$NODE_NAME" ]; then
+  echo ""
+  echo "Node Name not defined. NFS Server Provisioner will be deployed on random Microk8s Node."
+  echo ""
+  echo "If you want to use a dedicated (large disk space) Node as NFS Server, disable the Addon and start over: microk8s enable nfs -n NODE_NAME"
+  echo "Lookup Microk8s Node name as: kubectl get node -o yaml | grep 'kubernetes.io/hostname'"
+  echo ""  
+else
+  echo ""
+  echo "NFS Server Provisioner will be deployed on Node: $NODE_NAME"
+  echo ""
+fi
+
+# Create namespace
+$KUBECTL create namespace "$NAMESPACE" > /dev/null 2>&1 || true
+
+# HostPath PV has to be created to hook to NFS Server Provisioner's PVC
+  # DISK_SIZE is a dummy value. NFS Server Provisioner consumes by default the complete Node disk space, unless LVM or similar technique is used.
+  # Same applies to customer's PVC storage requests.
+CLAIMREF_NAME="data-nfs-server-provisioner-0"
+DISK_SIZE=1Gi
+HOSTPATH="/var/snap/microk8s/common/nfs-storage"
+echo "Preparing PV for NFS Server Provisioner"
+echo ""
+cat $CURRENT_DIR/nfs.yaml | $SNAP/bin/sed "s@{{claimref_name}}@$CLAIMREF_NAME@g" | $SNAP/bin/sed "s@{{disk_size}}@$DISK_SIZE@g" | $SNAP/bin/sed "s@{{hostpath}}@$HOSTPATH@g" | $KUBECTL apply -f -
+
+# Add Helm Repo
+$HELM repo add nfs-ganesha-server-and-external-provisioner https://kubernetes-sigs.github.io/nfs-ganesha-server-and-external-provisioner/
+
+# Install Helm Chart
+if [ -z "$NODE_NAME" ]; then
+   $HELM upgrade -i nfs-server-provisioner nfs-ganesha-server-and-external-provisioner/nfs-server-provisioner \
+      --version $CHART_VERSION \
+      --namespace $NAMESPACE --set persistence.enabled=true --set persistence.storageClass='-'
+else
+   $HELM upgrade -i nfs-server-provisioner nfs-ganesha-server-and-external-provisioner/nfs-server-provisioner \
+      --version $CHART_VERSION \
+      --namespace $NAMESPACE --set persistence.enabled=true --set persistence.storageClass='-' --set nodeSelector."kubernetes\.io/hostname"=$NODE_NAME
+fi
+
+echo ""
+echo "NFS Server Provisioner is installed"
+echo ""
+echo "WARNING: Install \"nfs-common\" package on all MicroK8S nodes to allow Pods with NFS mounts to start: sudo apt update && sudo apt install -y nfs-common"
+echo "WARNING: NFS Server Provisioner servers by default hostPath storage from a single Node."

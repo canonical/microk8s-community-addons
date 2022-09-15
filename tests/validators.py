@@ -100,7 +100,7 @@ def validate_storage():
         time.sleep(2)
         attempt -= 1
 
-    # Make sure the test pod writes data sto the storage
+    # Make sure the test pod writes data to the storage
     found = False
     for root, dirs, files in os.walk("/var/snap/microk8s/common/default-storage"):
         for file in files:
@@ -108,6 +108,42 @@ def validate_storage():
                 found = True
     assert found
     assert "myclaim" in output
+    assert "Bound" in output
+    kubectl("delete -f {}".format(manifest))
+
+
+def validate_storage_nfs():
+    """
+    Validate NFS Storage by creating two Pods mounting the same PVC. (optimal test would be on multinode-cluster)
+    """
+    wait_for_pod_state(
+        "", "nfs-server-provisioner", "running", label="app=nfs-server-provisioner"
+    )
+
+    here = os.path.dirname(os.path.abspath(__file__))
+    manifest = os.path.join(here, "templates", "pvc-nfs.yaml")
+    kubectl("apply -f {}".format(manifest))
+    wait_for_pod_state("", "default", "running", label="app=busybox-pvc-nfs")
+
+    attempt = 50
+    while attempt >= 0:
+        output = kubectl("get pvc -l vol=pvc-nfs")
+        if "Bound" in output:
+            break
+        time.sleep(2)
+        attempt -= 1
+
+    # Make sure the test pod writes data to the storage
+    found = False
+    for root, dirs, files in os.walk("/var/snap/microk8s/common/nfs-storage"):
+        for file in files:
+            if file == "dates1":
+                found1 = True
+            if file == "dates2":
+                found2 = True
+    assert found1
+    assert found2
+    assert "pvc-nfs" in output
     assert "Bound" in output
     kubectl("delete -f {}".format(manifest))
 
@@ -272,14 +308,21 @@ def validate_istio():
 
 def validate_knative():
     """
-    Validate Knative by deploying the helloworld-go app.
+    Validate Knative by deploying the helloworld-go app supports both amd64 and arm64
     """
-    if platform.machine() != "x86_64":
-        print("Knative tests are only relevant in x86 architectures")
-        return
 
     wait_for_installation()
-    knative_services = ["activator", "autoscaler", "controller"]
+    knative_services = [
+        "activator",
+        "autoscaler",
+        "controller",
+        "domain-mapping",
+        "autoscaler-hpa",
+        "domainmapping-webhook",
+        "webhook",
+        "net-kourier-controller",
+        "3scale-kourier-gateway",
+    ]
     for service in knative_services:
         wait_for_pod_state(
             "", "knative-serving", "running", label="app={}".format(service)
@@ -628,3 +671,26 @@ def validate_kata():
     kubectl("apply -f {}".format(manifest))
     wait_for_pod_state("", "default", "running", label="app=kata")
     kubectl("delete -f {}".format(manifest))
+
+
+def validate_osm_edge():
+    """
+    Validate osm-edge
+    """
+    wait_for_installation()
+    wait_for_pod_state(
+        "",
+        "osm-system",
+        "running",
+        label="app=osm-controller",
+        timeout_insec=300,
+    )
+    print("osm-edge controller up and running")
+    wait_for_pod_state(
+        "",
+        "osm-system",
+        "running",
+        label="app=osm-injector",
+        timeout_insec=300,
+    )
+    print("osm-edge proxy injector up and running.")
