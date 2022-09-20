@@ -4,45 +4,45 @@ set -e
 
 source $SNAP/actions/common/utils.sh
 
-KUBECTL="$SNAP/kubectl --kubeconfig=${SNAP_DATA}/credentials/client.config"
-HELM="$SNAP_DATA/bin/helm3 --kubeconfig=$SNAP_DATA/credentials/client.config"
+KUBECTL="$SNAP/microk8s-kubectl.wrapper"
+HELM="$SNAP/microk8s-helm3.wrapper"
 
 echo "Disabling gopaddle lite"
 #uninstall rabbitmq
-run_with_sudo $HELM delete gp-rabbitmq-4-2  -n gp-lite
+$HELM delete gp-rabbitmq-4-2  -n gp-lite
 
 #uninstall gopaddle lite
-run_with_sudo $HELM delete gp-core-4-2 -n gp-lite
+$HELM delete gp-core-4-2 -n gp-lite
 
 # delete namespace
-run_with_sudo $KUBECTL delete ns gp-lite
+$KUBECTL delete ns gp-lite
 
 #remove gopaddle helm folder
-run_with_sudo rm -rf "$SNAP_DATA/tmp/gopaddle-lite"
+rm -rf "$SNAP_DATA/tmp/gopaddle-lite"
 
 #remove gopaddle addons
 if $KUBECTL get ns gopaddle-servers >/dev/null 2>&1
 then
-    run_with_sudo $KUBECTL delete ns gopaddle-servers
+    $KUBECTL delete ns gopaddle-servers
     
     if $KUBECTL get clusterrole gopaddle:prometheus-tool-kube-state-metrics >/dev/null 2>&1
     then
-        run_with_sudo $KUBECTL delete clusterrole gopaddle:prometheus-tool-kube-state-metrics gopaddle:prometheus-tool-server
+        $KUBECTL delete clusterrole gopaddle:prometheus-tool-kube-state-metrics gopaddle:prometheus-tool-server
     fi
     
     if $KUBECTL get clusterrolebinding gopaddle:event-exporter-rb >/dev/null 2>&1
     then
-        run_with_sudo $KUBECTL delete clusterrolebinding gopaddle:event-exporter-rb gopaddle:prometheus-tool-kube-state-metrics gopaddle:prometheus-tool-server
+        $KUBECTL delete clusterrolebinding gopaddle:event-exporter-rb gopaddle:prometheus-tool-kube-state-metrics gopaddle:prometheus-tool-server
     fi
     
     if $KUBECTL get service default-http-backend >/dev/null 2>&1
     then
-        run_with_sudo $KUBECTL delete service default-http-backend
+        $KUBECTL delete service default-http-backend
     fi
     
     if $KUBECTL get deployment default-http-backend >/dev/null 2>&1
     then
-        run_with_sudo $KUBECTL delete deployment default-http-backend
+        $KUBECTL delete deployment default-http-backend
     fi
     
 fi
@@ -50,7 +50,7 @@ fi
 #remove pv resourceVersion and uid
 echo ""
 echo "removing the resourceVersion and uid in persistentvolume"
-DATA=$(run_with_sudo $KUBECTL get pv  -l gp-install-pv=microk8s-hostpath-gp-retain -o yaml| grep "name: pvc" | awk '{print $2}')
+DATA=$($KUBECTL get pv  -l gp-install-pv=microk8s-hostpath-gp-retain -o yaml| grep "name: pvc" | awk '{print $2}')
 
 for i in $(echo $DATA | tr " " "\n")
 do
@@ -60,6 +60,6 @@ done
 
 
 # remove helm repo
-run_with_sudo $HELM repo remove gp-lite
+$HELM repo remove gp-lite
 
 echo "Disabled gopaddle lite"
