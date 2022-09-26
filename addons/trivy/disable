@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+set -e
+
+source $SNAP/actions/common/utils.sh
+
+NAMESPACE_TRIVY="trivy-system"
+
+KUBECTL="$SNAP/microk8s-kubectl.wrapper"
+HELM="$SNAP/microk8s-helm3.wrapper"
+KUBECTL_DELETE_ARGS="--wait=true --timeout=180s --ignore-not-found=true"
+
+echo "Disabling Trivy"
+
+$HELM delete trivy-operator -n $NAMESPACE_TRIVY
+
+$KUBECTL delete $KUBECTL_DELETE_ARGS namespace "$NAMESPACE_TRIVY" > /dev/null 2>&1 || true
+
+echo "Trivy disabled"

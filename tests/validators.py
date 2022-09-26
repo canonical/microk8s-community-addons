@@ -649,15 +649,15 @@ def validate_openebs():
     kubectl("delete -f {}".format(manifest))
 
 
-def validate_starboard():
+def validate_trivy():
     """
-    Validate Starboard
+    Validate Trivy
     """
     wait_for_pod_state(
         "",
-        "starboard-system",
+        "trivy-system",
         "running",
-        label="app.kubernetes.io/instance=starboard-operator",
+        label="app.kubernetes.io/instance=trivy-operator",
     )
 
 

@@ -33,7 +33,7 @@ from validators import (
     validate_openfaas,
     validate_openebs,
     validate_kata,
-    validate_starboard,
+    validate_trivy,
     validate_argocd,
     validate_osm_edge,
 )
@@ -340,22 +340,22 @@ class TestAddons(object):
 
     @pytest.mark.skipif(
         platform.machine() != "x86_64",
-        reason="Starboard tests are only relevant in x86 architectures",
+        reason="Trivy tests are only relevant in x86 architectures",
     )
     @pytest.mark.skipif(
         os.environ.get("UNDER_TIME_PRESSURE") == "True",
         reason="Skipping multus tests as we are under time pressure",
     )
-    def test_starboard(self):
+    def test_trivy(self):
         """
-        Sets up and validates Starboard.
+        Sets up and validates Trivy.
         """
-        print("Enabling starboard")
-        microk8s_enable("starboard")
-        print("Validating starboard")
-        validate_starboard()
-        print("Disabling starboard")
-        microk8s_disable("starboard")
+        print("Enabling Trivy")
+        microk8s_enable("trivy")
+        print("Validating Trivy")
+        validate_trivy()
+        print("Disabling Trivy")
+        microk8s_disable("trivy")
 
     @pytest.mark.skipif(
         platform.machine() != "x86_64",
