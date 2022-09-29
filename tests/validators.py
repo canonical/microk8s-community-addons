@@ -701,7 +701,10 @@ def validate_sosivio():
     Validate sosivio
     """
     wait_for_pod_state(
-        "", "sosivio", "running", label="app=sosivio-dashboard",
+        "",
+        "sosivio",
+        "running",
+        label="app=sosivio-dashboard",
         timeout_insec=300,
     )
     print("sosivio is up and running")

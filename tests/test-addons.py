@@ -36,7 +36,7 @@ from validators import (
     validate_trivy,
     validate_argocd,
     validate_osm_edge,
-    validate_sosivio
+    validate_sosivio,
 )
 from utils import (
     microk8s_enable,
