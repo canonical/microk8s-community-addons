@@ -36,6 +36,7 @@ from validators import (
     validate_trivy,
     validate_argocd,
     validate_osm_edge,
+    validate_sosivio,
 )
 from utils import (
     microk8s_enable,
@@ -460,3 +461,22 @@ class TestAddons(object):
         validate_osm_edge()
         print("Disabling osm-edge")
         microk8s_disable("osm-edge")
+
+    @pytest.mark.skipif(
+        platform.machine() != "x86_64",
+        reason="Sosivio tests are only relevant in x86 architectures",
+    )
+    @pytest.mark.skipif(
+        os.environ.get("UNDER_TIME_PRESSURE") == "True",
+        reason="Skipping Sosivio tests as we are under time pressure",
+    )
+    def test_sosivio(self):
+        """
+        Sets up and validates Sosivio.
+        """
+        print("Enabling sosivio")
+        microk8s_enable("sosivio")
+        print("Validating sosivio")
+        validate_sosivio()
+        print("Disabling sosivio")
+        microk8s_disable("sosivio")

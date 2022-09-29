@@ -694,3 +694,17 @@ def validate_osm_edge():
         timeout_insec=300,
     )
     print("osm-edge proxy injector up and running.")
+
+
+def validate_sosivio():
+    """
+    Validate sosivio
+    """
+    wait_for_pod_state(
+        "",
+        "sosivio",
+        "running",
+        label="app=sosivio-dashboard",
+        timeout_insec=300,
+    )
+    print("sosivio is up and running")
