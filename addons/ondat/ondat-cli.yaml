@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: storageos-cli
+    app.kubernetes.io/component: storageos-cli
+    app.kubernetes.io/part-of: storageos
+    kind: storageos
+  name: storageos-cli
+  namespace: storageos
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: storageos-cli
+  template:
+    metadata:
+      labels:
+        app: storageos-cli
+    spec:
+      containers:
+        - command:
+            - /bin/sh
+            - -c
+            - while true; do sleep 3600; done
+          env:
+            - name: STORAGEOS_USERNAME
+              value: storageos
+            - name: STORAGEOS_PASSWORD
+              value: storageos
+            - name: STORAGEOS_ENDPOINTS
+              value: storageos:5705
+          image: storageos/cli:v2.8.1
+          imagePullPolicy: Always
+          name: cli
+          ports:
+            - containerPort: 5705
+          resources:
+            limits:
+              cpu: 100m
+              memory: 128Mi
+            requests:
+              cpu: 50m
+              memory: 32Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
