@@ -37,6 +37,7 @@ from validators import (
     validate_argocd,
     validate_osm_edge,
     validate_sosivio,
+    validate_ondat,
 )
 from utils import (
     microk8s_enable,
@@ -480,3 +481,22 @@ class TestAddons(object):
         validate_sosivio()
         print("Disabling sosivio")
         microk8s_disable("sosivio")
+
+    @pytest.mark.skipif(
+        platform.machine() != "x86_64",
+        reason="Ondat tests are only relevant in x86 architectures",
+    )
+    @pytest.mark.skipif(
+        os.environ.get("UNDER_TIME_PRESSURE") == "True",
+        reason="Skipping Ondat tests as we are under time pressure",
+    )
+    def test_ondat(self):
+        """
+        Setup and validates Ondat.
+        """
+        print("Enabling Ondat.")
+        microk8s_enable("ondat")
+        print("Validating Ondat.")
+        validate_ondat()
+        print("Disabling Ondat.")
+        microk8s_disable("ondat")
