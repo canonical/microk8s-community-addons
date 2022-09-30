@@ -1,0 +1,96 @@
+#!/usr/bin/env bash
+# shellcheck disable=SC1091
+set -euo pipefail
+source "$SNAP/actions/common/utils.sh"
+
+# global colour variables.
+reset=$(tput sgr0)
+red=$(tput bold && tput setaf 1)
+green=$(tput bold && tput setaf 2)
+yellow=$(tput bold && tput setaf 3)
+
+function error() {
+	# local variable.
+	local date_time
+	date_time=$(date +'%d-%m-%Y-T%H:%M:%S%z')
+
+	echo "[$date_time]: $*" >&2
+}
+
+function main() {
+	remove_ondat_cli
+}
+
+# ***
+# uninstall the Ondat CLI from the cluster.
+# ***
+function remove_ondat_cli() {
+	# local variables.
+	local kubectl
+	local current_directory
+
+	kubectl="$SNAP/microk8s-kubectl.wrapper"
+	current_directory=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+
+	# remove Ondat CLI.
+	echo "$yellow Removing 'Ondat CLI'... $reset"
+	"$kubectl" delete --filename="$current_directory"/ondat-cli.yaml
+	echo "$green Ondat CLI is removed... $reset"
+	remove_ondat
+}
+
+# ***
+# uninstall Ondat from the cluster.
+# ***
+function remove_ondat() {
+	# local variables.
+	local helm
+	local ondat_namespace
+
+	helm="$SNAP/microk8s-helm3.wrapper"
+	ondat_namespace="storageos"
+
+	# remove Ondat.
+	echo "$yellow Disabling 'Ondat' add-on ... $reset"
+	"$helm" uninstall ondat \
+		--namespace="$ondat_namespace" # --debug
+	echo "$green Ondat is disabled... $reset"
+	post_removal
+}
+
+# ***
+# post uninstall guidance for users who
+# want to permanently delete volume data
+# and metadata.
+# ***
+function post_removal() {
+	cat <<EndOfMessage
+$yellow
+  *** Delete Volume Data & Metadata (Optional) ***
+
+  Ondat stores volume data, metadata and a configuration file 
+  called 'config.json' under the '/var/lib/storageos/' directory, 
+  on each node where every Ondat daemonset pod runs.
+
+  If cluster administrators would like to permanently delete the 
+  data stored in '/var/lib/storageos/', a recommendation would be 
+  to delete the directory from each node where Ondat was running on:
+
+      rm -rf /var/lib/storageos/
+  
+  To automate the removal of '/var/lib/storageos/' in multi node clusters,
+  users can run a bash script that deploys a daemonset which will remove 
+  the Ondat data directory '/var/lib/storageos/' on the nodes.
+  For more information, review the documentation below:
+
+    https://docs.ondat.io/docs/operations/uninstall/
+$red
+  WARNING - This step is irreversible and will permanently remove 
+  any existing data in '/var/lib/storageos/'. Ensure that you have 
+  backed up your data before executing this step.
+$yellow
+$reset
+EndOfMessage
+}
+
+main "$@"
