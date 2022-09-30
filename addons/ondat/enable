@@ -1,0 +1,145 @@
+#!/usr/bin/env bash
+# shellcheck disable=SC1091
+set -euo pipefail
+source "$SNAP/actions/common/utils.sh"
+
+# global colour variables.
+reset=$(tput sgr0)
+red=$(tput bold && tput setaf 1)
+green=$(tput bold && tput setaf 2)
+yellow=$(tput bold && tput setaf 3)
+
+function error() {
+	# local variable.
+	local date_time
+	date_time=$(date +'%d-%m-%Y-T%H:%M:%S%z')
+
+	echo "[$date_time]: $*" >&2
+}
+
+function main() {
+	set_prerequisites
+}
+
+# enable microk8s add-on dependencies
+# (dns, hostpath-storage, helm3) that
+# are required for Ondat to run.
+function set_prerequisites() {
+	# local variables.
+	local enable_addon
+	enable_addon="$SNAP/microk8s-enable.wrapper"
+
+	# enable Ondat add-on dependencies.
+	echo "$yellow Enabling CoreDNS for Service Discovery... $reset"
+	"$enable_addon" dns
+	echo "$yellow Enabling Hostpath Storage for Ondat's etcd Cluster... $reset"
+	"$enable_addon" hostpath-storage
+	echo "$yellow Enabling Helm 3 Package Manager to deploy the Ondat Helm Chart... $reset"
+	"$enable_addon" helm3
+	echo "$green Ondat dependency add-ons enabled... $reset"
+	deploy_ondat
+}
+
+# ***
+# install Ondat into a microk8s cluster
+# through the official Helm chart.
+# ***
+function deploy_ondat() {
+	# local variables.
+	local helm
+	local ondat_namespace
+	local etcd_cluster_storage_class
+	local etcd_cluster_storage_size
+	local etcd_cluster_requests_cpu
+	local etcd_cluster_requests_memory
+
+	helm="$SNAP/microk8s-helm3.wrapper"
+	ondat_namespace="storageos"
+	etcd_cluster_storage_class="microk8s-hostpath"
+	etcd_cluster_storage_size="6Gi"
+	etcd_cluster_requests_cpu="100m"
+	etcd_cluster_requests_memory="300Mi"
+
+	# install Ondat.
+	cat <<EndOfMessage
+$yellow
+  *** Ondat 'etcd' Cluster Replicas Sizing Guide ***
+    
+  - Single-node Cluster (=1 node)   = '1' etcd replica.
+  - Multi-node Cluster  (=3 nodes)  = '3' etcd replcias (For Test Environments).
+  - Multi-node Cluster  (>=5 nodes) = '5' etcd replcias (For Prod Environments).
+$reset
+EndOfMessage
+	read -rp "$yellow Number of 'etcd' replicas to create (Min= 1, Max = 5): $reset" etcd_cluster_replica_count
+	echo " "
+	if [[ "$etcd_cluster_replica_count" -gt 0 && "$etcd_cluster_replica_count" -le 5 ]]; then
+		echo "$yellow Enabling 'Ondat' add-on... $reset"
+		"$helm" repo add ondat https://ondat.github.io/charts
+		"$helm" repo update
+		"$helm" install ondat ondat/ondat \
+			--create-namespace \
+			--namespace="$ondat_namespace" \
+			--set etcd-cluster-operator.cluster.storageclass="$etcd_cluster_storage_class" \
+			--set etcd-cluster-operator.cluster.replicas="$etcd_cluster_replica_count" \
+			--set etcd-cluster-operator.cluster.storage="$etcd_cluster_storage_size" \
+			--set etcd-cluster-operator.cluster.resources.requests.cpu="$etcd_cluster_requests_cpu" \
+			--set etcd-cluster-operator.cluster.resources.requests.memory="$etcd_cluster_requests_memory" # --debug
+		echo "$green Ondat is enabled... $reset"
+	else
+		error "$red Ensure that you enter a natural number greater than '0' or less than/equal to '5'... $reset"
+		exit 1
+	fi
+	deploy_ondat_cli
+}
+
+# ***
+# install the Ondat CLI into a microk8s
+# cluster to manage and configure Ondat
+# resources and conduct Day-2 storage
+# operations.
+# ***
+function deploy_ondat_cli() {
+	# local variables.
+	local kubectl
+	local current_directory
+
+	kubectl="$SNAP/microk8s-kubectl.wrapper"
+	current_directory=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+
+	# install Ondat CLI.
+	echo "$yellow Deploying 'Ondat CLI'... $reset"
+	"$kubectl" apply --filename="$current_directory"/ondat-cli.yaml
+	echo "$green Ondat CLI is deployed... $reset"
+	post_install
+}
+
+# ***
+# post install guidance and details on how
+# to get help or getting started with Ondat.
+# ***
+function post_install() {
+	cat <<EndOfMessage
+$yellow
+  *** Getting Started With Ondat ***
+    
+  Get your free Community edition licence by 
+  signing up and register your cluster through 
+  Ondat's SaaS platform:
+    
+    https://portal.ondat.io/
+  
+  Create your first Ondat volume with your microK8s
+  cluster by following the how-to guide below:
+    
+    https://docs.ondat.io/docs/operations/firstpvc/
+
+  To interact with your Ondat cluster and conduct 
+  Day-2 storage operations, use the Ondat CLI that 
+  is deployed in your microK8s cluster:
+  
+    https://docs.ondat.io/docs/reference/cli/#usage
+$reset
+EndOfMessage
+}
+
+main "$@"
