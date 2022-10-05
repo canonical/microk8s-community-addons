@@ -189,6 +189,25 @@ class TestAddons(object):
 
     @pytest.mark.skipif(
         platform.machine() != "x86_64",
+        reason="Istio tests are only relevant in x86 architectures",
+    )
+    @pytest.mark.skipif(
+        os.environ.get("UNDER_TIME_PRESSURE") == "True",
+        reason="Skipping istio and knative tests as we are under time pressure",
+    )
+    def test_istio(self):
+        """
+        Sets up and validate istio.
+        """
+        print("Enabling Istio")
+        microk8s_enable("istio")
+        print("Validating Istio")
+        validate_istio()
+        print("Disabling Istio")
+        microk8s_disable("istio")
+
+    @pytest.mark.skipif(
+        platform.machine() != "x86_64",
         reason="Fluentd, prometheus, jaeger tests are only relevant in x86 architectures",
     )
     @pytest.mark.skipif(
