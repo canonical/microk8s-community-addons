@@ -565,15 +565,15 @@ def validate_metallb_config(ip_ranges="192.168.0.105"):
         assert ip_range in out
 
 
-def validate_coredns_config(ip_ranges="8.8.8.8,1.1.1.1"):
+def validate_coredns_config(nameservers="8.8.8.8,1.1.1.1"):
     """
     Validate dns
     """
     out = kubectl("get configmap coredns -n kube-system -o jsonpath='{.data.Corefile}'")
-    expected_forward_val = "forward ."
-    for ip_range in ip_ranges.split(","):
-        expected_forward_val = expected_forward_val + " " + ip_range
-    assert expected_forward_val in out
+    for line in out.split("\n"):
+        if "forward ." in line:
+            for nameserver in nameservers.split(","):
+                assert nameserver in line
 
 
 def validate_keda():
