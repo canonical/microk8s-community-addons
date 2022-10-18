@@ -18,7 +18,7 @@ then
 fi
 
 STATICIP=""
-HELM_VERSION="4.2.4"
+HELM_VERSION="4.2.5"
 STORAGECLASS=""
 ARGS=$(getopt -a --options i:v:s: --longoptions "ip:,version:,storageclass:" -- "$@")
 eval set -- "$ARGS"
@@ -117,17 +117,17 @@ enable_gopaddle_lite() {
     if [ $PUBLICIP == true ]
     then
         #install rabbitmq
-        $HELM install gp-rabbitmq-4-2 gp-lite/gp-lite  --namespace gp-lite  --set global.routingType=NodePortWithOutIngress --set global.installType=public --set global.storageClassName=$STORAGECLASS --set global.gp-rabbitmq.enabled=true --set global.gp-lite-core.enabled=false --set global.nodeSelector.gp-install-node=node1 --set global.nodeName=$NODENAME  --version $HELM_VERSION
+        $HELM install gp-rabbitmq-4-2 gp-lite/gp-installer  --namespace gp-lite  --set global.routingType=NodePortWithOutIngress --set global.installType=public --set global.storageClassName=$STORAGECLASS --set global.installer.chart.rabbitmq=true --set global.installer.chart.gp-core=false --set global.nodeSelector.gp-install-node=node1 --set global.nodeName=$NODENAME  --version $HELM_VERSION
         
         #install gp-lite
-        $HELM install gp-core-4-2 gp-lite/gp-lite  --namespace gp-lite  --set global.routingType=NodePortWithOutIngress --set global.installType=public --set global.storageClassName=$STORAGECLASS --set global.cluster.provider=other --set-string global.gopaddle.https=false --set-string global.gopaddleWebhook.https=false --set global.staticIP=$STATICIP  --set global.gp-rabbitmq.enabled=false --set global.gp-lite-core.enabled=true --set global.installSource=microk8s --set global.nodeSelector.gp-install-node=node1 --set global.nodeName=$NODENAME  --version $HELM_VERSION
+        $HELM install gp-core-4-2 gp-lite/gp-installer  --namespace gp-lite  --set global.routingType=NodePortWithOutIngress --set global.installType=public --set global.storageClassName=$STORAGECLASS --set global.cluster.provider=other --set-string global.gopaddle.https=false --set-string global.gopaddleWebhook.https=false --set global.staticIP=$STATICIP  --set global.installer.chart.rabbitmq=false --set global.installer.chart.gp-core=true --set global.installer.edition=microk8s --set global.nodeSelector.gp-install-node=node1 --set global.nodeName=$NODENAME  --version $HELM_VERSION
     elif [ $PUBLICIP == false ]
     then
         #install rabbitmq
-        $HELM install gp-rabbitmq-4-2 gp-lite/gp-lite  --namespace gp-lite  --set global.routingType=NodePortWithOutIngress --set global.installType=private --set global.storageClassName=$STORAGECLASS --set global.gp-rabbitmq.enabled=true --set global.gp-lite-core.enabled=false  --set global.nodeSelector.gp-install-node=node1 --set global.nodeName=$NODENAME --version $HELM_VERSION
+        $HELM install gp-rabbitmq-4-2 gp-lite/gp-installer  --namespace gp-lite  --set global.routingType=NodePortWithOutIngress --set global.installType=private --set global.storageClassName=$STORAGECLASS --set global.installer.chart.rabbitmq=true --set global.installer.chart.gp-core=false  --set global.nodeSelector.gp-install-node=node1 --set global.nodeName=$NODENAME --version $HELM_VERSION
         
         #install gp-lite
-        $HELM install gp-core-4-2 gp-lite/gp-lite  --namespace gp-lite  --set global.routingType=NodePortWithOutIngress --set global.installType=private --set global.storageClassName=$STORAGECLASS --set global.cluster.provider=other --set-string global.gopaddle.https=false --set-string global.gopaddleWebhook.https=false --set global.staticIP=$STATICIP  --set global.gp-rabbitmq.enabled=false --set global.gp-lite-core.enabled=true --set global.installSource=microk8s --set global.nodeSelector.gp-install-node=node1 --set global.nodeName=$NODENAME --version $HELM_VERSION
+        $HELM install gp-core-4-2 gp-lite/gp-installer  --namespace gp-lite  --set global.routingType=NodePortWithOutIngress --set global.installType=private --set global.storageClassName=$STORAGECLASS --set global.cluster.provider=other --set-string global.gopaddle.https=false --set-string global.gopaddleWebhook.https=false --set global.staticIP=$STATICIP  --set global.installer.chart.rabbitmq=false --set global.installer.chart.gp-core=true --set global.installer.edition=microk8s --set global.nodeSelector.gp-install-node=node1 --set global.nodeName=$NODENAME --version $HELM_VERSION
     fi
     
     echo ""
@@ -150,11 +150,11 @@ enable_gopaddle_lite() {
         $KUBECTL patch  pv $i --type='merge' -p '{"metadata":{"labels":{"gp-install-pv":"'$STORAGECLASS'"}}}'
     done
     
-    echo ""
-    echo "Waiting for the gopaddle services to move to running state. This may take a while."
+    #echo ""
+    #echo "Waiting for the gopaddle services to move to running state. This may take a while."
     
     
-    $KUBECTL wait --for=condition=ready pod -l released-by=gopaddle -n gp-lite --timeout=20m
+    #$KUBECTL wait --for=condition=ready pod -l released-by=gopaddle -n gp-lite --timeout=20m
     
     echo ""
     echo ""
