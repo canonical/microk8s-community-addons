@@ -175,6 +175,7 @@ enable_gopaddle_lite() {
         IP=$(echo $NODEIP | cut -d ' ' -f 2)
         echo "http://$IP:30003"
     fi
+    
 }
 
 

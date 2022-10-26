@@ -55,7 +55,8 @@ DATA=$(run_with_sudo $KUBECTL get pv  -l gp-install-pv=microk8s-hostpath-gp-reta
 for i in $(echo $DATA | tr " " "\n")
 do
     #PVNAME=$(echo $i | cut -d '"' -f 2)
-    $KUBECTL patch  pv $i  --type='merge' -p '{"spec":{"claimRef":{"resourceVersion":null,"uid":null}}}'
+    microk8s kubectl patch  pv $i  --type='merge' -p '{"spec":{"claimRef":{"resourceVersion":null,"uid":null}}}'
+    
 done
 
 
