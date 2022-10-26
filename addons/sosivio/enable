@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+
+set -e
+
+source $SNAP/actions/common/utils.sh
+CURRENT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
+
+BLUE='\033[0;34m'
+NC='\033[0m'
+BOLD='\033[1m'
+echo ""
+echo -e "${BLUE}Enabling Sosivio${NC}"
+echo ""
+
+"$SNAP/microk8s-enable.wrapper" dns
+"$SNAP/microk8s-enable.wrapper" helm3
+
+
+KUBECTL="$SNAP/microk8s-kubectl.wrapper"
+HELM="$SNAP/microk8s-helm3.wrapper"
+NAMESPACE_SOSIVIO="sosivio"
+DASHBOARD_SERVICE="dashboard-lb"
+
+
+
+$HELM repo add sosivio https://helm.sosiv.io > /dev/null 2>&1
+$HELM repo update > /dev/null 2>&1
+$KUBECTL create ns $NAMESPACE_SOSIVIO > /dev/null 2>&1 || true
+$HELM upgrade -n $NAMESPACE_SOSIVIO --install \
+  sosivio sosivio/sosivio \
+  --set expose=LoadBalancer > /dev/null 2>&1 || true
+
+echo ""
+echo "Waiting for Sosivio to become active..."
+echo "It might take a while if your network connection is slow."
+
+WATCH="$KUBECTL rollout status --watch"
+until $WATCH deploy -n ${NAMESPACE_SOSIVIO} sosivio-dashboard --watch > /dev/null 2>&1
+do
+  sleep 1
+done
+
+echo ""
+echo ""
+echo "Sosivio is reachable using the following local address:"
+#TODO: MAKE BOLD:
+echo -e "${BOLD}http://localhost:$(${KUBECTL} get svc ${DASHBOARD_SERVICE} -n ${NAMESPACE_SOSIVIO} -o jsonpath='{.spec.ports[0].nodePort}')${NC}"
+echo ""
+echo "Alternatively you can use port-forward:"
+echo "'microk8s kubectl port-forward -n ${NAMESPACE_SOSIVIO} svc/${DASHBOARD_SERVICE} 8088'"
+echo ""
+echo "Your first login credentials are:"
+echo "Username: admin"
+echo "Password: $(${KUBECTL} get secret -n ${NAMESPACE_SOSIVIO} sosivio-admin-otp -o jsonpath='{.data.password}' | base64 -d)"
+echo ""
+echo "You can get this password again using the following command:"
+echo "microk8s kubectl get secret -n ${NAMESPACE_SOSIVIO} sosivio-admin-otp -o jsonpath='{.data.password}' | base64 -d"
+echo ""
+echo -e "${BLUE}Sosivio Enabled${NC}"

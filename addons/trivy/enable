@@ -4,9 +4,9 @@ set -e
 
 source $SNAP/actions/common/utils.sh
 
-NAMESPACE_STARBOARD="starboard-system"
+NAMESPACE_TRIVY="trivy-system"
 
-STARBOARD_HELM_VERSION="0.10.0"
+TRIVY_HELM_VERSION="0.2.0"
 
 KUBECTL="$SNAP/microk8s-kubectl.wrapper"
 HELM="$SNAP/microk8s-helm3.wrapper"
@@ -22,53 +22,53 @@ do_prerequisites() {
 
 VALUES=""
 
-get_starboard() {
+get_trivy() {
   # get the options
   while getopts ":f:h:" flag; do
     case "${flag}" in
             f) VALUES=${OPTARG}
               ;;
-            *) echo "Usage: microk8s enable starboard"
+            *) echo "Usage: microk8s enable trivy"
               echo ""
-              echo "With overwriting default values: microk8s enable starboard -f values.yaml"
+              echo "With overwriting default values: microk8s enable trivy -f values.yaml"
               echo ""
-              echo "See https://github.com/aquasecurity/starboard/tree/main/deploy/helm for more information about the values"
+              echo "See https://github.com/aquasecurity/trivy-operator/tree/main/deploy/helm for more information about the values"
               exit 0
               ;;
     esac
   done
 
-  echo "Installing Starboard"
+  echo "Installing Trivy"
 
   if [ -n "$VALUES" ]; then
       echo "Using values file: $VALUES"
   fi
 
-  # make sure the "starboard-system" namespace exists
-  # $KUBECTL create namespace "$NAMESPACE_STARBOARD" > /dev/null 2>&1 || true
+  # make sure the "trivy-system" namespace exists
+  # $KUBECTL create namespace "$NAMESPACE_TRIVY" > /dev/null 2>&1 || true
 
-  # add the Starboard chart repository
+  # add the trivy operator chart repository
   $HELM repo add aqua https://aquasecurity.github.io/helm-charts/
 
   # install the helm chart
   if [ -z "$VALUES" ]
   then
-      $HELM upgrade -i starboard-operator aqua/starboard-operator \
-        --namespace "$NAMESPACE_STARBOARD" \
+      $HELM upgrade -i trivy-operator aqua/trivy-operator \
+        --namespace "$NAMESPACE_TRIVY" \
         --create-namespace \
         --set="trivy.ignoreUnfixed=true" \
-        --version $STARBOARD_HELM_VERSION
+        --version $TRIVY_HELM_VERSION
   else
-      $HELM upgrade -i starboard-operator aqua/starboard-operator \
-        --namespace "$NAMESPACE_STARBOARD" \
+      $HELM upgrade -i trivy-operator aqua/trivy-operator \
+        --namespace "$NAMESPACE_TRIVY" \
         --create-namespace \
         --set="trivy.ignoreUnfixed=true" \
-        --version $STARBOARD_HELM_VERSION \
+        --version $TRIVY_HELM_VERSION \
         -f $VALUES
   fi
 
-  echo "Starboard is installed"
+  echo "Trivy is installed"
 }
 
 do_prerequisites
-get_starboard
+get_trivy

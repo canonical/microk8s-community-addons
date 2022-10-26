@@ -3,6 +3,7 @@
 set -e
 
 source $SNAP/actions/common/utils.sh
+CURRENT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
 
 read -ra ARGUMENTS <<< "$@"
 
@@ -10,7 +11,7 @@ ARCH=$(arch)
 
 # check if osm-edge cli is already in the system.  Download if it doesn't exist.
 if [ ! -f "${SNAP_DATA}/bin/osm" ]; then
-  OSM_EDGE_VERSION="${OSM_EDGE_VERSION:-v1.1.0}"
+  OSM_EDGE_VERSION="${OSM_EDGE_VERSION:-v1.1.2}"
   echo "Fetching osm-edge version $OSM_EDGE_VERSION."
 
   run_with_sudo mkdir -p "${SNAP_DATA}/tmp/osm-edge"
@@ -43,6 +44,14 @@ else
   KUBECONFIG=$SNAP_DATA/credentials/client.config $SNAP_DATA/bin/osm install --mesh-name "$OSM_MESH_NAME" \
     --osm-namespace "$OSM_MESH_NS" \
     --set=osm.enablePermissiveTrafficPolicy=true
+fi
+
+# add custom command
+
+if [ ! -f "${SNAP_COMMON}/plugins/osm" ]; then
+  run_with_sudo mkdir -p "${SNAP_COMMON}/plugins"
+  run_with_sudo cp "$CURRENT_DIR/osm.wrapper" "${SNAP_COMMON}/plugins/osm"
+  run_with_sudo chmod uo+x "${SNAP_COMMON}/plugins/osm"
 fi
 
 echo "osm-edge is enabled"
