@@ -1,0 +1,28 @@
+#!/bin/bash
+
+set -eu
+
+export PATH="$SNAP/usr/sbin:$SNAP/usr/bin:$SNAP/sbin:$SNAP/bin:$PATH"
+ARCH="$($SNAP/bin/uname -m)"
+export LD_LIBRARY_PATH="$SNAP/lib:$SNAP/usr/lib:$SNAP/lib/$ARCH-linux-gnu:$SNAP/usr/lib/$ARCH-linux-gnu"
+
+if [ -e ${SNAP_DATA}/var/lock/clustered.lock ]
+then
+  echo "This MicroK8s deployment is acting as a node in a cluster. Please use the microk8s osm on the master."
+  exit 0
+fi
+
+if [ ! -f "${SNAP_DATA}/bin/osm" ]; then
+  echo "osm-edge not available, try enabling osm-edge. 'microk8s enable osm-edge' "
+  exit 0
+fi
+
+source $SNAP/actions/common/utils.sh
+ARCH=$(arch)
+
+if echo "$*" | grep -v -q -- '--kubeconfig'; then
+  exit_if_no_permissions
+fi
+
+exit_if_stopped
+KUBECONFIG="${SNAP_DATA}"/credentials/client.config "${SNAP_DATA}/bin/osm" "$@"
