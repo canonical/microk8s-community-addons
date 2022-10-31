@@ -709,6 +709,7 @@ def validate_sosivio():
     )
     print("sosivio is up and running")
 
+
 def validate_gopaddle_lite():
     """
     Validate gopaddle-lite

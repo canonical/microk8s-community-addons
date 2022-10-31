@@ -1,6 +1,6 @@
 # Develop a new MicroK8s addon
 
-This document describes the process of developing a new addon for MicroK8s. As an example, we will create a simple addon `demo-nginx`, which creates a simple nginx deployment on our cluster. We will also show how to extend the `microk8s` CLI with new commands that work in tandem with the enabled addons. 
+This document describes the process of developing a new addon for MicroK8s. As an example, we will create a simple addon `demo-nginx`, which creates a simple nginx deployment on our cluster. We will also show how to extend the `microk8s` CLI with new commands that work in tandem with the enabled addons.
 
 ## Overview
 
@@ -13,7 +13,6 @@ This document describes the process of developing a new addon for MicroK8s. As a
     - [4. Write unit tests](#4-write-unit-tests)
   - [Use addon](#use-addon)
   - [Custom commands](#custom-commands)
-
 
 ## Develop addon
 
@@ -168,7 +167,7 @@ The `nginxctl` plugin simply prints some information about the environment and l
 
     ```bash
     Available subcommands from addons are:
-	    nginxctl
+        nginxctl
     ```
 
 3.  Execute the plugin by calling the `microk8s nginxctl` command:

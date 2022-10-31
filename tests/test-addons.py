@@ -500,7 +500,7 @@ class TestAddons(object):
         validate_sosivio()
         print("Disabling sosivio")
         microk8s_disable("sosivio")
-        
+
     @pytest.mark.skipif(
         platform.machine() != "x86_64",
         reason="gopaddle-lite tests are only relevant in x86 architectures",
