@@ -156,3 +156,10 @@ microk8s-addons:
       check_status: "deployment.apps/sosivio-dashboard"
       supported_architectures:
         - amd64
+
+    - name: "gopaddle-lite"
+      description: "Cheapest, fastest and simplest way to modernize your applications"
+      version: "4.2.4"
+      check_status: "deployment.apps/gateway"
+      supported_architectures:
+        - amd64

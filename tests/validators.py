@@ -708,3 +708,9 @@ def validate_sosivio():
         timeout_insec=300,
     )
     print("sosivio is up and running")
+
+def validate_gopaddle_lite():
+    """
+    Validate gopaddle-lite
+    """
+    wait_for_pod_state("", "gp-lite", "running", label="released-by=gopaddle")
