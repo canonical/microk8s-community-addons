@@ -157,3 +157,11 @@ microk8s-addons:
       check_status: "deployment.apps/sosivio-dashboard"
       supported_architectures:
         - amd64
+
+    - name: "kwasm"
+      description: "WebAssembly support for WasmEdge (Docker Wasm) and Spin (Azure AKS WASI)"
+      version: "0.2.0"
+      check_status: "deployment.apps/kwasm-operator"
+      supported_architectures:
+        - arm64
+        - amd64

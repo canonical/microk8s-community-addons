@@ -37,6 +37,7 @@ from validators import (
     validate_argocd,
     validate_osm_edge,
     validate_sosivio,
+    validate_kwasm,
 )
 from utils import (
     microk8s_enable,
@@ -495,3 +496,15 @@ class TestAddons(object):
         validate_sosivio()
         print("Disabling sosivio")
         microk8s_disable("sosivio")
+
+    @pytest.mark.skipif(platform.machine() == "s390x", reason="Not available on s390x")
+    def test_kwasm(self):
+        """
+        Sets up and validates kwasm.
+        """
+        print("Enabling kwasm")
+        microk8s_enable("kwasm")
+        print("Validating kwasm")
+        validate_kwasm()
+        print("Disabling kwasm")
+        microk8s_disable("kwasm")

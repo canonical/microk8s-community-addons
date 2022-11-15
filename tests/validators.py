@@ -708,3 +708,21 @@ def validate_sosivio():
         timeout_insec=300,
     )
     print("sosivio is up and running")
+
+
+def validate_kwasm():
+    """
+    Validate kwasm
+    """
+    wait_for_pod_state(
+        "", "kwasm-system", "running", label="app.kubernetes.io/name=kwasm-operator"
+    )
+
+    here = os.path.dirname(os.path.abspath(__file__))
+    manifest = os.path.join(here, "templates", "wasm-job.yaml")
+    kubectl("apply -f {}".format(manifest))
+    wait_for_pod_state(
+        "", "default", "terminated", "Completed", label="job-name=wasm-test"
+    )
+    kubectl("delete -f {}".format(manifest))
+    print("kwasm is up and running")

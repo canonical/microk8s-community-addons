@@ -1,0 +1,22 @@
+apiVersion: node.k8s.io/v1
+kind: RuntimeClass
+metadata:
+  name: crun
+handler: crun
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: wasm-test
+spec:
+  template:
+    metadata:
+      annotations:
+        module.wasm.image/variant: compat-smart
+    spec:
+      containers:
+      - image: wasmedge/example-wasi:latest
+        name: wasm-test
+      restartPolicy: Never
+      runtimeClassName: crun
+  backoffLimit: 1
