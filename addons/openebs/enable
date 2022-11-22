@@ -16,7 +16,7 @@ while getopts ":j:h:" arg
 do
     case "${arg}" in
         j)
-          JIVA_REPLICAS=${3:-${OPTARG}}
+          JIVA_REPLICAS=${OPTARG}
         ;;
         h)
           usage
