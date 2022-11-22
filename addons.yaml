@@ -15,6 +15,7 @@ microk8s-addons:
       check_status: "${SNAP_DATA}/bin/istioctl"
       supported_architectures:
         - amd64
+        - arm64
 
     - name: "knative"
       description: "Knative Serverless and Event Driven Applications"

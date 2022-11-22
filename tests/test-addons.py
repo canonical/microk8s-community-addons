@@ -188,10 +188,6 @@ class TestAddons(object):
         wait_for_namespace_termination("knative-serving", timeout_insec=600)
 
     @pytest.mark.skipif(
-        platform.machine() != "x86_64",
-        reason="Istio tests are only relevant in x86 architectures",
-    )
-    @pytest.mark.skipif(
         os.environ.get("UNDER_TIME_PRESSURE") == "True",
         reason="Skipping istio and knative tests as we are under time pressure",
     )
