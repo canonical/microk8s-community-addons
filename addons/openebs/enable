@@ -73,7 +73,7 @@ $HELM -n openebs install openebs openebs/openebs \
     --version ${OPENEBS_VERSION} \
     --set cstor.enabled=true \
     --set jiva.enabled=true \
-    --set jiva.replicas=${JIVA_REPLICAS} \
+    --set jiva.defaultPolicy.replicas=${JIVA_REPLICAS} \
     --set legacy.enabled=false \
     --set cstor.cleanup.image.tag="latest" \
     --set cstor.csiNode.kubeletDir="$SNAP_COMMON/var/lib/kubelet/" \
