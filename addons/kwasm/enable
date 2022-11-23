@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+set -e
+
+NAMESPACE_KWASM="kwasm-system"
+
+"$SNAP/microk8s-enable.wrapper" helm3
+HELM="$SNAP/microk8s-helm3.wrapper"
+
+echo "Installing KWasm"
+
+$HELM repo add --force-update kwasm http://kwasm.sh/kwasm-operator/ 
+$HELM upgrade -i -n $NAMESPACE_KWASM --create-namespace kwasm-operator kwasm/kwasm-operator \
+    --set kwasmOperator.autoProvision="true"
+
+echo "KWasm is installed"
+echo ""
+echo "If you need help to get started visit:"
+echo "    https://kwasm.sh/?dist=microk8s#Quickstart"
