@@ -9,7 +9,7 @@ HELM="$SNAP/microk8s-helm3.wrapper"
 
 OPENEBS_NS="openebs"
 OPENEBS_VERSION="3.3.x"
-# Force to defaut to 3, able to overide value with -j int flag
+# Force to default to 3, able to override value with -j int flag
 JIVA_REPLICAS=3
 
 while getopts ":j:h:" arg
@@ -30,7 +30,7 @@ usage() {
   #small wrapper function to call other help output functions
   print_iscsi_help
 
-  #print function to overide jiva replicas in helm command '${JIVA_REPLICAS}'
+  #print function to override jiva replicas in helm command '${JIVA_REPLICAS}'
   jiva_replicas
 }
 
