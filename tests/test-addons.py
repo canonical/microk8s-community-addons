@@ -175,6 +175,7 @@ class TestAddons(object):
         os.environ.get("UNDER_TIME_PRESSURE") == "True",
         reason="Skipping knative tests as we are under time pressure",
     )
+    @pytest.mark.skip(reason="Due to https://github.com/canonical/microk8s/issues/3597")
     def test_knative(self):
         """
         Test knative
