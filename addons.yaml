@@ -164,4 +164,10 @@ microk8s-addons:
       check_status: "deployment.apps/kwasm-operator"
       supported_architectures:
         - arm64
+
+    - name: "gopaddle-lite"
+      description: "Cheapest, fastest and simplest way to modernize your applications"
+      version: "4.2.5"
+      check_status: "deployment.apps/gateway"
+      supported_architectures:
         - amd64

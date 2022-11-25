@@ -1,0 +1,181 @@
+#!/usr/bin/env bash
+
+set -e
+
+source $SNAP/actions/common/utils.sh
+
+KUBECTL="$SNAP/microk8s-kubectl.wrapper"
+HELM="$SNAP/microk8s-helm3.wrapper"
+
+KUBE_VERSION=$($KUBECTL version -o json | $SNAP/usr/bin/jq -r '.serverVersion.minor')
+
+CURRENT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
+
+STATIC_VERSION="25"
+if [ "${KUBE_VERSION%+}" -gt $STATIC_VERSION ]
+then
+    echo "WARNING: Detected Kubernetes version $KUBE_VERSION, which is not supported"
+fi
+
+STATICIP=""
+HELM_VERSION="4.2.5"
+STORAGECLASS=""
+ARGS=$(getopt -a --options i:v:s: --longoptions "ip:,version:,storageclass:" -- "$@")
+eval set -- "$ARGS"
+
+while true; do
+    case "$1" in
+        -i|--ip)
+            STATICIP="$2"
+        shift 2;;
+        -v|--version)
+            HELM_VERSION="$2"
+        shift 2;;
+        --)
+        break;;
+    esac
+done
+
+PUBLICIP=true
+if [ $STATICIP ]
+then
+    echo "static IP of the microk8s cluster: $STATICIP"
+    echo ""
+    "$SNAP/microk8s-enable.wrapper" host-access:ip=$STATICIP
+elif $KUBECTL get node -o yaml | grep ExternalIP >/dev/null 2>&1
+then
+    echo "Static IP input is not provided. Assuming External IP of the microk8s node for the gopaddle access endpoint."
+    echo ""
+else
+    echo "Static IP input is not provided. External IP is not set for the microk8s node. Assuming Internal IP of the microk8s node for the gopaddle access endpoint."
+    PUBLICIP=false
+    echo ""
+fi
+
+if [ -z "$STORAGECLASS" ]
+then
+    $KUBECTL apply -f $CURRENT_DIR/storageclass-retain.yaml
+    STORAGECLASS="microk8s-hostpath-gp-retain"
+fi
+
+
+do_prerequisites() {
+    #refresh_opt_in_config "authentication-token-webhook" "true" kubelet
+    #restart_service kubelet
+    # enable helm3
+    "$SNAP/microk8s-enable.wrapper" helm3
+    
+    # enable storage
+    "$SNAP/microk8s-enable.wrapper" hostpath-storage
+    
+    # enable dns
+    "$SNAP/microk8s-enable.wrapper" dns
+    
+    # enable metrics-server
+    "$SNAP/microk8s-enable.wrapper" metrics-server
+}
+
+enable_gopaddle_lite() {
+    
+    echo "Enabling gopaddle lite"
+    # download gopaddle-lite helm
+    
+    # add helm repo
+    $HELM repo add gp-lite https://gopaddle-io.github.io/gopaddle-lite
+    
+    #list helm repo
+    $HELM repo update
+    
+    # create namespace
+    if $KUBECTL get ns gp-lite >/dev/null 2>&1
+    then
+        echo ""
+        echo "gp-lite namespace created."
+    else
+        $KUBECTL create ns gp-lite
+    fi
+    
+    NODENAME=""
+    
+    NODELABEL=$($KUBECTL get node -l gp-install-node=node1 -o yaml | grep " name:"| awk '{print $2}' )
+    
+    if [ -z "$NODELABEL" ]
+    then
+        #getting node name
+        NODE=$($KUBECTL get node -o yaml| grep "kubernetes.io/hostname:")
+        NODENAME=$(echo $NODE| cut -d ':' -f 2|cut -d ' ' -f 2)
+        echo ""
+        echo "Adding label 'gp-install-node=node1' to the node '$NODENAME'"
+        echo ""
+        #adding label in node
+        $KUBECTL label nodes $NODENAME gp-install-node=node1 --overwrite=true
+    else
+        #getting node name
+        NODENAME=$($KUBECTL get node -l gp-install-node=node1 -o yaml | grep " name:"| awk '{print $2}' )
+    fi
+    
+    if [ $PUBLICIP == true ]
+    then
+        #install rabbitmq
+        $HELM install gp-rabbitmq-4-2 gp-lite/gp-installer  --namespace gp-lite  --set global.routingType=NodePortWithOutIngress --set global.installType=public --set global.storageClassName=$STORAGECLASS --set global.installer.chart.rabbitmq=true --set global.installer.chart.gp-core=false --set global.nodeSelector.gp-install-node=node1 --set global.nodeName=$NODENAME  --version $HELM_VERSION
+        
+        #install gp-lite
+        $HELM install gp-core-4-2 gp-lite/gp-installer  --namespace gp-lite  --set global.routingType=NodePortWithOutIngress --set global.installType=public --set global.storageClassName=$STORAGECLASS --set global.cluster.provider=other --set-string global.gopaddle.https=false --set-string global.gopaddleWebhook.https=false --set global.staticIP=$STATICIP  --set global.installer.chart.rabbitmq=false --set global.installer.chart.gp-core=true --set global.installer.edition=microk8s --set global.nodeSelector.gp-install-node=node1 --set global.nodeName=$NODENAME  --version $HELM_VERSION
+    elif [ $PUBLICIP == false ]
+    then
+        #install rabbitmq
+        $HELM install gp-rabbitmq-4-2 gp-lite/gp-installer  --namespace gp-lite  --set global.routingType=NodePortWithOutIngress --set global.installType=private --set global.storageClassName=$STORAGECLASS --set global.installer.chart.rabbitmq=true --set global.installer.chart.gp-core=false  --set global.nodeSelector.gp-install-node=node1 --set global.nodeName=$NODENAME --version $HELM_VERSION
+        
+        #install gp-lite
+        $HELM install gp-core-4-2 gp-lite/gp-installer  --namespace gp-lite  --set global.routingType=NodePortWithOutIngress --set global.installType=private --set global.storageClassName=$STORAGECLASS --set global.cluster.provider=other --set-string global.gopaddle.https=false --set-string global.gopaddleWebhook.https=false --set global.staticIP=$STATICIP  --set global.installer.chart.rabbitmq=false --set global.installer.chart.gp-core=true --set global.installer.edition=microk8s --set global.nodeSelector.gp-install-node=node1 --set global.nodeName=$NODENAME --version $HELM_VERSION
+    fi
+    
+    echo ""
+    echo "Waiting for the gopaddle volume to move bound. This may take a while."
+    while true
+    do
+        if $KUBECTL wait pvc --for=jsonpath='{.status.phase}'=Bound -l released-by=gopaddle -n gp-lite --timeout=20m 2>/dev/null; then
+            break
+        fi
+    done
+    
+    
+    #adding label to volume
+    echo ""
+    echo "adding label to persistentvolume"
+    PVCLIST=$($KUBECTL get pvc -n gp-lite -o yaml| grep "volumeName" | awk '{print $2}')
+    
+    for i in $(echo $PVCLIST | tr " " "\n")
+    do
+        $KUBECTL patch  pv $i --type='merge' -p '{"metadata":{"labels":{"gp-install-pv":"'$STORAGECLASS'"}}}'
+    done
+    
+    #echo ""
+    #echo "Waiting for the gopaddle services to move to running state. This may take a while."
+    
+    
+    #$KUBECTL wait --for=condition=ready pod -l released-by=gopaddle -n gp-lite --timeout=20m
+    
+    echo ""
+    echo ""
+    echo "gopaddle lite is enabled"
+    echo ""
+    echo "gopaddle lite access endpoint"
+    if [ $STATICIP ]
+    then
+        echo "http://$STATICIP:30003"
+    elif [ $PUBLICIP == true ]
+    then
+        NODEIP=$($KUBECTL get node -o wide| awk '{print $6}')
+        IP=$(echo $NODEIP | cut -d ' ' -f 2)
+        echo "http://$IP:30003"
+    else
+        NODEIP=$($KUBECTL get node -o wide| awk '{print $6}')
+        IP=$(echo $NODEIP | cut -d ' ' -f 2)
+        echo "http://$IP:30003"
+    fi
+}
+
+
+do_prerequisites
+enable_gopaddle_lite

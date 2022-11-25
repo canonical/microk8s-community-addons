@@ -726,3 +726,10 @@ def validate_kwasm():
     )
     kubectl("delete -f {}".format(manifest))
     print("kwasm is up and running")
+
+
+def validate_gopaddle_lite():
+    """
+    Validate gopaddle-lite
+    """
+    wait_for_pod_state("", "gp-lite", "running", label="released-by=gopaddle")
