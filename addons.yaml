@@ -163,6 +163,7 @@ microk8s-addons:
       version: "0.2.0"
       check_status: "deployment.apps/kwasm-operator"
       supported_architectures:
+        - amd64
         - arm64
 
     - name: "gopaddle-lite"
