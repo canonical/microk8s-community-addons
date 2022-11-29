@@ -2,9 +2,9 @@ name: Run tests
 
 on:
   push:
-    branches: [1.25]
+    branches: [1.24-eksd]
   pull_request:
-    branches: [1.25]
+    branches: [1.24-eksd]
 
 jobs:
   run-tests:
@@ -24,7 +24,7 @@ jobs:
       - name: Running addons tests
         run: |
           set -x
-          sudo snap install microk8s --classic --channel=1.25/edge
+          sudo snap install microk8s --classic --channel=1.24-eksd/edge
           sudo microk8s status --wait-ready --timeout 600
           if sudo microk8s addons repo list | grep community
           then
@@ -33,20 +33,5 @@ jobs:
           sudo microk8s addons repo add community .
           export UNDER_TIME_PRESSURE="True"
           export SKIP_PROMETHEUS="False"
-          sudo -E pytest -s -ra ./tests/test-addons.py
-          sudo snap remove microk8s --purge
-      - name: Running addons tests on strict
-        run: |
-          set -x
-          sudo snap install microk8s --channel=1.25-strict/edge
-          sudo microk8s status --wait-ready --timeout 600
-          if sudo microk8s addons repo list | grep community
-          then
-            sudo microk8s addons repo remove community
-          fi
-          sudo microk8s addons repo add community .
-          export UNDER_TIME_PRESSURE="True"
-          export SKIP_PROMETHEUS="False"
-          export STRICT="yes"
           sudo -E pytest -s -ra ./tests/test-addons.py
           sudo snap remove microk8s --purge
