@@ -177,5 +177,6 @@ microk8s-addons:
       description: "Ondat is a software-defined, cloud native storage platform for Kubernetes."
       version: "latest"
       check_status: "deployment.apps/storageos-cli"
+      confinement: "classic"
       supported_architectures:
         - amd64
