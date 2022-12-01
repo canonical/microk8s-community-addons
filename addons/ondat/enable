@@ -3,12 +3,6 @@
 set -euo pipefail
 source "$SNAP/actions/common/utils.sh"
 
-# global colour variables.
-reset=$(tput sgr0)
-red=$(tput bold && tput setaf 1)
-green=$(tput bold && tput setaf 2)
-yellow=$(tput bold && tput setaf 3)
-
 # MicroK8s variables.
 kubectl="$SNAP/microk8s-kubectl.wrapper"
 
@@ -33,13 +27,13 @@ function set_prerequisites() {
 	enable_addon="$SNAP/microk8s-enable.wrapper"
 
 	# enable Ondat add-on dependencies.
-	echo "$yellow Enabling CoreDNS for Service Discovery... $reset"
+	echo "Enabling CoreDNS for Service Discovery..."
 	"$enable_addon" dns
-	echo "$yellow Enabling Hostpath Storage for Ondat's etcd Cluster... $reset"
+	echo "Enabling Hostpath Storage for Ondat's etcd Cluster..."
 	"$enable_addon" hostpath-storage
-	echo "$yellow Enabling Helm 3 Package Manager to deploy the Ondat Helm Chart... $reset"
+	echo "Enabling Helm 3 Package Manager to deploy the Ondat Helm Chart..."
 	"$enable_addon" helm3
-	echo "$green Ondat dependency add-ons enabled... $reset"
+	echo "Ondat dependency add-ons enabled..."
 	deploy_ondat
 }
 
@@ -71,8 +65,8 @@ function deploy_ondat() {
 
 	# Install Ondat.
 	if [[ "$get_node_count" -le "2" ]]; then
-		echo "$yellow Detected: $get_node_count node(s)... $reset"
-		echo "$yellow Enabling 'Ondat' add-on with '1' etcd replica... $reset"
+		echo "Detected: $get_node_count node(s)..."
+		echo "Enabling 'Ondat' add-on with '1' etcd replica..."
 		"$helm" install ondat ondat/ondat \
 			--create-namespace \
 			--namespace="$ondat_namespace" \
@@ -82,10 +76,10 @@ function deploy_ondat() {
 			--set etcd-cluster-operator.cluster.resources.requests.cpu="$etcd_cluster_requests_cpu" \
 			--set etcd-cluster-operator.cluster.resources.requests.memory="$etcd_cluster_requests_memory" # --debug
 		"$kubectl" scale --replicas=1 deployment storageos-etcd-controller-manager --namespace="$ondat_namespace"
-		echo "$green Ondat is enabled... $reset"
+		echo "Ondat is enabled..."
 	elif [[ "$get_node_count" -ge "3" && "$get_node_count" -le "4" ]]; then
-		echo "$yellow Detected: $get_node_count nodes... $reset"
-		echo "$yellow Enabling 'Ondat' add-on with '3' etcd replicas... $reset"
+		echo "Detected: $get_node_count nodes..."
+		echo "Enabling 'Ondat' add-on with '3' etcd replicas..."
 		"$helm" install ondat ondat/ondat \
 			--create-namespace \
 			--namespace="$ondat_namespace" \
@@ -94,10 +88,10 @@ function deploy_ondat() {
 			--set etcd-cluster-operator.cluster.storage="$etcd_cluster_storage_size" \
 			--set etcd-cluster-operator.cluster.resources.requests.cpu="$etcd_cluster_requests_cpu" \
 			--set etcd-cluster-operator.cluster.resources.requests.memory="$etcd_cluster_requests_memory" # --debug
-		echo "$green Ondat is enabled... $reset"
+		echo "Ondat is enabled..."
 	elif [[ "$get_node_count" -ge "5" ]]; then
-		echo "$yellow Detected: $get_node_count nodes... $reset"
-		echo "$yellow Enabling 'Ondat' add-on with '5' etcd replicas... $reset"
+		echo "Detected: $get_node_count nodes..."
+		echo "Enabling 'Ondat' add-on with '5' etcd replicas..."
 		"$helm" install ondat ondat/ondat \
 			--create-namespace \
 			--namespace="$ondat_namespace" \
@@ -107,7 +101,7 @@ function deploy_ondat() {
 			--set etcd-cluster-operator.cluster.resources.requests.cpu="$etcd_cluster_requests_cpu" \
 			--set etcd-cluster-operator.cluster.resources.requests.memory="$etcd_cluster_requests_memory" # --debug
 	else
-		error "$red Cannot install Ondat, check and ensure that your cluster nodes are healthy... $reset"
+		error "Cannot install Ondat, check and ensure that your cluster nodes are healthy..."
 		exit 1
 	fi
 	deploy_ondat_cli
@@ -126,9 +120,9 @@ function deploy_ondat_cli() {
 	current_directory=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 
 	# install Ondat CLI.
-	echo "$yellow Deploying 'Ondat CLI'... $reset"
+	echo "Deploying 'Ondat CLI'..."
 	"$kubectl" apply --filename="$current_directory"/ondat-cli.yaml
-	echo "$green Ondat CLI is deployed... $reset"
+	echo "Ondat CLI is deployed..."
 	post_install
 }
 
@@ -138,7 +132,6 @@ function deploy_ondat_cli() {
 # ***
 function post_install() {
 	cat <<EndOfMessage
-$yellow
   *** Getting Started With Ondat ***
     
   Get your free Community edition licence by 
@@ -157,7 +150,6 @@ $yellow
   is deployed in your microK8s cluster:
   
     https://docs.ondat.io/docs/reference/cli/#usage
-$reset
 EndOfMessage
 }
 
