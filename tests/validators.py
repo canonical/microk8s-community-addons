@@ -709,6 +709,7 @@ def validate_sosivio():
     )
     print("sosivio is up and running")
 
+
 def validate_kwasm():
     """
     Validate kwasm
@@ -732,6 +733,7 @@ def validate_gopaddle_lite():
     Validate gopaddle-lite
     """
     wait_for_pod_state("", "gp-lite", "running", label="released-by=gopaddle")
+
 
 def validate_ondat():
     """

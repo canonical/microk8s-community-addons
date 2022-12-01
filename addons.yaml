@@ -170,6 +170,8 @@ microk8s-addons:
       description: "Cheapest, fastest and simplest way to modernize your applications"
       version: "4.2.5"
       check_status: "deployment.apps/gateway"
+      supported_architectures:
+        - amd64
 
     - name: "ondat"
       description: "Ondat is a software-defined, cloud native storage platform for Kubernetes."
