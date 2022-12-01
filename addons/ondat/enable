@@ -9,6 +9,9 @@ red=$(tput bold && tput setaf 1)
 green=$(tput bold && tput setaf 2)
 yellow=$(tput bold && tput setaf 3)
 
+# MicroK8s variables.
+kubectl="$SNAP/microk8s-kubectl.wrapper"
+
 function error() {
 	# local variable.
 	local date_time
@@ -46,6 +49,7 @@ function set_prerequisites() {
 # ***
 function deploy_ondat() {
 	# local variables.
+	local get_node_count
 	local helm
 	local ondat_namespace
 	local etcd_cluster_storage_class
@@ -53,6 +57,7 @@ function deploy_ondat() {
 	local etcd_cluster_requests_cpu
 	local etcd_cluster_requests_memory
 
+	get_node_count=$("$SNAP"/microk8s-kubectl.wrapper get nodes --no-headers | wc -l)
 	helm="$SNAP/microk8s-helm3.wrapper"
 	ondat_namespace="storageos"
 	etcd_cluster_storage_class="microk8s-hostpath"
@@ -60,33 +65,49 @@ function deploy_ondat() {
 	etcd_cluster_requests_cpu="100m"
 	etcd_cluster_requests_memory="300Mi"
 
-	# install Ondat.
-	cat <<EndOfMessage
-$yellow
-  *** Ondat 'etcd' Cluster Replicas Sizing Guide ***
-    
-  - Single-node Cluster (=1 node)   = '1' etcd replica.
-  - Multi-node Cluster  (=3 nodes)  = '3' etcd replcias (For Test Environments).
-  - Multi-node Cluster  (>=5 nodes) = '5' etcd replcias (For Prod Environments).
-$reset
-EndOfMessage
-	read -rp "$yellow Number of 'etcd' replicas to create (Min= 1, Max = 5): $reset" etcd_cluster_replica_count
-	echo " "
-	if [[ "$etcd_cluster_replica_count" -gt 0 && "$etcd_cluster_replica_count" -le 5 ]]; then
-		echo "$yellow Enabling 'Ondat' add-on... $reset"
-		"$helm" repo add ondat https://ondat.github.io/charts
-		"$helm" repo update
+	# Setup Ondat Helm chart repository.
+	"$helm" repo add ondat https://ondat.github.io/charts
+	"$helm" repo update
+
+	# Install Ondat.
+	if [[ "$get_node_count" -le "2" ]]; then
+		echo "$yellow Detected: $get_node_count node(s)... $reset"
+		echo "$yellow Enabling 'Ondat' add-on with '1' etcd replica... $reset"
 		"$helm" install ondat ondat/ondat \
 			--create-namespace \
 			--namespace="$ondat_namespace" \
 			--set etcd-cluster-operator.cluster.storageclass="$etcd_cluster_storage_class" \
-			--set etcd-cluster-operator.cluster.replicas="$etcd_cluster_replica_count" \
+			--set etcd-cluster-operator.cluster.replicas=1 \
+			--set etcd-cluster-operator.cluster.storage="$etcd_cluster_storage_size" \
+			--set etcd-cluster-operator.cluster.resources.requests.cpu="$etcd_cluster_requests_cpu" \
+			--set etcd-cluster-operator.cluster.resources.requests.memory="$etcd_cluster_requests_memory" # --debug
+		"$kubectl" scale --replicas=1 deployment storageos-etcd-controller-manager --namespace="$ondat_namespace"
+		echo "$green Ondat is enabled... $reset"
+	elif [[ "$get_node_count" -ge "3" && "$get_node_count" -le "4" ]]; then
+		echo "$yellow Detected: $get_node_count nodes... $reset"
+		echo "$yellow Enabling 'Ondat' add-on with '3' etcd replicas... $reset"
+		"$helm" install ondat ondat/ondat \
+			--create-namespace \
+			--namespace="$ondat_namespace" \
+			--set etcd-cluster-operator.cluster.storageclass="$etcd_cluster_storage_class" \
+			--set etcd-cluster-operator.cluster.replicas=3 \
 			--set etcd-cluster-operator.cluster.storage="$etcd_cluster_storage_size" \
 			--set etcd-cluster-operator.cluster.resources.requests.cpu="$etcd_cluster_requests_cpu" \
 			--set etcd-cluster-operator.cluster.resources.requests.memory="$etcd_cluster_requests_memory" # --debug
 		echo "$green Ondat is enabled... $reset"
+	elif [[ "$get_node_count" -ge "5" ]]; then
+		echo "$yellow Detected: $get_node_count nodes... $reset"
+		echo "$yellow Enabling 'Ondat' add-on with '5' etcd replicas... $reset"
+		"$helm" install ondat ondat/ondat \
+			--create-namespace \
+			--namespace="$ondat_namespace" \
+			--set etcd-cluster-operator.cluster.storageclass="$etcd_cluster_storage_class" \
+			--set etcd-cluster-operator.cluster.replicas=5 \
+			--set etcd-cluster-operator.cluster.storage="$etcd_cluster_storage_size" \
+			--set etcd-cluster-operator.cluster.resources.requests.cpu="$etcd_cluster_requests_cpu" \
+			--set etcd-cluster-operator.cluster.resources.requests.memory="$etcd_cluster_requests_memory" # --debug
 	else
-		error "$red Ensure that you enter a natural number greater than '0' or less than/equal to '5'... $reset"
+		error "$red Cannot install Ondat, check and ensure that your cluster nodes are healthy... $reset"
 		exit 1
 	fi
 	deploy_ondat_cli
@@ -100,10 +121,8 @@ EndOfMessage
 # ***
 function deploy_ondat_cli() {
 	# local variables.
-	local kubectl
 	local current_directory
 
-	kubectl="$SNAP/microk8s-kubectl.wrapper"
 	current_directory=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 
 	# install Ondat CLI.
