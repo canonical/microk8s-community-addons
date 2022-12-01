@@ -172,3 +172,11 @@ microk8s-addons:
       check_status: "deployment.apps/gateway"
       supported_architectures:
         - amd64
+
+    - name: "ondat"
+      description: "Ondat is a software-defined, cloud native storage platform for Kubernetes."
+      version: "latest"
+      check_status: "deployment.apps/storageos-cli"
+      confinement: "classic"
+      supported_architectures:
+        - amd64

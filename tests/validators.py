@@ -733,3 +733,15 @@ def validate_gopaddle_lite():
     Validate gopaddle-lite
     """
     wait_for_pod_state("", "gp-lite", "running", label="released-by=gopaddle")
+
+
+def validate_ondat():
+    """
+    Validate the Ondat addon.
+    """
+    if platform.machine() != "x86_64":
+        print("Ondat tests are only relevant in x86 architectures")
+        return
+    wait_for_pod_state("", "storageos", "running", label="app=storageos-cli")
+    wait_for_pod_state("", "storageos", "running", label="app=ondat-operator")
+    wait_for_pod_state("", "storageos", "running", label="app=storageos")

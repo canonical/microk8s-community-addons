@@ -39,6 +39,7 @@ from validators import (
     validate_sosivio,
     validate_kwasm,
     validate_gopaddle_lite,
+    validate_ondat,
 )
 from utils import (
     microk8s_enable,
@@ -526,3 +527,22 @@ class TestAddons(object):
         print("Disabling gopaddle-lite")
         microk8s_disable("gopaddle-lite")
         reason = ("Sosivio tests are only relevant in x86 architectures",)
+
+    @pytest.mark.skipif(
+        os.environ.get("STRICT") == "yes",
+        reason="Skipping nfs tests in strict confinement as they are expected to fail",
+    )
+    @pytest.mark.skipif(
+        platform.machine() != "x86_64",
+        reason="Ondat tests are only relevant in x86 architectures",
+    )
+    def test_ondat(self):
+        """
+        Setup and validates Ondat.
+        """
+        print("Enabling Ondat.")
+        microk8s_enable("ondat")
+        print("Validating Ondat.")
+        validate_ondat()
+        print("Disabling Ondat.")
+        microk8s_disable("ondat")
