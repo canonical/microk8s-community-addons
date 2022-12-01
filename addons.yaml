@@ -11,10 +11,11 @@ microk8s-addons:
 
     - name: "istio"
       description: "Core Istio service mesh services"
-      version: "1.10.3"
+      version: "1.15.3"
       check_status: "${SNAP_DATA}/bin/istioctl"
       supported_architectures:
         - amd64
+        - arm64
 
     - name: "knative"
       description: "Knative Serverless and Event Driven Applications"
@@ -156,6 +157,19 @@ microk8s-addons:
       check_status: "deployment.apps/sosivio-dashboard"
       supported_architectures:
         - amd64
+
+    - name: "kwasm"
+      description: "WebAssembly support for WasmEdge (Docker Wasm) and Spin (Azure AKS WASI)"
+      version: "0.2.0"
+      check_status: "deployment.apps/kwasm-operator"
+      supported_architectures:
+        - amd64
+        - arm64
+
+    - name: "gopaddle-lite"
+      description: "Cheapest, fastest and simplest way to modernize your applications"
+      version: "4.2.5"
+      check_status: "deployment.apps/gateway"
 
     - name: "ondat"
       description: "Ondat is a software-defined, cloud native storage platform for Kubernetes."

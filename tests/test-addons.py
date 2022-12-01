@@ -37,6 +37,8 @@ from validators import (
     validate_argocd,
     validate_osm_edge,
     validate_sosivio,
+    validate_kwasm,
+    validate_gopaddle_lite,
     validate_ondat,
 )
 from utils import (
@@ -175,6 +177,7 @@ class TestAddons(object):
         os.environ.get("UNDER_TIME_PRESSURE") == "True",
         reason="Skipping knative tests as we are under time pressure",
     )
+    @pytest.mark.skip(reason="Due to https://github.com/canonical/microk8s/issues/3597")
     def test_knative(self):
         """
         Test knative
@@ -187,6 +190,21 @@ class TestAddons(object):
         print("Disabling Knative")
         microk8s_disable("knative")
         wait_for_namespace_termination("knative-serving", timeout_insec=600)
+
+    @pytest.mark.skipif(
+        os.environ.get("UNDER_TIME_PRESSURE") == "True",
+        reason="Skipping istio and knative tests as we are under time pressure",
+    )
+    def test_istio(self):
+        """
+        Sets up and validate istio.
+        """
+        print("Enabling Istio")
+        microk8s_enable("istio")
+        print("Validating Istio")
+        validate_istio()
+        print("Disabling Istio")
+        microk8s_disable("istio")
 
     @pytest.mark.skipif(
         platform.machine() != "x86_64",
@@ -481,6 +499,34 @@ class TestAddons(object):
         validate_sosivio()
         print("Disabling sosivio")
         microk8s_disable("sosivio")
+
+    @pytest.mark.skipif(platform.machine() == "s390x", reason="Not available on s390x")
+    def test_kwasm(self):
+        """
+        Sets up and validates kwasm.
+        """
+        print("Enabling kwasm")
+        microk8s_enable("kwasm")
+        print("Validating kwasm")
+        validate_kwasm()
+        print("Disabling kwasm")
+        microk8s_disable("kwasm")
+
+    @pytest.mark.skipif(
+        platform.machine() != "x86_64",
+        reason="gopaddle-lite tests are only relevant in x86 architectures",
+    )
+    def test_gopaddle_lite(self):
+        """
+        Sets up and validates gopaddle-lite.
+        """
+        print("Enabling gopaddle-lite")
+        microk8s_enable("gopaddle-lite")
+        print("Validating gopaddle-lite")
+        validate_gopaddle_lite()
+        print("Disabling gopaddle-lite")
+        microk8s_disable("gopaddle-lite")
+        reason = ("Sosivio tests are only relevant in x86 architectures",)
 
     @pytest.mark.skipif(
         platform.machine() != "x86_64",

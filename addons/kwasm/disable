@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+set -e
+
+NAMESPACE_KWASM="kwasm-system"
+
+"$SNAP/microk8s-enable.wrapper" helm3
+HELM="$SNAP/microk8s-helm3.wrapper"
+KUBECTL="$SNAP/microk8s-kubectl.wrapper"
+
+echo "Disabling KWasm"
+
+$HELM delete -n $NAMESPACE_KWASM kwasm-operator
+$HELM repo remove kwasm
+$KUBECTL delete ns $NAMESPACE_KWASM
+
+echo "KWasm disabled"
