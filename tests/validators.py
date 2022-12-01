@@ -742,11 +742,10 @@ def validate_ondat():
     if platform.machine() != "x86_64":
         print("Ondat tests are only relevant in x86 architectures")
         return
-    wait_for_installation()
     wait_for_pod_state(
-        "storageos-cli", "storageos", "running", label="app=storageos-cli"
+        "", "storageos", "running", label="app=storageos-cli"
     )
     wait_for_pod_state(
-        "ondat-ondat-operator", "storageos", "running", label="app=ondat-operator"
+        "", "storageos", "running", label="app=ondat-operator"
     )
-    wait_for_pod_state("storageos-node", "storageos", "running", label="app=storageos")
+    wait_for_pod_state("", "storageos", "running", label="app=storageos")
