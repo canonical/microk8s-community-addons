@@ -536,6 +536,7 @@ class TestAddons(object):
         platform.machine() != "x86_64",
         reason="Ondat tests are only relevant in x86 architectures",
     )
+    @pytest.mark.skipif(is_container(), reason="Ondat is failing in LXC")
     def test_ondat(self):
         """
         Setup and validates Ondat.
