@@ -4,7 +4,7 @@ set -e
 
 source $SNAP/actions/common/utils.sh
 
-KNATIVE_VERSION="1.6.0"
+KNATIVE_VERSION="1.8.2"
 KUBECTL="$SNAP/microk8s-kubectl.wrapper"
 
 echo "Disabling Knative"

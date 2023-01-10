@@ -5,8 +5,8 @@ set -e
 source $SNAP/actions/common/utils.sh
 
 
-KNATIVE_VERSION="1.6.0"
-KNATIVE_FUNC_VERSION="0.25.0"
+KNATIVE_VERSION="1.8.2"
+KNATIVE_FUNC_VERSION="1.8.2"
 KNATIVE_SERVING=true
 KNATIVE_EVENTING=false
 ARCH=$(arch)
@@ -99,7 +99,7 @@ fi
 if [ ! -f "${SNAP_COMMON}/plugins/kn-func" ] && [ "${ARCH}" = "amd64" ]; then
   echo "Fetching Knative Functions plugin version ${KNATIVE_FUNC_VERSION} in ${SNAP_COMMON}/plugins/kn-func"
   run_with_sudo mkdir -p "${SNAP_COMMON}/plugins"
-  fetch_as https://github.com/knative-sandbox/kn-plugin-func/releases/download/v${KNATIVE_FUNC_VERSION}/func_linux_${ARCH} "${SNAP_COMMON}/plugins/kn-func"
+  fetch_as https://github.com/knative/func/releases/download/knative-v${KNATIVE_FUNC_VERSION}/func_linux_${ARCH} "${SNAP_COMMON}/plugins/kn-func"
   run_with_sudo chmod uo+x "${SNAP_COMMON}/plugins/kn-func"
 fi
 
