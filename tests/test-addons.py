@@ -173,11 +173,6 @@ class TestAddons(object):
         microk8s_disable("inaccel")
 
     @pytest.mark.skipif(platform.machine() == "s390x", reason="Not available on s390x")
-    @pytest.mark.skipif(
-        os.environ.get("UNDER_TIME_PRESSURE") == "True",
-        reason="Skipping knative tests as we are under time pressure",
-    )
-    @pytest.mark.skip(reason="Due to https://github.com/canonical/microk8s/issues/3597")
     def test_knative(self):
         """
         Test knative
