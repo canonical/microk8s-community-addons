@@ -1,50 +1,31 @@
-#!/usr/bin/env bash
-set -e
+#!/bin/bash -e
 
-source $SNAP/actions/common/utils.sh
-CURRENT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
+HELM="${SNAP}/microk8s-helm.wrapper"
 
-"$SNAP/microk8s-enable.wrapper" dns
-"$SNAP/microk8s-enable.wrapper" helm3
-"$SNAP/microk8s-enable.wrapper" hostpath-storage
+NAMESPACE="traefik"
+TRAEFIK_CHART_VERSION="${TRAEFIK_CHART_VERSION:-20.8.0}"
 
-NAMESPACE_PTR="traefik"
-
-KUBECTL="$SNAP/microk8s-kubectl.wrapper"
-HELM="$SNAP/microk8s-helm3.wrapper"
-
-echo "Enabling traefik ingress controller on port 8080"
 echo "Enabling traefik ingress controller"
 
-# make sure the "traefik" namespace exists
-$KUBECTL create namespace "$NAMESPACE_PTR" > /dev/null 2>&1 || true
-# load the CRD and wait for it to be installed
-$KUBECTL apply -f "${CURRENT_DIR}/traefik.yaml"
-#$KUBECTL apply -f "${SNAP}/actions/traefik.yaml"
-VALUES="$@"
+"${HELM}" repo update traefik || "${HELM}" repo add traefik https://helm.traefik.io/traefik
+"${HELM}" upgrade --install --create-namespace traefik traefik/traefik -n "${NAMESPACE}" --version "${TRAEFIK_CHART_VERSION}" "$@"
 
-for i in "$@"
-do
-case $i in
-    -f=*|--values=*)
-    VALUES="${i#*=}"
-    shift # past argument=value
-    ;;
-    *)
-          # unknown option
-    ;;
-esac
-done
+echo "
 
-$HELM repo add traefik https://helm.traefik.io/traefik
-$HELM repo update
-if [ -z "$VALUES" ]
-then
-  $HELM upgrade --install traefik  traefik/traefik -n $NAMESPACE_PTR
-else
-  $HELM upgrade --install traefik -f "$2" traefik/traefik -n $NAMESPACE_PTR
-fi
+Traefik Ingress controller ${TRAEFIK_CHART_VERSION} has been installed. Next, you can start
+creating Ingress resources to access your services. Useful commands:
 
-echo "traefik ingress controller has been installed on port 8080"
-# print a final help message
-echo "Traefik has been installed via helm. For enabling dashboard pl use port forwarding or access through node port"
+1. Get the external IP of the LoadBalancer service.
+
+    $ microk8s kubectl get service -n traefik traefik
+
+2. If your cluster cannot provision LoadBalancer services, you can also use the NodePort service.
+
+    $ microk8s kubectl get service -n traefik traefik-ingress-service
+
+3. Access the Traefik Web UI at http://localhost:18080
+
+    $ microk8s kubectl port-forward -n traefik traefik-web-ui 18080:8080
+
+
+"

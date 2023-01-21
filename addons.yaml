@@ -83,12 +83,13 @@ microk8s-addons:
         - amd64
 
     - name: "traefik"
-      description: "traefik Ingress controller for external access"
-      version: "2.5.0"
-      check_status: "pod/traefik"
+      description: "traefik Ingress controller"
+      version: "2.9.6"
+      check_status: "deployment.apps/traefik"
       supported_architectures:
         - arm64
         - amd64
+        - s390x
 
     - name: "keda"
       description: "Kubernetes-based Event Driven Autoscaling"
@@ -161,6 +162,7 @@ microk8s-addons:
       description: "WebAssembly support for WasmEdge (Docker Wasm) and Spin (Azure AKS WASI)"
       version: "0.2.0"
       check_status: "deployment.apps/kwasm-operator"
+      confinement: "classic"
       supported_architectures:
         - amd64
         - arm64
