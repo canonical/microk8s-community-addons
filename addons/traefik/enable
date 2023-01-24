@@ -3,10 +3,12 @@
 HELM="${SNAP}/microk8s-helm.wrapper"
 
 NAMESPACE="traefik"
-TRAEFIK_CHART_VERSION="${TRAEFIK_CHART_VERSION:-20.8.0}"
+TRAEFIK_CHART_VERSION="${TRAEFIK_CHART_VERSION:-20.4.0}"
 
 echo "Enabling traefik ingress controller"
 KUBECTL="$SNAP/kubectl --kubeconfig=${SNAP_DATA}/credentials/client.config"
+"$SNAP/microk8s-enable.wrapper" dns
+"$SNAP/microk8s-enable.wrapper" helm3
 "${HELM}" repo update traefik || "${HELM}" repo add traefik https://helm.traefik.io/traefik
 "${HELM}" upgrade --install --create-namespace traefik traefik/traefik -n "${NAMESPACE}" --version "${TRAEFIK_CHART_VERSION}" "$@"
 
