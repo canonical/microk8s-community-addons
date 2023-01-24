@@ -69,7 +69,7 @@ microk8s-addons:
 
     - name: "traefik"
       description: "traefik Ingress controller"
-      version: "2.9.6"
+      version: "2.9.4"
       check_status: "deployment.apps/traefik"
       supported_architectures:
         - arm64
