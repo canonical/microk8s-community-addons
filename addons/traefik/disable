@@ -6,6 +6,6 @@ NAMESPACE="traefik"
 
 echo "Disabling Traefik Ingress controller"
 
-"${HELM}" uninstall traefik -n "${NAMESPACE}"
+${HELM} uninstall traefik -n "${NAMESPACE}"
 
 echo "Disabled Traefik Ingress controller"

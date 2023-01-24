@@ -9,8 +9,8 @@ echo "Enabling traefik ingress controller"
 KUBECTL="$SNAP/kubectl --kubeconfig=${SNAP_DATA}/credentials/client.config"
 "$SNAP/microk8s-enable.wrapper" dns
 "$SNAP/microk8s-enable.wrapper" helm3
-"${HELM}" repo update traefik || "${HELM}" repo add traefik https://helm.traefik.io/traefik
-"${HELM}" upgrade --install --create-namespace traefik traefik/traefik -n "${NAMESPACE}" --version "${TRAEFIK_CHART_VERSION}" "$@"
+${HELM} repo update traefik || ${HELM} repo add traefik https://helm.traefik.io/traefik
+${HELM} upgrade --install --create-namespace traefik traefik/traefik -n "${NAMESPACE}" --version "${TRAEFIK_CHART_VERSION}" "$@"
 
 echo "
 
@@ -18,9 +18,6 @@ Traefik Ingress controller ${TRAEFIK_CHART_VERSION} has been installed. Next, yo
 creating Ingress resources to access your services. Useful commands:
 
 1. Get the external IP of the LoadBalancer service.
-
-
-HELM="$SNAP_DATA/bin/helm3 --kubeconfig=$SNAP_DATA/credentials/client.config"
 
     $ microk8s kubectl get service -n traefik traefik
 
