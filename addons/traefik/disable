@@ -6,6 +6,7 @@ NAMESPACE="traefik"
 
 echo "Disabling Traefik Ingress controller"
 
+"$SNAP/microk8s-enable.wrapper" helm3
 ${HELM} uninstall traefik -n "${NAMESPACE}"
 
 echo "Disabled Traefik Ingress controller"
