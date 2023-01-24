@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-HELM="${SNAP}/microk8s-helm.wrapper"
+HELM="$SNAP_DATA/bin/helm3 --kubeconfig=$SNAP_DATA/credentials/client.config"
 
 NAMESPACE="traefik"
 TRAEFIK_CHART_VERSION="${TRAEFIK_CHART_VERSION:-20.4.0}"
