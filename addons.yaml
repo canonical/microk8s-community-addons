@@ -181,3 +181,11 @@ microk8s-addons:
       confinement: "classic"
       supported_architectures:
         - amd64
+
+    - name: "shifu"
+      description: "Kubernetes native IoT software development framework."
+      version: "0.10.0"
+      check_status: "deployment.apps/shifu-crd-controller-manager"
+      supported_architectures:
+        - amd64
+        - arm64

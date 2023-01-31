@@ -40,6 +40,7 @@ from validators import (
     validate_kwasm,
     validate_gopaddle_lite,
     validate_ondat,
+    validate_shifu,
 )
 from utils import (
     microk8s_enable,
@@ -550,3 +551,15 @@ class TestAddons(object):
         validate_ondat()
         print("Disabling Ondat.")
         microk8s_disable("ondat")
+
+    @pytest.mark.skipif(platform.machine() == "s390x", reason="Not available on s390x")
+    def test_shifu(self):
+        """
+        Sets up and validates shifu.
+        """
+        print("Enabling shifu")
+        microk8s_enable("shifu")
+        print("Validating shifu")
+        validate_shifu()
+        print("Disabling shifu")
+        microk8s_disable("shifu")

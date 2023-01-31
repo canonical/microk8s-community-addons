@@ -745,3 +745,12 @@ def validate_ondat():
     wait_for_pod_state("", "storageos", "running", label="app=storageos-cli")
     wait_for_pod_state("", "storageos", "running", label="app=ondat-operator")
     wait_for_pod_state("", "storageos", "running", label="app=storageos")
+
+
+def validate_shifu():
+    """
+    Validate shifu
+    """
+    wait_for_pod_state(
+        "", "shifu-crd-system", "running", label="control-plane=controller-manager"
+    )
