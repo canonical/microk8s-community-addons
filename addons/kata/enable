@@ -72,6 +72,7 @@ def print_next_steps():
     print()
     print("To use the kata runtime set the 'kata' runtimeClassName, eg:")
     print()
+    print("apiVersion: v1")
     print("kind: Pod")
     print("metadata:")
     print("  name: nginx-kata")
