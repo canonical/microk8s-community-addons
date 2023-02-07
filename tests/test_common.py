@@ -118,8 +118,8 @@ class TestCommon(object):
 
     def validate_dashboard_ingress(self):
         """
-        Validate the ingress for dashboard addon by trying to access the kubernetes 
-        dashboard using ingress ports. The dashboard will return HTTP 200 and HTML 
+        Validate the ingress for dashboard addon by trying to access the kubernetes
+        dashboard using ingress ports. The dashboard will return HTTP 200 and HTML
         indicating that it is up and running.
         """
         service_ok = False

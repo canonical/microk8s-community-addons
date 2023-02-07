@@ -13,7 +13,7 @@ from utils import (
 class TestKwasm(object):
     @pytest.mark.skipif(
         os.environ.get("STRICT") == "yes",
-        reason="Skipping kwasm tests in strict confinement as they are expected to fail"
+        reason="Skipping kwasm tests in strict confinement as they are expected to fail",
     )
     @pytest.mark.skipif(platform.machine() == "s390x", reason="Not available on s390x")
     def test_kwasm(self):

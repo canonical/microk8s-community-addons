@@ -40,7 +40,7 @@ class TestNfs(object):
 
     def validate_storage_nfs(self):
         """
-        Validate NFS Storage by creating two Pods mounting the same PVC. 
+        Validate NFS Storage by creating two Pods mounting the same PVC.
         (optimal test would be on multinode-cluster)
         """
         wait_for_pod_state(
