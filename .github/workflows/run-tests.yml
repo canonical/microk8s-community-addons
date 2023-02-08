@@ -20,7 +20,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y python3-setuptools nfs-common
           sudo pip3 install --upgrade pip
-          sudo pip3 install -U pytest sh
+          sudo pip3 install -r tests/requirements.txt
       - name: Running addons tests
         run: |
           set -x
@@ -33,7 +33,7 @@ jobs:
           sudo microk8s addons repo add community .
           export UNDER_TIME_PRESSURE="True"
           export SKIP_PROMETHEUS="False"
-          sudo -E pytest -s -ra ./tests/test-addons.py
+          sudo -E pytest -s -ra ./tests/
           sudo snap remove microk8s --purge
       - name: Running addons tests on strict
         run: |
@@ -48,5 +48,5 @@ jobs:
           export UNDER_TIME_PRESSURE="True"
           export SKIP_PROMETHEUS="False"
           export STRICT="yes"
-          sudo -E pytest -s -ra ./tests/test-addons.py
+          sudo -E pytest -s -ra ./tests/
           sudo snap remove microk8s --purge

@@ -13,6 +13,7 @@ This document describes the process of developing a new addon for MicroK8s. As a
     - [4. Write unit tests](#4-write-unit-tests)
   - [Use addon](#use-addon)
   - [Custom commands](#custom-commands)
+    - [Create an example `nginxctl` plugin](#create-an-example-nginxctl-plugin)
 
 
 ## Develop addon
@@ -108,10 +109,12 @@ chmod +x ./addons/demo-nginx/disable
 
 ### 4. Write unit tests
 
-Add unit tests for the `demo-nginx` addon in the following files:
+Add unit tests for the `demo-nginx` addon:
 
-- `tests/validators.py`: Write a `validate_demo_nginx` function.
-- `tests/test-addons.py`: Add a `test_demo_nginx` test case that enables, validates and then disables the addon.
+- Create the `tests/test_demo_nginx.py` file
+- `tests/test_demo_nginx.py`: Create a class named `TestDemoNginx`
+- `tests/test_demo_nginx.py`: Write a `validate_demo_nginx` function under `TestDemoNginx`
+- `tests/test_demo_nginx.py`: Add a `test_demo_nginx` test case that enables, validates and then disables the addon under `TestDemoNginx`
 
 The unit tests can be run against MicroK8s to verify that your addon is functional.
 
