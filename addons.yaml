@@ -181,3 +181,11 @@ microk8s-addons:
       confinement: "classic"
       supported_architectures:
         - amd64
+
+    - name: "easyhaproxy"
+      description: "EasyHAProxy can configure HAProxy automatically based on ingress labels"
+      version: "latest"
+      check_status: "pod/ingress-easyhaproxy"
+      supported_architectures:
+        - amd64
+        - arm64
