@@ -23,7 +23,7 @@ class TestEasyHAProxy(object):
 
     def validate_easyhaproxy(self):
         """
-        Validate easyhaproxy
+        Validate easyhaproxy (2)
         """
         wait_for_pod_state(
             "", "easyhaproxy", "running", label="app.kubernetes.io/name=easyhaproxy"
