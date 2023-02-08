@@ -181,3 +181,11 @@ microk8s-addons:
       confinement: "classic"
       supported_architectures:
         - amd64
+
+    - name: "parking"
+      description: "Static webserver to park a domain. Works with EasyHAProxy."
+      version: "latest"
+      check_status: "deployment.apps/parking-static-httpserver"
+      supported_architectures:
+        - amd64
+        - arm64
