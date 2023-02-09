@@ -12,6 +12,12 @@ class TestEasyHAProxy(object):
     @pytest.mark.skipif(platform.machine() == "s390x", reason="Not available on s390x")
     def test_easyhaproxy(self):
         """
+        Disabling conflicting addons
+        """
+        microk8s_disable("ingress")
+        microk8s_disable("traefik")
+
+        """
         Sets up and validates easyhaproxy.
         """
         print("Enabling easyhaproxy")
@@ -23,7 +29,7 @@ class TestEasyHAProxy(object):
 
     def validate_easyhaproxy(self):
         """
-        Validate easyhaproxy (2)
+        Validate easyhaproxy
         """
         wait_for_pod_state(
             "", "easyhaproxy", "running", label="app.kubernetes.io/name=easyhaproxy"
