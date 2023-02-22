@@ -23,7 +23,7 @@ $KUBECTL create namespace "$NAMESPACE_PTR" > /dev/null 2>&1 || true
 $HELM repo add byjg https://opensource.byjg.com/helm > /dev/null 2>&1
 $HELM repo update > /dev/null 2>&1
 
-$HELM_PACKAGE_VERSION="0.1.0"
+HELM_PACKAGE_VERSION="0.1.0"
 
 if [ -z "$1" ]; then
 
