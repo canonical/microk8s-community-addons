@@ -184,7 +184,7 @@ microk8s-addons:
 
     - name: "easyhaproxy"
       description: "EasyHAProxy can configure HAProxy automatically based on ingress labels"
-      version: "latest"
+      version: "0.1.5"
       check_status: "pod/ingress-easyhaproxy"
       supported_architectures:
         - amd64

@@ -57,10 +57,12 @@ $HELM repo add byjg https://opensource.byjg.com/helm > /dev/null 2>&1
 $HELM repo update > /dev/null 2>&1
 
 $KUBECTL label nodes $(hostname) "easyhaproxy/node=master" --overwrite
+$HELM_PACKAGE_VERSION="0.1.5"
 
 if [ -z "$1" ]; then
 
     $HELM upgrade --install ingress byjg/easyhaproxy \
+        --version $HELM_PACKAGE_VERSION \
         --namespace $NAMESPACE_PTR \
         --set resources.requests.cpu=100m \
         --set resources.requests.memory=128Mi
@@ -72,6 +74,7 @@ if [ -z "$1" ]; then
 elif [ "$1" == "--nodeport" ]; then
 
     $HELM upgrade --install ingress byjg/easyhaproxy \
+        --version $HELM_PACKAGE_VERSION \
         --namespace $NAMESPACE_PTR \
         --set resources.requests.cpu=100m \
         --set resources.requests.memory=128Mi \
