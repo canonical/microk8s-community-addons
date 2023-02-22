@@ -23,6 +23,8 @@ $KUBECTL create namespace "$NAMESPACE_PTR" > /dev/null 2>&1 || true
 $HELM repo add byjg https://opensource.byjg.com/helm > /dev/null 2>&1
 $HELM repo update > /dev/null 2>&1
 
+$HELM_PACKAGE_VERSION="0.1.0"
+
 if [ -z "$1" ]; then
 
     echo "ERROR: Missing Domain names"
@@ -33,6 +35,7 @@ if [ -z "$1" ]; then
 else
 
     $HELM upgrade --install parking byjg/static-httpserver \
+        --version $HELM_PACKAGE_VERSION \
         --namespace parking \
         --set "ingress.hosts={$1}" \
         --set parameters.title="Domain Parked" \
