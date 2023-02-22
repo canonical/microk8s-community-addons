@@ -57,7 +57,7 @@ $HELM repo add byjg https://opensource.byjg.com/helm > /dev/null 2>&1
 $HELM repo update > /dev/null 2>&1
 
 $KUBECTL label nodes $(hostname) "easyhaproxy/node=master" --overwrite
-$HELM_PACKAGE_VERSION="0.1.5"
+HELM_PACKAGE_VERSION="0.1.5"
 
 if [ -z "$1" ]; then
 
