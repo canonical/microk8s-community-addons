@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+set -e
+
+source $SNAP/actions/common/utils.sh
+CURRENT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
+
+"$SNAP/microk8s-enable.wrapper" dns
+"$SNAP/microk8s-enable.wrapper" helm3
+
+
+NAMESPACE_PTR="parking"
+
+KUBECTL="$SNAP/microk8s-kubectl.wrapper"
+HELM="$SNAP/microk8s-helm3.wrapper"
+
+echo "+======================+"
+echo "| Enabling Parking App |"
+echo "+======================+"
+echo
+
+$KUBECTL create namespace "$NAMESPACE_PTR" > /dev/null 2>&1 || true
+
+$HELM repo add byjg https://opensource.byjg.com/helm > /dev/null 2>&1
+$HELM repo update > /dev/null 2>&1
+
+HELM_PACKAGE_VERSION="0.1.0"
+
+if [ -z "$1" ]; then
+
+    echo "ERROR: Missing Domain names"
+    echo
+    echo "You need to pass the domain names using comma and no spaces."
+    echo
+
+else
+
+    $HELM upgrade --install parking byjg/static-httpserver \
+        --version $HELM_PACKAGE_VERSION \
+        --namespace parking \
+        --set "ingress.hosts={$1}" \
+        --set parameters.title="Domain Parked" \
+        --set parameters.htmlTitle="Domain Parked"
+
+    echo
+    echo "Installed."
+    echo
+
+fi
+

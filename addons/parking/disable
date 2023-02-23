@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+set -e
+
+source $SNAP/actions/common/utils.sh
+CURRENT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
+
+
+NAMESPACE_PTR="parking"
+
+KUBECTL="$SNAP/microk8s-kubectl.wrapper"
+HELM="$SNAP/microk8s-helm3.wrapper"
+
+echo "Disabling Parking App"
+echo
+
+$HELM uninstall parking  \
+    --namespace $NAMESPACE_PTR
+
+# $KUBECTL create namespace "$NAMESPACE_PTR" > /dev/null 2>&1 || true
