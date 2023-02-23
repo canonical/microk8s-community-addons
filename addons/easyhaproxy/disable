@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+set -e
+
+source $SNAP/actions/common/utils.sh
+CURRENT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
+
+
+NAMESPACE_PTR="easyhaproxy"
+
+KUBECTL="$SNAP/microk8s-kubectl.wrapper"
+HELM="$SNAP/microk8s-helm3.wrapper"
+
+echo "Disabling EasyHAProxy Ingress Controller"
+echo
+
+
+$KUBECTL label nodes $(hostname) "easyhaproxy/node-"
+
+$HELM uninstall ingress  \
+    --namespace $NAMESPACE_PTR
+
+# $KUBECTL create namespace "$NAMESPACE_PTR" > /dev/null 2>&1 || true
