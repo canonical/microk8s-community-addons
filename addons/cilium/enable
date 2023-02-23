@@ -4,12 +4,6 @@ set -e
 
 source $SNAP/actions/common/utils.sh
 
-ARCH=$(arch)
-if ! [ "${ARCH}" = "amd64" ]; then
-  echo "Cilium is not available for ${ARCH}" >&2
-  exit 1
-fi
-
 "$SNAP/microk8s-enable.wrapper" helm3
 
 echo "Ensure kube-apiserver --allow-privileged=true flag"
@@ -44,9 +38,10 @@ fi
 
 echo "Enabling Cilium"
 
+# Cilium Supports Arm beginning v1.11.12 and greater
 read -ra CILIUM_VERSION <<< "$1"
 if [ -z "$CILIUM_VERSION" ]; then
-  CILIUM_VERSION="v1.10"
+  CILIUM_VERSION="v1.11.12"
 fi
 CILIUM_ERSION=$(echo $CILIUM_VERSION | sed 's/v//g')
 
