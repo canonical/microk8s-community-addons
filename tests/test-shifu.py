@@ -10,9 +10,7 @@ from utils import (
 
 
 class Testshifu(object):
-    @pytest.mark.skipif(
-        platform.machine() == "s390x",
-        reason="Not available on s390x")
+    @pytest.mark.skipif(platform.machine() == "s390x", reason="Not available on s390x")
     def test_shifu(self):
         """
         Sets up and validates shifu.
@@ -29,8 +27,5 @@ class Testshifu(object):
         Validate shifu
         """
         wait_for_pod_state(
-            "",
-            "shifu-crd-system",
-            "running",
-            label="control-plane=controller-manager"
+            "", "shifu-crd-system", "running", label="control-plane=controller-manager"
         )
