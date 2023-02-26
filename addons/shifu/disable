@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+set -e
+
+source $SNAP/actions/common/utils.sh
+
+KUBECTL="$SNAP/microk8s-kubectl.wrapper"
+
+if [ -f "$SNAP_DATA/shifu/shifu_install.yml" ]
+then
+echo "Disabling Shifu"
+$KUBECTL delete -f "$SNAP_DATA/shifu/shifu_install.yml" || true
+run_with_sudo rm -rf "$SNAP_DATA/shifu"
+fi
+
+echo "The Shifu addon is disabled."
