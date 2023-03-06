@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+set -e
+
+source $SNAP/actions/common/utils.sh
+
+KUBECTL="$SNAP/microk8s-kubectl.wrapper"
+
+do_prerequisites() {
+  # enable dns service
+  $SNAP/microk8s-enable.wrapper dns
+  $SNAP/microk8s-status.wrapper --wait-ready --timeout 30 >/dev/null
+  run_with_sudo mkdir -p "$SNAP_DATA/shifu"
+}
+
+get_shifu() {
+  SHIFU_VERSION="v0.11.0"
+  echo "Fetching shifu version $SHIFU_VERSION."
+  fetch_as https://raw.githubusercontent.com/Edgenesis/shifu/$SHIFU_VERSION/pkg/k8s/crd/install/shifu_install.yml "$SNAP_DATA/shifu/shifu_install.yml"
+}
+
+enable_shifu() {
+  echo "Enabling Shifu"
+  $KUBECTL apply -f "$SNAP_DATA/shifu/shifu_install.yml"
+}
+
+do_prerequisites
+get_shifu
+enable_shifu
+
+echo "The Shifu is enabled."
