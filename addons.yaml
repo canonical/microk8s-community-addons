@@ -214,3 +214,5 @@ microk8s-addons:
       supported_architectures:
         - amd64
         - arm64
+        - s390x
+        - ppc64le
