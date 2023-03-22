@@ -1,0 +1,80 @@
+#!/usr/bin/env bash
+
+set -e
+
+source $SNAP/actions/common/utils.sh
+CURRENT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
+source $CURRENT_DIR/../common/utils.sh
+
+NAMESPACE="ingress"
+CHART_VERSION="0.16.2"
+KUBECTL="$SNAP/microk8s-kubectl.wrapper"
+HELM="${SNAP}/microk8s-helm3.wrapper"
+
+TEMP=$(getopt -o "h" \
+              --long help,tls-secret:,plus-token:,values: \
+              -n "$(basename "$0")" -- "$@")
+
+if [ $? != 0 ] ; then echo "Terminating..." >&2 ; exit 1 ; fi
+
+eval set -- "$TEMP"
+
+CERT_SECRET="${CERT_SECRET:-}"
+PLUS_TOKEN="${PLUS_TOKEN:-}"
+NGINX_VALUES="${NGINX_VALUES:-}"
+
+while true; do
+  case "$1" in
+    --tls-secret ) CERT_SECRET="$2"; shift 2 ;;
+    --plus-token ) PLUS_TOKEN="$2"; shift 2 ;;
+    --values ) NGINX_VALUES="$2"; shift 2 ;;
+    -h | --help )
+      prog=$(basename -s.wrapper "$0")
+      echo "Usage: $prog [options...]"
+      echo "     --tls-secret <secret> TLS Secret that will be used by the controller"
+      echo "         Example: namespace/secret_name"
+      echo "     --plus-token <token> JWT Image Pull Token for Nginx Plus"
+      echo "     --values <distro> Values file to override for the nginx helm chart"
+      echo
+      exit ;;
+    -- ) shift; break ;;
+    * ) break ;;
+  esac
+done
+
+echo "Enabling NGINX ingress"
+
+$HELM repo add nginx-stable https://helm.nginx.com/stable
+$HELM repo update
+
+HELM_OPTS=
+if [ -n "${CERT_SECRET}" ]; then
+  HELM_OPTS+="--set controller.defaultTLS.secret=${CERT_SECRET} "
+fi
+
+if [ -n "${NGINX_VALUES}" ]; then
+  HELM_OPTS+="--values ${NGINX_VALUES} "
+fi
+
+$KUBECTL create namespace $NAMESPACE
+
+if [ -n "${PLUS_TOKEN}" ]; then
+  $KUBECTL create secret docker-registry nginx-regcred --docker-server=private-registry.nginx.com --docker-username=$PLUS_TOKEN --docker-password=none -n $NAMESPACE
+
+  $HELM upgrade --install nginx-ingress nginx-stable/nginx-ingress \
+    --namespace $NAMESPACE \
+    --set controller.config.entries.external-status-address="127.0.0.1" \
+    --set controller.image.repository=private-registry.nginx.com/nginx-ic/nginx-plus-ingress \
+    --set controller.serviceAccount.imagePullSecretName=nginx-regcred \
+    --set controller.nginxplus=true \
+    --version $CHART_VERSION \
+    ${HELM_OPTS}
+else
+  $HELM upgrade --install nginx-ingress nginx-stable/nginx-ingress \
+    --namespace $NAMESPACE \
+    --set controller.config.entries.external-status-address="127.0.0.1" \
+    --version $CHART_VERSION \
+    ${HELM_OPTS}
+fi
+
+echo "NGINX ingress is enabled"

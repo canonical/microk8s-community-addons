@@ -206,3 +206,11 @@ microk8s-addons:
       supported_architectures:
         - amd64
         - arm64
+
+    - name: "nginx-ingress"
+      description: "NGINX Ingress controller from the NGINX Team."
+      version: "0.16.2"
+      check_status: "deployment.apps/nginx-ingress-nginx-ingress"
+      supported_architectures:
+        - amd64
+        - arm64
