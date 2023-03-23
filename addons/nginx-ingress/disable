@@ -4,14 +4,14 @@ set -e
 source $SNAP/actions/common/utils.sh
 CURRENT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
 
-NAMESPACE="ingress"
+NAMESPACE="nginx-ingress"
 KUBECTL="$SNAP/microk8s-kubectl.wrapper"
 HELM="${SNAP}/microk8s-helm3.wrapper"
 echo "Disabling NGINX ingress"
 
 # unload the the manifests
 $HELM uninstall nginx-ingress -n $NAMESPACE > /dev/null 2>&1
-$KUBECTL delete secret nginx-regcred -n $NAMESPACE
+$KUBECTL delete secret nginx-regcred -n $NAMESPACE  > /dev/null 2>&1 || true
 $KUBECTL delete namespace $NAMESPACE
 
 echo "NGINX ingress is disabled"

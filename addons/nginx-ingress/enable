@@ -6,7 +6,7 @@ source $SNAP/actions/common/utils.sh
 CURRENT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
 source $CURRENT_DIR/../common/utils.sh
 
-NAMESPACE="ingress"
+NAMESPACE="nginx-ingress"
 CHART_VERSION="0.16.2"
 KUBECTL="$SNAP/microk8s-kubectl.wrapper"
 HELM="${SNAP}/microk8s-helm3.wrapper"
@@ -56,14 +56,14 @@ if [ -n "${NGINX_VALUES}" ]; then
   HELM_OPTS+="--values ${NGINX_VALUES} "
 fi
 
-$KUBECTL create namespace $NAMESPACE
-
 if [ -n "${PLUS_TOKEN}" ]; then
+  $KUBECTL create namespace $NAMESPACE
   $KUBECTL create secret docker-registry nginx-regcred --docker-server=private-registry.nginx.com --docker-username=$PLUS_TOKEN --docker-password=none -n $NAMESPACE
 
   $HELM upgrade --install nginx-ingress nginx-stable/nginx-ingress \
     --namespace $NAMESPACE \
     --set controller.config.entries.external-status-address="127.0.0.1" \
+    --set controller.hostNetwork=true \
     --set controller.image.repository=private-registry.nginx.com/nginx-ic/nginx-plus-ingress \
     --set controller.serviceAccount.imagePullSecretName=nginx-regcred \
     --set controller.nginxplus=true \
@@ -71,8 +71,9 @@ if [ -n "${PLUS_TOKEN}" ]; then
     ${HELM_OPTS}
 else
   $HELM upgrade --install nginx-ingress nginx-stable/nginx-ingress \
-    --namespace $NAMESPACE \
+    --namespace $NAMESPACE --create-namespace \
     --set controller.config.entries.external-status-address="127.0.0.1" \
+    --set controller.hostNetwork=true \
     --version $CHART_VERSION \
     ${HELM_OPTS}
 fi
