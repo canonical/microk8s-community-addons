@@ -54,13 +54,16 @@ class TestNginxIngress(object):
 
         assert service_ok
 
-
     def validate_nginx_ingress(self):
         """
         Validate nginx-ingress
         """
-        kubectl("annotate ingressclass nginx ingressclass.kubernetes.io/is-default-class=true")
-        wait_for_pod_state("", "nginx-ingress", "running", label="app=nginx-ingress-nginx-ingress")
+        kubectl(
+            "annotate ingressclass nginx ingressclass.kubernetes.io/is-default-class=true"
+        )
+        wait_for_pod_state(
+            "", "nginx-ingress", "running", label="app=nginx-ingress-nginx-ingress"
+        )
 
         here = os.path.dirname(os.path.abspath(__file__))
         manifest = os.path.join(here, "templates", "ingress.yaml")
