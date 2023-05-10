@@ -6,10 +6,11 @@ source $SNAP/actions/common/utils.sh
 
 echo "Enabling Istio"
 
+ARCH=$(arch)
+
 if [ ! -f "${SNAP_DATA}/bin/istioctl" ]
 then
   ISTIO_VERSION="v1.15.3"
-  if [ "$(uname -i)" == 'x86_64' ]; then ARCH='amd64'; else ARCH='arm64'; fi
   echo "Fetching istioctl version $ISTIO_VERSION ($ARCH)."
   ISTIO_ERSION=$(echo $ISTIO_VERSION | sed 's/v//g')
   run_with_sudo mkdir -p "${SNAP_DATA}/tmp/istio"
