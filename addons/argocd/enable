@@ -6,7 +6,7 @@ source $SNAP/actions/common/utils.sh
 
 NAMESPACE_ARGOCD="argocd"
 
-ARGOCD_HELM_VERSION="4.6.3"
+ARGOCD_HELM_VERSION="5.34.3"
 
 "$SNAP/microk8s-enable.wrapper" helm3
 
