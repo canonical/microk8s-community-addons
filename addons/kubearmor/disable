@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+echo "Removing kubearmor from k8s cluster"
+
+config=$(sudo microk8s config)
+
+echo "$config" > $SNAP_DATA/.kube/config
+
+export KUBECONFIG=$SNAP_DATA/.kube/config
+
+karmor uninstall
+
+rm $SNAP_DATA/.kube/config
+
+cd / && sudo rm /var/lib/snapd/snap/bin/karmor

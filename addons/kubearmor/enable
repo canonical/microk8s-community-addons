@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+set -e
+
+config=$(sudo microk8s config)
+
+echo "$config" > $SNAP_DATA/.kube/config
+
+export KUBECONFIG=$SNAP_DATA/.kube/config
+
+curl -sfL http://get.kubearmor.io/ | sudo sh -s -- -b /var/lib/snapd/snap/bin
+
+karmor install
