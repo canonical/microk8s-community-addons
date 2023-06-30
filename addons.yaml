@@ -210,7 +210,7 @@ microk8s-addons:
 
     - name: "kubearmor"
       description: "Cloud-native runtime security enforcement system for k8s"
-      version: "0.10.1"
+      version: "0.10.2"
       check_status: "daemonset.apps/kubearmor"
       supported_architectures:
         - amd64
