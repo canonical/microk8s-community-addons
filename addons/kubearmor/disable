@@ -12,6 +12,6 @@ karmor uninstall
 
 rm $SNAP_DATA/.kube/config
 
-if [[ -f "/var/lib/snapd/snap/bin/karmor" ]]; then
-    sudo rm /var/lib/snapd/snap/bin/karmor
+if [[ -f "/usr/local/bin/karmor" ]]; then
+    sudo rm /usr/local/bin/karmor
 fi

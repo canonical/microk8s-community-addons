@@ -11,7 +11,7 @@ export KUBECONFIG=$SNAP_DATA/.kube/config
 if hash karmor 2>/dev/null; then
     echo "karmor tool is already installed"
 else 
-    curl -sfL http://get.kubearmor.io/ | sudo sh -s -- -b /var/lib/snapd/snap/bin
+    curl -sfL http://get.kubearmor.io/ | sudo sh -s -- -b /usr/local/bin
 fi
 
 karmor install
