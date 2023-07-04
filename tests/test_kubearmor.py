@@ -34,9 +34,8 @@ class TestKubearmor(object):
 
         wait_for_installation()
         kubearmor_pods = [
-            "kubearmor-policy-manager",
-            "kubearmor-host-policy-manager",
-            "kubearmor-annotation-manager",
+            "kubearmor-controller",
+            "kubearmor",
             "kubearmor-relay",
         ]
         for pod in kubearmor_pods:
