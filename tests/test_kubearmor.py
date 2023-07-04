@@ -1,4 +1,7 @@
 import os
+import pytest
+import platform
+
 
 from utils import (
     kubectl,
@@ -11,7 +14,7 @@ from utils import (
 
 
 class TestKubearmor(object):
-
+    @pytest.mark.skipif(platform.machine() == "s390x", reason="Not available on s390x")
     def test_kubearmor(self):
         """
         Sets up and validates kubearmor.
@@ -31,7 +34,10 @@ class TestKubearmor(object):
 
         wait_for_installation()
         kubearmor_pods = [
-            "kubearmor-policy-manager", "kubearmor-host-policy-manager", "kubearmor-annotation-manager", "kubearmor-relay"
+            "kubearmor-policy-manager",
+            "kubearmor-host-policy-manager",
+            "kubearmor-annotation-manager",
+            "kubearmor-relay",
         ]
         for pod in kubearmor_pods:
             wait_for_pod_state(
