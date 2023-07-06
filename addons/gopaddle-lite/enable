@@ -182,12 +182,12 @@ enable_gopaddle_lite() {
     #echo "Waiting for the gopaddle services to move to running state. This may take a while."
     #$KUBECTL wait --for=condition=ready pod -l released-by=gopaddle -n gopaddle --timeout=20m
     
-    echo ""
+    # echo ""
     echo ""
     echo "gopaddle lite is enabled. Please wait for 10-15 minutes for gopaddle services to move to READY state."
-    echo ""
-    echo "You can check the status of the services by running the command 'microk8s.kubectl wait --for=condition=ready pod -l released-by=gopaddle -n gopaddle'."
-    echo ""
+    # echo ""
+    echo "You can check the status of the services by running the command 'microk8s.kubectl get pods -n gopaddle'."
+    # echo ""
     if [ $STATICIP ]
     then
         echo "Once the services are ready, you can access the gopaddle endpoint at http://$STATICIP:30003"
