@@ -169,8 +169,8 @@ microk8s-addons:
         - amd64
         - arm64
 
-    - name: "gopaddle-lite"
-      description: "Cheapest, fastest and simplest way to modernize your applications"
+    - name: "gopaddle"
+      description: "DevSecOps and Multi-Cloud Kubernetes Platform"
       version: "latest"
       check_status: "deployment.apps/gateway"
       supported_architectures:
