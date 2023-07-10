@@ -47,8 +47,7 @@ class TestKubearmor(object):
         manifest = os.path.join(here, "templates", "kubearmor-nginx.yaml")
         policy = os.path.join(here, "templates", "kubearmor-policy.yaml")
         kubectl("apply -f {}".format(manifest))
-        wait_for_pod_state("", "kubearmor-test", "running",
-                           label="app=nginx-test-pod")
+        wait_for_pod_state("", "kubearmor-test", "running", label="app=nginx-test-pod")
         kubectl("apply -f {}".format(policy))
         output = kubectl("exec -n kubearmor-test nginx -- apt")
         kubectl("delete -f {}".format(policy))
@@ -59,3 +58,4 @@ class TestKubearmor(object):
         else:
             print("Kubearmor testing failed.")
             assert False
+
