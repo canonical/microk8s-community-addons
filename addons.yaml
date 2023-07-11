@@ -3,7 +3,7 @@ microk8s-addons:
   addons:
     - name: "microcks"
       description: "Open source Kubernetes Native tool for API Mocking and Testing"
-      version: "1.7.0"
+      version: "1.7.1"
       check_status: "deployment.apps/microcks"
       supported_architectures:
         - arm64
