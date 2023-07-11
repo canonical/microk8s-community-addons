@@ -17,7 +17,11 @@ echo "Enabling Microcks"
 echo "
 
 Microcks ${MICROCKS_CHART_VERSION} has been installed and enabled.
-Happy API(s) Mocking and Testing. Useful commands:
+Happy API(s) Mocking and Testing -> https://microcks."${IP}".nip.io 
+
+Getting started -> https://microcks.io/documentation/getting-started/
+
+Useful commands:
 
 1. Get the external IP of the Microcks service:
 
