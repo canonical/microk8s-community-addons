@@ -2,7 +2,7 @@
 
 set -e
 
-HELM="${SNAP}/microk8s-helm.wrapper"
+HELM="${SNAP}/microk8s-helm3.wrapper"
 NAMESPACE="microcks"
 
 echo "Disabling Microcks"
