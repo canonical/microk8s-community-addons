@@ -2,37 +2,51 @@
 
 set -e
 
-HELM="${SNAP}/microk8s-helm.wrapper"
+source $SNAP/actions/common/utils.sh
+
+HELM="${SNAP}/microk8s-helm3.wrapper"
 MICROK8S_CONFIG="${SNAP}/microk8s-config.wrapper"
 
 NAMESPACE="microcks"
-MICROCKS_CHART_VERSION="1.7.1"
+MICROCKS_CHART_VERSION="1.7.0"
+
+# Retreive microk8s cluster IP to nip.io setup
 IP=`"${MICROK8S_CONFIG}" | grep "server: https:" | sed "s/\/\// /" | awk -F ':' '{print $3}' | sed "s/ //"`
 
-echo "Enabling Microcks"
+# Ensure all prerequisites services are enabled
+do_prerequisites() {
+	# Enable dns service
+	"$SNAP/microk8s-enable.wrapper" dns
+	# Enable hostpath-storage service (storage is deprecated)
+	"$SNAP/microk8s-enable.wrapper" hostpath-storage
+	# Enable ingress service
+	"$SNAP/microk8s-enable.wrapper" ingress
+	# Allow some time for the apiserver to start and be responsive
+	${SNAP}/microk8s-status.wrapper --wait-ready --timeout 30 >/dev/null
+}
 
-"${HELM}" repo add microcks https://microcks.io/helm
-"${HELM}" upgrade --install --create-namespace microcks microcks/microcks -n "${NAMESPACE}" --version "${MICROCKS_CHART_VERSION}" --set microcks.url=microcks."${IP}".nip.io --set keycloak.url=keycloak."${IP}".nip.io
+get_microcks () {
+	echo "Enabling Microcks"
 
-echo "
+	# Add the microcks chart repository
+	"${HELM}" repo add microcks https://microcks.io/helm
+	# Install the helm chart
+	"${HELM}" upgrade --install --create-namespace microcks microcks/microcks -n "${NAMESPACE}" --version "${MICROCKS_CHART_VERSION}" --set microcks.url=microcks."${IP}".nip.io --set keycloak.url=keycloak."${IP}".nip.io
 
-Microcks ${MICROCKS_CHART_VERSION} has been installed and enabled.
-Happy API(s) Mocking and Testing -> https://microcks."${IP}".nip.io 
+	# Final comment and informations
+	echo ""
+	echo "Microcks ${MICROCKS_CHART_VERSION} has been installed and enabled."
+	echo "Happy API(s) Mocking and Testing -> https://microcks."${IP}".nip.io"
+	echo ""
+	echo "Getting started -> https://microcks.io/documentation/getting-started/"
+	echo ""
+	echo "Useful commands:"
+	echo ""
+	echo "- Retrieve all Microcks' URLs of the created ingress:"
+	echo ""
+	echo "$ microk8s kubectl get ingress -n microcks"
+	echo ""
+}
 
-Getting started -> https://microcks.io/documentation/getting-started/
-
-Useful commands:
-
-1. Get the external IP of the Microcks service:
-
-    $ microk8s kubectl get service -n microcks microcks
-
-2. Access the Microcks Web UI on a different port (default is 8080): 
-
-    $ microk8s kubectl port-forward -n microcks microcks 18080:8080
-
-3. Retrieve all Microcks' URLs of the created ingress:
-
-    $ microk8s kubectl get ingress -n microcks
-
-"
+do_prerequisites
+get_microcks
