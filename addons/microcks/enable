@@ -15,12 +15,12 @@ IP=`"${MICROK8S_CONFIG}" | grep "server: https:" | sed "s/\/\// /" | awk -F ':' 
 
 # Ensure all prerequisites services are enabled
 do_prerequisites() {
-	# Enable dns service
-	"$SNAP/microk8s-enable.wrapper" dns
-	# Enable hostpath-storage service (storage is deprecated)
-	"$SNAP/microk8s-enable.wrapper" hostpath-storage
-	# Enable ingress service
-	"$SNAP/microk8s-enable.wrapper" ingress
+        # Enable dns service
+        "$SNAP/microk8s-enable.wrapper" dns
+        # Enable ingress service
+        "$SNAP/microk8s-enable.wrapper" ingress
+        # Enable hostpath-storage service (storage is deprecated)
+        "$SNAP/microk8s-enable.wrapper" hostpath-storage
 	# Allow some time for the apiserver to start and be responsive
 	${SNAP}/microk8s-status.wrapper --wait-ready --timeout 30 >/dev/null
 }
@@ -28,8 +28,8 @@ do_prerequisites() {
 get_microcks () {
 	echo "Enabling Microcks"
 
-	# Add the microcks chart repository
-	"${HELM}" repo add microcks https://microcks.io/helm
+        # Always update the chart repo first (do not miss minor versions...), add repo if it does not exists
+        "${HELM}" repo update microcks || "${HELM}" repo add microcks https://microcks.io/helm
 	# Install the helm chart
 	"${HELM}" upgrade --install --create-namespace microcks microcks/microcks -n "${NAMESPACE}" --version "${MICROCKS_CHART_VERSION}" --set microcks.url=microcks."${IP}".nip.io --set keycloak.url=keycloak."${IP}".nip.io
 
