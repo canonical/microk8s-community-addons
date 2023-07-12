@@ -11,8 +11,8 @@ from utils import (
 
 class TestArgoCD(object):
     @pytest.mark.skipif(
-        platform.machine() != "x86_64",
-        reason="ArgoCD tests are only relevant in x86 architectures",
+        platform.machine() == "s390x",
+        reason="ArgoCD tests are only relevant in x86 and arm64 architectures",
     )
     @pytest.mark.skipif(
         os.environ.get("UNDER_TIME_PRESSURE") == "True",
