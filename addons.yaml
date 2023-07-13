@@ -94,7 +94,7 @@ microk8s-addons:
 
     - name: "keda"
       description: "Kubernetes-based Event Driven Autoscaling"
-      version: "2.6.1"
+      version: "2.11.1"
       check_status: "pod/keda-operator"
       supported_architectures:
         - amd64
