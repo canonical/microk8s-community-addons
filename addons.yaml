@@ -9,7 +9,6 @@ microk8s-addons:
         - arm64
         - amd64
 
-  addons:
     - name: "dashboard-ingress"
       description: "Ingress definition for Kubernetes dashboard"
       version: "1.0.0"
