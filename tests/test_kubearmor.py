@@ -58,4 +58,3 @@ class TestKubearmor(object):
         else:
             print("Kubearmor testing failed.")
             assert False
-
