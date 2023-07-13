@@ -10,7 +10,7 @@ MICROK8S_CONFIG="${SNAP}/microk8s-config.wrapper"
 NAMESPACE="microcks"
 MICROCKS_CHART_VERSION="1.7.1"
 
-# Retreive microk8s cluster IP to nip.io setup
+# Retrieve microk8s cluster IP to nip.io setup
 IP=`"${MICROK8S_CONFIG}" | grep "server: https:" | sed "s/\/\// /" | awk -F ':' '{print $3}' | sed "s/ //"`
 
 # Ensure all prerequisites services are enabled
@@ -33,7 +33,7 @@ get_microcks () {
 	# Install the helm chart
 	"${HELM}" upgrade --install --create-namespace microcks microcks/microcks -n "${NAMESPACE}" --version "${MICROCKS_CHART_VERSION}" --set microcks.url=microcks."${IP}".nip.io --set keycloak.url=keycloak."${IP}".nip.io
 
-	# Final comment and informations
+	# Final comment and information
 	echo ""
 	echo "Microcks ${MICROCKS_CHART_VERSION} has been installed and enabled."
 	echo "Happy API(s) Mocking and Testing -> https://microcks."${IP}".nip.io"
