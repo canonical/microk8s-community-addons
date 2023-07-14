@@ -28,3 +28,4 @@ class TestMicrocks(object):
         wait_for_pod_state(
             "", "microcks", "running", label="app.kubernetes.io/name=microcks"
         )
+        
