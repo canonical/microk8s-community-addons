@@ -27,7 +27,7 @@ $HELM repo add sosivio https://helm.sosiv.io > /dev/null 2>&1
 $HELM repo update > /dev/null 2>&1
 $KUBECTL create ns $NAMESPACE_SOSIVIO > /dev/null 2>&1 || true
 $HELM upgrade -n $NAMESPACE_SOSIVIO --install \
-  sosivio sosivio/sosivio \
+  sosivio sosivio/sosivio --version 1.5.3 \
   --set expose=LoadBalancer > /dev/null 2>&1 || true
 
 echo ""
