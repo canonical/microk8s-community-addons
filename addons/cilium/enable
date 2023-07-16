@@ -41,7 +41,7 @@ echo "Enabling Cilium"
 # Cilium Supports Arm beginning v1.11.12 and greater
 read -ra CILIUM_VERSION <<< "$1"
 if [ -z "$CILIUM_VERSION" ]; then
-  CILIUM_VERSION="v1.11.12"
+  CILIUM_VERSION="v1.13.4"
 fi
 CILIUM_ERSION=$(echo $CILIUM_VERSION | sed 's/v//g')
 
@@ -75,12 +75,12 @@ else
   (cd "${SNAP_DATA}/tmp/cilium/$CILIUM_DIR/install/kubernetes"
   ${SNAP}/microk8s-helm3.wrapper template cilium \
       --namespace $NAMESPACE \
-      --set cni.confPath="$SNAP_DATA/args/cni-network" \
-      --set cni.binPath="$SNAP_DATA/opt/cni/bin" \
+      --set cni.confPath="/var/snap/microk8s/current/args/cni-network" \
+      --set cni.binPath="/var/snap/microk8s/current/opt/cni/bin" \
       --set cni.customConf=true \
       --set containerRuntime.integration="containerd" \
-      --set global.containerRuntime.socketPath="$SNAP_COMMON/run/containerd.sock" \
-      --set daemon.runPath="$SNAP_DATA/var/run/cilium" \
+      --set global.containerRuntime.socketPath="/var/snap/microk8s/common/run/containerd.sock" \
+      --set daemon.runPath="/var/snap/microk8s/current/var/run/cilium" \
       --set operator.replicas=1 \
       --set keepDeprecatedLabels=true \
       --set ipam.operator.clusterPoolIPv4PodCIDR=10.1.0.0/16 \
