@@ -212,6 +212,7 @@ microk8s-addons:
       description: "Cloud-native runtime security enforcement system for k8s"
       version: "0.10.2"
       check_status: "daemonset.apps/kubearmor"
+      confinement: "classic"
       supported_architectures:
         - amd64
         - arm64

@@ -2,16 +2,12 @@
 
 set -e
 
-config=$(sudo microk8s config)
+CURRENT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
 
-echo "$config" > $SNAP_DATA/.kube/config
+curl -sfL http://get.kubearmor.io/ | sudo sh -s -- -b "$CURRENT_DIR/tmp"
 
-export KUBECONFIG=$SNAP_DATA/.kube/config
+cp "$CURRENT_DIR/karmor" "$SNAP_COMMON/plugins"
 
-if hash karmor 2>/dev/null; then
-    echo "karmor tool is already installed"
-else 
-    curl -sfL http://get.kubearmor.io/ | sudo sh -s -- -b /usr/local/bin
-fi
+chmod +x "$SNAP_COMMON/plugins/karmor"
 
-karmor install
+sudo microk8s karmor install
