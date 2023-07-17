@@ -90,7 +90,7 @@ else
   )
 
   ${SNAP}/microk8s-status.wrapper --wait-ready >/dev/null
-  echo "Deploying $SNAP_DATA/actions/cilium.yaml. This may take several minutes."
+  echo "Waiting for cilium. This may take several minutes."
   "$SNAP/microk8s-kubectl.wrapper" -n $NAMESPACE rollout status ds/cilium
 
   # Fetch the Cilium CLI binary and install
@@ -106,7 +106,7 @@ else
   echo "Cilium is enabled"
   echo
   echo "You can now enable hubble with:"
-  echo "  microk8s helm upgrade cilium cilium/cilium --version ${CILIUM_VERSION} --namespace ${NAMESPACE} --reuse-values --set hubble.relay.enabled=true    --set hubble.ui.enabled=true"
+  echo "  sudo microk8s cilium hubble enable"
 
 fi
 
