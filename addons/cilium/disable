@@ -6,7 +6,7 @@ source $SNAP/actions/common/utils.sh
 
 echo "Disabling Cilium"
 
-"$SNAP/microk8s-kubectl.wrapper" delete -f "$SNAP_DATA/actions/cilium.yaml"
+"$SNAP/microk8s-helm.wrapper" uninstall cilium -n kube-system || true
 
 # Give K8s some time to process the deletion request
 sleep 15
