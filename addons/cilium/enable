@@ -45,7 +45,7 @@ if [ -z "$CILIUM_VERSION" ]; then
 fi
 CILIUM_ERSION=$(echo $CILIUM_VERSION | sed 's/v//g')
 
-if [ -f "${SNAP_DATA}/bin/cilium-$CILIUM_ERSION" ]
+if [ -f "${SNAP_COMMON}/plugins/cilium" ]
 then
   echo "Cilium version $CILIUM_VERSION is already installed."
 else
@@ -68,8 +68,11 @@ else
   run_with_sudo mv "$SNAP_DATA/args/cni-network/cni.conf" "$SNAP_DATA/args/cni-network/10-kubenet.conf" 2>/dev/null || true
   run_with_sudo mv "$SNAP_DATA/args/cni-network/flannel.conflist" "$SNAP_DATA/args/cni-network/20-flanneld.conflist" 2>/dev/null || true
   run_with_sudo cp "$SNAP_DATA/tmp/cilium/$CILIUM_DIR/$CILIUM_CNI_CONF" "$SNAP_DATA/args/cni-network/05-cilium-cni.conf"
-
-  run_with_sudo mkdir -p "$SNAP_DATA/actions/cilium/"
+  
+  IPv4_CLUSTER_CIDR="10.1.0.0/16"
+  if [ -e "${SNAP_DATA}/args/cni-env" ]; then
+    source "${SNAP_DATA}/args/cni-env"
+  fi
 
   # Generate the YAMLs for Cilium and apply them
   (cd "${SNAP_DATA}/tmp/cilium/$CILIUM_DIR/install/kubernetes"
@@ -85,7 +88,7 @@ else
       --set daemon.runPath="/var/snap/microk8s/current/var/run/cilium" \
       --set operator.replicas=1 \
       --set keepDeprecatedLabels=true \
-      --set ipam.operator.clusterPoolIPv4PodCIDR=10.1.0.0/16 \
+      --set ipam.operator.clusterPoolIPv4PodCIDR="${IPv4_CLUSTER_CIDR}" \
       --set nodePort.enabled=true
   )
 
@@ -96,7 +99,7 @@ else
   # Fetch the Cilium CLI binary and install
   ARCH=$(arch)
   SCRIPT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
-  mkdir -p ${SCRIPT_DIR}/cli/
+  mkdir -p "${SCRIPT_DIR}/cli/"
   fetch_as "https://github.com/cilium/cilium-cli/releases/download/v0.15.2/cilium-linux-${ARCH}.tar.gz" "${SCRIPT_DIR}/cli/cilium.tar.gz"
   tar -zxf "${SCRIPT_DIR}/cli/cilium.tar.gz" -C "${SCRIPT_DIR}/cli"
   chmod +x "${SCRIPT_DIR}/cli/cilium"
