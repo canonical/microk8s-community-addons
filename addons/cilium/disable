@@ -28,6 +28,7 @@ run_with_sudo rm -f "$SNAP_DATA/actions/cilium.yaml"
 run_with_sudo rm -rf "$SNAP_DATA/actions/cilium"
 run_with_sudo rm -rf "$SNAP_DATA/var/run/cilium"
 run_with_sudo rm -rf "$SNAP_DATA/sys/fs/bpf"
+run_with_sudo rm -rf "$SNAP_COMMON/plugins/cilium"
 
 if $SNAP/sbin/ip link show "cilium_vxlan"
 then
