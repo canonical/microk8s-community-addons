@@ -25,6 +25,4 @@ class TestMicrocks(object):
         """
         Validate microcks
         """
-        wait_for_pod_state(
-            "", "microcks", "running", label="app=microcks"
-        )
+        wait_for_pod_state("", "microcks", "running", label="app=microcks")
