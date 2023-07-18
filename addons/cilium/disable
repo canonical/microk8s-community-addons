@@ -6,7 +6,7 @@ source $SNAP/actions/common/utils.sh
 
 echo "Disabling Cilium"
 
-"$SNAP/microk8s-kubectl.wrapper" delete -f "$SNAP_DATA/actions/cilium.yaml"
+"$SNAP/microk8s-helm.wrapper" uninstall cilium -n kube-system || true
 
 # Give K8s some time to process the deletion request
 sleep 15
@@ -28,6 +28,7 @@ run_with_sudo rm -f "$SNAP_DATA/actions/cilium.yaml"
 run_with_sudo rm -rf "$SNAP_DATA/actions/cilium"
 run_with_sudo rm -rf "$SNAP_DATA/var/run/cilium"
 run_with_sudo rm -rf "$SNAP_DATA/sys/fs/bpf"
+run_with_sudo rm -rf "$SNAP_COMMON/plugins/cilium"
 
 if $SNAP/sbin/ip link show "cilium_vxlan"
 then

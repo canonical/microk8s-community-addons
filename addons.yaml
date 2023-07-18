@@ -51,7 +51,7 @@ microk8s-addons:
 
     - name: "cilium"
       description: "SDN, fast with full network policy"
-      version: "1.11.12"
+      version: "1.13.4"
       check_status: "pod/cilium"
       confinement: "classic"
       supported_architectures:

@@ -41,11 +41,11 @@ echo "Enabling Cilium"
 # Cilium Supports Arm beginning v1.11.12 and greater
 read -ra CILIUM_VERSION <<< "$1"
 if [ -z "$CILIUM_VERSION" ]; then
-  CILIUM_VERSION="v1.11.12"
+  CILIUM_VERSION="v1.13.4"
 fi
 CILIUM_ERSION=$(echo $CILIUM_VERSION | sed 's/v//g')
 
-if [ -f "${SNAP_DATA}/bin/cilium-$CILIUM_ERSION" ]
+if [ -f "${SNAP_COMMON}/plugins/cilium" ]
 then
   echo "Cilium version $CILIUM_VERSION is already installed."
 else
@@ -68,41 +68,48 @@ else
   run_with_sudo mv "$SNAP_DATA/args/cni-network/cni.conf" "$SNAP_DATA/args/cni-network/10-kubenet.conf" 2>/dev/null || true
   run_with_sudo mv "$SNAP_DATA/args/cni-network/flannel.conflist" "$SNAP_DATA/args/cni-network/20-flanneld.conflist" 2>/dev/null || true
   run_with_sudo cp "$SNAP_DATA/tmp/cilium/$CILIUM_DIR/$CILIUM_CNI_CONF" "$SNAP_DATA/args/cni-network/05-cilium-cni.conf"
-
-  run_with_sudo mkdir -p "$SNAP_DATA/actions/cilium/"
+  
+  IPv4_CLUSTER_CIDR="10.1.0.0/16"
+  if [ -e "${SNAP_DATA}/args/cni-env" ]; then
+    source "${SNAP_DATA}/args/cni-env"
+  fi
 
   # Generate the YAMLs for Cilium and apply them
   (cd "${SNAP_DATA}/tmp/cilium/$CILIUM_DIR/install/kubernetes"
-  ${SNAP}/microk8s-helm3.wrapper template cilium \
+  # Add cilium repository
+  ${SNAP}/microk8s-helm3.wrapper repo add cilium https://helm.cilium.io/
+  ${SNAP}/microk8s-helm3.wrapper install cilium cilium/cilium --version ${CILIUM_VERSION} \
       --namespace $NAMESPACE \
-      --set cni.confPath="$SNAP_DATA/args/cni-network" \
-      --set cni.binPath="$SNAP_DATA/opt/cni/bin" \
+      --set cni.confPath="/var/snap/microk8s/current/args/cni-network" \
+      --set cni.binPath="/var/snap/microk8s/current/opt/cni/bin" \
       --set cni.customConf=true \
       --set containerRuntime.integration="containerd" \
-      --set global.containerRuntime.socketPath="$SNAP_COMMON/run/containerd.sock" \
-      --set daemon.runPath="$SNAP_DATA/var/run/cilium" \
+      --set global.containerRuntime.socketPath="/var/snap/microk8s/common/run/containerd.sock" \
+      --set daemon.runPath="/var/snap/microk8s/current/var/run/cilium" \
       --set operator.replicas=1 \
       --set keepDeprecatedLabels=true \
-      --set ipam.operator.clusterPoolIPv4PodCIDR=10.1.0.0/16 \
-      --set nodePort.enabled=true \
-      | run_with_sudo tee "$SNAP_DATA/actions/cilium.yaml" >/dev/null)
+      --set ipam.operator.clusterPoolIPv4PodCIDR="${IPv4_CLUSTER_CIDR}" \
+      --set nodePort.enabled=true
+  )
 
   ${SNAP}/microk8s-status.wrapper --wait-ready >/dev/null
-  echo "Deploying $SNAP_DATA/actions/cilium.yaml. This may take several minutes."
-  "$SNAP/microk8s-kubectl.wrapper" apply -f "$SNAP_DATA/actions/cilium.yaml"
+  echo "Waiting for cilium. This may take several minutes."
   "$SNAP/microk8s-kubectl.wrapper" -n $NAMESPACE rollout status ds/cilium
 
   # Fetch the Cilium CLI binary and install
-  CILIUM_POD=$("$SNAP/microk8s-kubectl.wrapper" -n $NAMESPACE get pod -l $CILIUM_LABELS -o jsonpath="{.items[0].metadata.name}")
-  CILIUM_BIN=$(mktemp)
-  "$SNAP/microk8s-kubectl.wrapper" -n $NAMESPACE cp $CILIUM_POD:/usr/bin/cilium $CILIUM_BIN >/dev/null
-  run_with_sudo mkdir -p "$SNAP_DATA/bin/"
-  run_with_sudo mv $CILIUM_BIN "$SNAP_DATA/bin/cilium-$CILIUM_ERSION"
-  run_with_sudo chmod +x "$SNAP_DATA/bin/"
-  run_with_sudo chmod +x "$SNAP_DATA/bin/cilium-$CILIUM_ERSION"
-  run_with_sudo ln -s $SNAP_DATA/bin/cilium-$CILIUM_ERSION $SNAP_DATA/bin/cilium
+  ARCH=$(arch)
+  SCRIPT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
+  mkdir -p "${SCRIPT_DIR}/cli/"
+  fetch_as "https://github.com/cilium/cilium-cli/releases/download/v0.15.2/cilium-linux-${ARCH}.tar.gz" "${SCRIPT_DIR}/cli/cilium.tar.gz"
+  tar -zxf "${SCRIPT_DIR}/cli/cilium.tar.gz" -C "${SCRIPT_DIR}/cli"
+  chmod +x "${SCRIPT_DIR}/cli/cilium"
+  cp "${SCRIPT_DIR}/cilium" "${SNAP_COMMON}/plugins/cilium"
+  chmod +x "${SNAP_COMMON}/plugins/cilium"
 
-  run_with_sudo rm -rf "$SNAP_DATA/tmp/cilium"
+  echo "Cilium is enabled"
+  echo
+  echo "You can now enable hubble with:"
+  echo "  sudo microk8s cilium hubble enable"
+
 fi
 
-echo "Cilium is enabled"
