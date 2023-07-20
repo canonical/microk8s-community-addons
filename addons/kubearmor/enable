@@ -4,7 +4,7 @@ set -e
 
 CURRENT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
 
-curl -sfL http://get.kubearmor.io/ | sudo sh -s -- -b "$CURRENT_DIR/tmp"
+curl -sfL http://get.kubearmor.io/ | sudo sh -s -- -b "$SNAP_COMMON/bin"
 
 cp "$CURRENT_DIR/karmor" "$SNAP_COMMON/plugins"
 

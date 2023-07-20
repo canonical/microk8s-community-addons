@@ -2,15 +2,13 @@
 
 echo "Removing kubearmor from k8s cluster"
 
-CURRENT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
-
 sudo microk8s karmor uninstall
 
 if [[ -f "$SNAP_COMMON/plugins/karmor" ]]; then
     sudo rm "$SNAP_COMMON/plugins/karmor"
 fi
 
-if [[ -d "$CURRENT_DIR/tmp" ]]; then
-    sudo rm -rf "$CURRENT_DIR/tmp"
+if [[ -f "$SNAP_COMMON/bin/karmor" ]]; then
+    sudo rm "$SNAP_COMMON/bin/karmor"
 fi
 
