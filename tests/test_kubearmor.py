@@ -1,8 +1,10 @@
 import pytest
 import platform
+import os
 
 
 from utils import (
+    is_container,
     microk8s_enable,
     microk8s_disable,
     microk8s_reset,
@@ -12,6 +14,8 @@ from utils import (
 
 
 class TestKubearmor(object):
+    @pytest.mark.skipif(os.environ.get("STRICT") == "yes", reason=("Skipping kubearmor tests in strict confinement as they are expected to fail"))
+    @pytest.mark.skipif(is_container(), reason="Kubearmor tests are skipped in containers")
     @pytest.mark.skipif(platform.machine() == "s390x", reason="Not available on s390x")
     def test_kubearmor(self):
         """
