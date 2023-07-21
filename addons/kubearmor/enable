@@ -10,4 +10,4 @@ cp "$CURRENT_DIR/karmor" "$SNAP_COMMON/plugins"
 
 chmod +x "$SNAP_COMMON/plugins/karmor"
 
-sudo microk8s karmor install
+sudo microk8s karmor install --image=kubearmor/kubearmor:v0.10.2
