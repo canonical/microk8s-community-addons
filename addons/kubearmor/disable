@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+echo "Removing kubearmor from k8s cluster"
+
+sudo microk8s karmor uninstall
+
+if [[ -f "$SNAP_COMMON/plugins/karmor" ]]; then
+    sudo rm "$SNAP_COMMON/plugins/karmor"
+fi
+
+if [[ -f "$SNAP_COMMON/bin/karmor" ]]; then
+    sudo rm "$SNAP_COMMON/bin/karmor"
+fi
+
