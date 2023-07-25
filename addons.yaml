@@ -1,6 +1,14 @@
 microk8s-addons:
   description: "List of all addons included in Microk8s."
   addons:
+    - name: "microcks"
+      description: "Open source Kubernetes Native tool for API Mocking and Testing"
+      version: "1.7.1"
+      check_status: "deployment.apps/microcks"
+      supported_architectures:
+        - arm64
+        - amd64
+
     - name: "dashboard-ingress"
       description: "Ingress definition for Kubernetes dashboard"
       version: "1.0.0"
