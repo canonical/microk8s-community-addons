@@ -6,7 +6,7 @@ source $SNAP/actions/common/utils.sh
 
 NAMESPACE_TRIVY="trivy-system"
 
-TRIVY_HELM_VERSION="0.2.0"
+TRIVY_HELM_VERSION="0.15.1"
 
 KUBECTL="$SNAP/microk8s-kubectl.wrapper"
 HELM="$SNAP/microk8s-helm3.wrapper"
