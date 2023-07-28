@@ -131,7 +131,7 @@ microk8s-addons:
 
     - name: "trivy"
       description: "Kubernetes-native security scanner"
-      version: "0.2.0"
+      version: "0.15.1"
       check_status: "deployment.apps/trivy-operator"
       supported_architectures:
         - arm64
