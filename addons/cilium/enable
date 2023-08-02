@@ -96,20 +96,28 @@ else
   echo "Waiting for cilium. This may take several minutes."
   "$SNAP/microk8s-kubectl.wrapper" -n $NAMESPACE rollout status ds/cilium
 
-  # Fetch the Cilium CLI binary and install
-  ARCH=$(arch)
-  SCRIPT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
-  mkdir -p "${SCRIPT_DIR}/cli/"
-  fetch_as "https://github.com/cilium/cilium-cli/releases/download/v0.15.2/cilium-linux-${ARCH}.tar.gz" "${SCRIPT_DIR}/cli/cilium.tar.gz"
-  tar -zxf "${SCRIPT_DIR}/cli/cilium.tar.gz" -C "${SCRIPT_DIR}/cli"
-  chmod +x "${SCRIPT_DIR}/cli/cilium"
-  cp "${SCRIPT_DIR}/cilium" "${SNAP_COMMON}/plugins/cilium"
-  chmod +x "${SNAP_COMMON}/plugins/cilium"
+  # Check if we are online
+  if ping -q -c 1 -W 1 8.8.8.8 > /dev/null; then
+    # Fetch the Cilium CLI binary and install
+    ARCH=$(arch)
+    SCRIPT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
+    mkdir -p "${SCRIPT_DIR}/cli/"
+    fetch_as "https://github.com/cilium/cilium-cli/releases/download/v0.15.2/cilium-linux-${ARCH}.tar.gz" "${SCRIPT_DIR}/cli/cilium.tar.gz"
+    tar -zxf "${SCRIPT_DIR}/cli/cilium.tar.gz" -C "${SCRIPT_DIR}/cli"
+    chmod +x "${SCRIPT_DIR}/cli/cilium"
+    cp "${SCRIPT_DIR}/cilium" "${SNAP_COMMON}/plugins/cilium"
+    chmod +x "${SNAP_COMMON}/plugins/cilium"
+  else
+    echo "Cluster is in offline mode. Skipping installing Cilium binary."
+  fi
 
   echo "Cilium is enabled"
   echo
-  echo "You can now enable hubble with:"
-  echo "  sudo microk8s cilium hubble enable"
-
+  echo "You can now enable hubble relay and UI with:"
+  echo "  sudo microk8s helm3 upgrade cilium cilium/cilium \\"
+  echo "    --version ${CILIUM_VERSION} \\"
+  echo "    --namespace ${NAMESPACE} \\"
+  echo "    --reuse-values \\"
+  echo "    --set hubble.relay.enabled=true \\"
+  echo "    --set hubble.ui.enabled=true"
 fi
-
