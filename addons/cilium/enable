@@ -119,6 +119,7 @@ else
   # Skip installing the Cilium CLI binary if the cluster is in offline mode
   if [[ "$OFFLINE_MODE" == False ]]; then
     # Fetch the Cilium CLI binary and install
+    echo "Installing Cilium CLI binary"
     ARCH=$(arch)
     SCRIPT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
     mkdir -p "${SCRIPT_DIR}/cli/"
