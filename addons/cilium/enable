@@ -96,8 +96,8 @@ else
   echo "Waiting for cilium. This may take several minutes."
   "$SNAP/microk8s-kubectl.wrapper" -n $NAMESPACE rollout status ds/cilium
 
-  # Check if we are online
-  if ping -q -c 1 -W 1 8.8.8.8 > /dev/null; then
+  # Skip installing the Cilium CLI binary if the cluster is in offline mode
+  if [[ "$*" != *"--offline"* ]]; then
     # Fetch the Cilium CLI binary and install
     ARCH=$(arch)
     SCRIPT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
@@ -120,4 +120,9 @@ else
   echo "    --reuse-values \\"
   echo "    --set hubble.relay.enabled=true \\"
   echo "    --set hubble.ui.enabled=true"
+  echo
+  echo
+  echo "In offline mode, the Cilium CLI binary will not be installed."
+  echo "You can enable offline mode with:"
+  echo "  sudo microk8s enable cilium --offline"
 fi
