@@ -122,12 +122,12 @@ else
     echo "Installing Cilium CLI binary"
     ARCH=$(arch)
     SCRIPT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
-    mkdir -p "${SCRIPT_DIR}/cli/"
-    fetch_as "https://github.com/cilium/cilium-cli/releases/download/v0.15.2/cilium-linux-${ARCH}.tar.gz" "${SCRIPT_DIR}/cli/cilium.tar.gz"
-    tar -zxf "${SCRIPT_DIR}/cli/cilium.tar.gz" -C "${SCRIPT_DIR}/cli"
-    chmod +x "${SCRIPT_DIR}/cli/cilium"
-    cp "${SCRIPT_DIR}/cilium" "${SNAP_COMMON}/plugins/cilium"
-    chmod +x "${SNAP_COMMON}/plugins/cilium"
+    run_with_sudo mkdir -p "${SCRIPT_DIR}/cli/"
+    run_with_sudo fetch_as "https://github.com/cilium/cilium-cli/releases/download/v0.15.2/cilium-linux-${ARCH}.tar.gz" "${SCRIPT_DIR}/cli/cilium.tar.gz"
+    run_with_sudo tar -zxf "${SCRIPT_DIR}/cli/cilium.tar.gz" -C "${SCRIPT_DIR}/cli"
+    run_with_sudo chmod +x "${SCRIPT_DIR}/cli/cilium"
+    run_with_sudo cp "${SCRIPT_DIR}/cilium" "${SNAP_COMMON}/plugins/cilium"
+    run_with_sudo chmod +x "${SNAP_COMMON}/plugins/cilium"
     echo "Cilium is enabled"
     echo
     echo "You can now enable hubble with:"
