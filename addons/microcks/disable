@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+set -e
+
+HELM="${SNAP}/microk8s-helm3.wrapper"
+NAMESPACE="microcks"
+
+echo "Disabling Microcks"
+
+"${HELM}" uninstall microcks -n "${NAMESPACE}"
+
+echo "Microcks is disabled"
