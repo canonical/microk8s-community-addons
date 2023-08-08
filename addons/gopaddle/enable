@@ -18,7 +18,7 @@ CURRENT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
 # fi
 
 STATICIP=""
-HELM_VERSION=""
+HELM_VERSION="4.2.9"
 STORAGECLASS=""
 ARGS=$(getopt -a --options i:v:s: --longoptions "ip:,version:,storageclass:" -- "$@")
 eval set -- "$ARGS"
