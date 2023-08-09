@@ -177,12 +177,13 @@ microk8s-addons:
         - amd64
         - arm64
 
-    - name: "gopaddle-lite"
-      description: "Cheapest, fastest and simplest way to modernize your applications"
-      version: "4.2.5"
+    - name: "gopaddle"
+      description: "DevSecOps and Multi-Cloud Kubernetes Platform"
+      version: "4.2.9"
       check_status: "deployment.apps/gateway"
       supported_architectures:
         - amd64
+        - arm64
 
     - name: "ondat"
       description: "Ondat is a software-defined, cloud native storage platform for Kubernetes."
