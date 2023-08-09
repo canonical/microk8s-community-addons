@@ -86,7 +86,7 @@ microk8s-addons:
     - name: "portainer"
       description: "Portainer UI for your Kubernetes cluster"
       version: "2.0.0"
-      check_status: "persistentvolumeclaim/portainer"
+      check_status: "${SNAP_DATA}/var/lock/portainer.enabled"
       supported_architectures:
         - arm64
         - amd64
