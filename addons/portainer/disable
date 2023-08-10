@@ -15,7 +15,7 @@ echo "Disabling Portainer"
 # unload the the manifests
 $KUBECTL delete $KUBECTL_DELETE_ARGS -n $NAMESPACE_PTR deployment,service,pods --all  > /dev/null 2>&1
 
-# remove the enabled file
-rm "${SNAP_DATA}/var/lock/portainer.enabled"
+# remove the enabled file as sudo in case the directory is write protected for non-root users
+run_with_sudo rm "${SNAP_DATA}/var/lock/portainer.enabled"
 
 echo "Portainer deployment is disabled"

@@ -23,6 +23,7 @@ def mark_portainer_enabled():
   try:
       snapdata_path = os.environ.get("SNAP_DATA")
       lock_fname = "{}/var/lock/portainer.enabled".format(snapdata_path)
+      # the SNAP_DATA path is usually write protected for non-root users, so use sudo to create the file
       subprocess.call(['sudo', 'touch', lock_fname])
   except (subprocess.CalledProcessError):
       print("Failed to mark the portainer addon as enabled." )
