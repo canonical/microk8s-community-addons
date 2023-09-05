@@ -6,6 +6,27 @@ source $SNAP/actions/common/utils.sh
 
 "$SNAP/microk8s-enable.wrapper" helm3
 
+CILIUM_VERSION=""
+INSTALL_CILIUM_CLI="True"
+
+# Parse command-line arguments
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --version)
+      CILIUM_VERSION="$2"
+      shift 2
+      ;;
+    --skip-cilium-cli)
+      INSTALL_CILIUM_CLI="False"
+      shift
+      ;;
+    *)
+      echo "Invalid option: $1" >&2
+      exit 1
+      ;;
+  esac
+done
+
 echo "Ensure kube-apiserver --allow-privileged=true flag"
 if ! grep -qE -- "--allow-privileged=true" "$SNAP_DATA/args/kube-apiserver"; then
   echo "Adding kube-apiserver --allow-privileged=true flag"
@@ -39,7 +60,6 @@ fi
 echo "Enabling Cilium"
 
 # Cilium Supports Arm beginning v1.11.12 and greater
-read -ra CILIUM_VERSION <<< "$1"
 if [ -z "$CILIUM_VERSION" ]; then
   CILIUM_VERSION="v1.13.4"
 fi
@@ -96,20 +116,33 @@ else
   echo "Waiting for cilium. This may take several minutes."
   "$SNAP/microk8s-kubectl.wrapper" -n $NAMESPACE rollout status ds/cilium
 
-  # Fetch the Cilium CLI binary and install
-  ARCH=$(arch)
-  SCRIPT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
-  mkdir -p "${SCRIPT_DIR}/cli/"
-  fetch_as "https://github.com/cilium/cilium-cli/releases/download/v0.15.2/cilium-linux-${ARCH}.tar.gz" "${SCRIPT_DIR}/cli/cilium.tar.gz"
-  tar -zxf "${SCRIPT_DIR}/cli/cilium.tar.gz" -C "${SCRIPT_DIR}/cli"
-  chmod +x "${SCRIPT_DIR}/cli/cilium"
-  cp "${SCRIPT_DIR}/cilium" "${SNAP_COMMON}/plugins/cilium"
-  chmod +x "${SNAP_COMMON}/plugins/cilium"
-
-  echo "Cilium is enabled"
-  echo
-  echo "You can now enable hubble with:"
-  echo "  sudo microk8s cilium hubble enable"
-
+  # Skip installing the Cilium CLI binary if the cluster is in offline mode
+  if [[ "$INSTALL_CILIUM_CLI" == "True" ]]; then
+    # Fetch the Cilium CLI binary and install
+    echo "Installing Cilium CLI binary"
+    ARCH=$(arch)
+    SCRIPT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
+    run_with_sudo mkdir -p "${SCRIPT_DIR}/cli/"
+    fetch_as "https://github.com/cilium/cilium-cli/releases/download/v0.15.2/cilium-linux-${ARCH}.tar.gz" "$SNAP_DATA/tmp/cilium.tar.gz"
+    run_with_sudo tar -zxf "$SNAP_DATA/tmp/cilium.tar.gz" -C "${SCRIPT_DIR}/cli"
+    run_with_sudo chmod +x "${SCRIPT_DIR}/cli/cilium"
+    run_with_sudo cp "${SCRIPT_DIR}/cilium" "${SNAP_COMMON}/plugins/cilium"
+    run_with_sudo chmod +x "${SNAP_COMMON}/plugins/cilium"
+    echo "Cilium is enabled"
+    echo
+    echo "You can now enable hubble with:"
+    echo "  sudo microk8s cilium hubble enable"
+    echo
+  else
+    echo "Cilium is enabled"
+    echo
+    echo "You can now enable hubble relay and UI with:"
+    echo "  sudo microk8s helm3 upgrade cilium cilium/cilium \\"
+    echo "    --version ${CILIUM_VERSION} \\"
+    echo "    --namespace ${NAMESPACE} \\"
+    echo "    --reuse-values \\"
+    echo "    --set hubble.relay.enabled=true \\"
+    echo "    --set hubble.ui.enabled=true"
+    echo
+  fi
 fi
-

@@ -11,14 +11,14 @@ KUBE_VERSION=$($KUBECTL version -o json | $SNAP/usr/bin/jq -r '.serverVersion.mi
 
 CURRENT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
 
-STATIC_VERSION="25"
-if [ "${KUBE_VERSION%+}" -gt $STATIC_VERSION ]
-then
-    echo "WARNING: Detected Kubernetes version $KUBE_VERSION, which is not supported"
-fi
+# STATIC_VERSION="27"
+# if [ "${KUBE_VERSION%+}" -gt $STATIC_VERSION ]
+# then
+#     echo "WARNING: Detected Kubernetes version $KUBE_VERSION, which is not supported"
+# fi
 
 STATICIP=""
-HELM_VERSION="4.2.5"
+HELM_VERSION="4.2.9"
 STORAGECLASS=""
 ARGS=$(getopt -a --options i:v:s: --longoptions "ip:,version:,storageclass:" -- "$@")
 eval set -- "$ARGS"
@@ -77,22 +77,22 @@ do_prerequisites() {
 
 enable_gopaddle_lite() {
     
-    echo "Enabling gopaddle lite"
+    echo "Enabling gopaddle"
     # download gopaddle-lite helm
     
     # add helm repo
-    $HELM repo add gp-lite https://gopaddle-io.github.io/gopaddle-lite
+    $HELM repo add gopaddle https://gopaddle-io.github.io/gopaddle-lite
     
     #list helm repo
     $HELM repo update
     
     # create namespace
-    if $KUBECTL get ns gp-lite >/dev/null 2>&1
+    if $KUBECTL get ns gopaddle >/dev/null 2>&1
     then
         echo ""
-        echo "gp-lite namespace created."
+        echo "gopaddle namespace created."
     else
-        $KUBECTL create ns gp-lite
+        $KUBECTL create ns gopaddle
     fi
     
     NODENAME=""
@@ -114,27 +114,43 @@ enable_gopaddle_lite() {
         NODENAME=$($KUBECTL get node -l gp-install-node=node1 -o yaml | grep " name:"| awk '{print $2}' )
     fi
     
-    if [ $PUBLICIP == true ]
+    MACHINE_HARDWARE_NAME=$(uname -m)
+    if [ "$MACHINE_HARDWARE_NAME" == "arm64" ] || [ "$MACHINE_HARDWARE_NAME" == "aarch64" ] || [ "$MACHINE_HARDWARE_NAME" == "aarch64_be" ] || [ "$MACHINE_HARDWARE_NAME" == "armv8b" ] || [ "$MACHINE_HARDWARE_NAME" == "armv8l" ] || [ "$MACHINE_HARDWARE_NAME" == "arm" ]
     then
-        #install rabbitmq
-        $HELM install gp-rabbitmq-4-2 gp-lite/gp-installer  --namespace gp-lite  --set global.routingType=NodePortWithOutIngress --set global.installType=public --set global.storageClassName=$STORAGECLASS --set global.installer.chart.rabbitmq=true --set global.installer.chart.gp-core=false --set global.nodeSelector.gp-install-node=node1 --set global.nodeName=$NODENAME  --version $HELM_VERSION
-        
-        #install gp-lite
-        $HELM install gp-core-4-2 gp-lite/gp-installer  --namespace gp-lite  --set global.routingType=NodePortWithOutIngress --set global.installType=public --set global.storageClassName=$STORAGECLASS --set global.cluster.provider=other --set-string global.gopaddle.https=false --set-string global.gopaddleWebhook.https=false --set global.staticIP=$STATICIP  --set global.installer.chart.rabbitmq=false --set global.installer.chart.gp-core=true --set global.installer.edition=microk8s --set global.nodeSelector.gp-install-node=node1 --set global.nodeName=$NODENAME  --version $HELM_VERSION
-    elif [ $PUBLICIP == false ]
-    then
-        #install rabbitmq
-        $HELM install gp-rabbitmq-4-2 gp-lite/gp-installer  --namespace gp-lite  --set global.routingType=NodePortWithOutIngress --set global.installType=private --set global.storageClassName=$STORAGECLASS --set global.installer.chart.rabbitmq=true --set global.installer.chart.gp-core=false  --set global.nodeSelector.gp-install-node=node1 --set global.nodeName=$NODENAME --version $HELM_VERSION
-        
-        #install gp-lite
-        $HELM install gp-core-4-2 gp-lite/gp-installer  --namespace gp-lite  --set global.routingType=NodePortWithOutIngress --set global.installType=private --set global.storageClassName=$STORAGECLASS --set global.cluster.provider=other --set-string global.gopaddle.https=false --set-string global.gopaddleWebhook.https=false --set global.staticIP=$STATICIP  --set global.installer.chart.rabbitmq=false --set global.installer.chart.gp-core=true --set global.installer.edition=microk8s --set global.nodeSelector.gp-install-node=node1 --set global.nodeName=$NODENAME --version $HELM_VERSION
+        ARCH="arm64"
+    else
+        ARCH="amd64"
     fi
+
+    if [ -z "$HELM_VERSION" ]
+    then
+        if [ $PUBLICIP == true ]
+        then
+            #Install gopaddle helm
+            $HELM install gopaddle gopaddle/gopaddle --namespace gopaddle --set global.installType=public --set global.storageClassName=$STORAGECLASS --set global.nodeSelector.gp-install-node=node1 --set global.nodeName=$NODENAME --set global.installer.arch=$ARCH --set global.cluster.type=microk8s
+        elif [ $PUBLICIP == false ]
+        then
+            #Install gopaddle helm
+            $HELM install gopaddle gopaddle/gopaddle --namespace gopaddle --set global.installType=private --set global.storageClassName=$STORAGECLASS --set global.nodeSelector.gp-install-node=node1 --set global.nodeName=$NODENAME --set global.installer.arch=$ARCH --set global.cluster.type=microk8s
+        fi
+    else
+        if [ $PUBLICIP == true ]
+        then
+            #Install gopaddle helm
+            $HELM install gopaddle gopaddle/gopaddle --namespace gopaddle --set global.installType=public --set global.storageClassName=$STORAGECLASS --set global.nodeSelector.gp-install-node=node1 --set global.nodeName=$NODENAME --set global.installer.arch=$ARCH --version $HELM_VERSION --set global.cluster.type=microk8s
+        elif [ $PUBLICIP == false ]
+        then
+            #Install gopaddle helm
+            $HELM install gopaddle gopaddle/gopaddle --namespace gopaddle --set global.installType=private --set global.storageClassName=$STORAGECLASS --set global.nodeSelector.gp-install-node=node1 --set global.nodeName=$NODENAME --set global.installer.arch=$ARCH --version $HELM_VERSION --set global.cluster.type=microk8s
+        fi
+    fi
+
     
     echo ""
     echo "Waiting for the gopaddle volume to move bound. This may take a while."
     while true
     do
-        if $KUBECTL wait pvc --for=jsonpath='{.status.phase}'=Bound -l released-by=gopaddle -n gp-lite --timeout=20m 2>/dev/null; then
+        if $KUBECTL wait pvc --for=jsonpath='{.status.phase}'=Bound -l released-by=gopaddle -n gopaddle --timeout=20m 2>/dev/null; then
             break
         fi
     done
@@ -143,7 +159,7 @@ enable_gopaddle_lite() {
     #adding label to volume
     echo ""
     echo "adding label to persistentvolume"
-    PVCLIST=$($KUBECTL get pvc -n gp-lite -o yaml| grep "volumeName" | awk '{print $2}')
+    PVCLIST=$($KUBECTL get pvc -n gopaddle -o yaml| grep "volumeName" | awk '{print $2}')
     
     for i in $(echo $PVCLIST | tr " " "\n")
     do
@@ -152,28 +168,30 @@ enable_gopaddle_lite() {
     
     #echo ""
     #echo "Waiting for the gopaddle services to move to running state. This may take a while."
+    #$KUBECTL wait --for=condition=ready pod -l released-by=gopaddle -n gopaddle --timeout=20m
     
-    
-    #$KUBECTL wait --for=condition=ready pod -l released-by=gopaddle -n gp-lite --timeout=20m
-    
+    # echo ""
     echo ""
-    echo ""
-    echo "gopaddle lite is enabled"
-    echo ""
-    echo "gopaddle lite access endpoint"
+    echo "gopaddle is enabled. Please wait for 10-15 minutes for gopaddle services to move to READY state."
+    # echo ""
+    echo "You can wait for the services to move to READY state by running the command 'microk8s.kubectl wait --for=condition=ready pod -l released-by=gopaddle -n gopaddle'."
+    # echo ""
     if [ $STATICIP ]
     then
-        echo "http://$STATICIP:30003"
+        echo "Once the services are ready, you can access the gopaddle endpoint at http://$STATICIP:30003"
     elif [ $PUBLICIP == true ]
     then
         NODEIP=$($KUBECTL get node -o wide| awk '{print $6}')
         IP=$(echo $NODEIP | cut -d ' ' -f 2)
-        echo "http://$IP:30003"
+        echo "Once the services are ready, you can access the gopaddle endpoint at http://$IP:30003"
     else
         NODEIP=$($KUBECTL get node -o wide| awk '{print $6}')
         IP=$(echo $NODEIP | cut -d ' ' -f 2)
-        echo "http://$IP:30003"
+        echo "Once the services are ready, you can access the gopaddle endpoint at http://$IP:30003"
     fi
+
+    echo ""
+
 }
 
 
