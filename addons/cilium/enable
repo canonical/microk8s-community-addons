@@ -90,6 +90,14 @@ else
   run_with_sudo cp "$SNAP_DATA/tmp/cilium/$CILIUM_DIR/$CILIUM_CNI_CONF" "$SNAP_DATA/args/cni-network/05-cilium-cni.conf"
   
   IPv4_CLUSTER_CIDR="10.1.0.0/16"
+  IPv4_CLUSTER_CIDR_ARGS="ipam.operator.clusterPoolIPv4PodCIDR"
+  
+  # Cilium v1.14.x Value ipam.operator.clusterPoolIPv4PodCIDR removed
+  # use ipam.operator.clusterPoolIPv4PodCIDRList instead
+  if [[ $CILIUM_ERSION > "1.4" ]]; then
+    IPv4_CLUSTER_CIDR_ARGS="ipam.operator.clusterPoolIPv4PodCIDRList"
+  fi
+
   if [ -e "${SNAP_DATA}/args/cni-env" ]; then
     source "${SNAP_DATA}/args/cni-env"
   fi
@@ -108,7 +116,7 @@ else
       --set daemon.runPath="/var/snap/microk8s/current/var/run/cilium" \
       --set operator.replicas=1 \
       --set keepDeprecatedLabels=true \
-      --set ipam.operator.clusterPoolIPv4PodCIDR="${IPv4_CLUSTER_CIDR}" \
+      --set ${IPv4_CLUSTER_CIDR_ARGS}="${IPv4_CLUSTER_CIDR}" \
       --set nodePort.enabled=true
   )
 
