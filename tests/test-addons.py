@@ -500,6 +500,9 @@ class TestAddons(object):
         microk8s_disable("sosivio")
 
     @pytest.mark.skipif(platform.machine() == "s390x", reason="Not available on s390x")
+    @pytest.mark.skip(
+        reason="See https://github.com/canonical/microk8s-community-addons/issues/180"
+    )
     def test_kwasm(self):
         """
         Sets up and validates kwasm.
