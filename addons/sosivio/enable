@@ -186,6 +186,7 @@ if [ $DEBUG -eq 1 ]; then
 fi
 
 install_addons_prereq
+add_helm_repo
 install_soivio
 wait_for_sosivio
 print_finished
