@@ -15,6 +15,8 @@ do_prerequisites() {
   "$SNAP/microk8s-enable.wrapper" helm3
   # enable dns service
   "$SNAP/microk8s-enable.wrapper" dns
+  # enable hostpath-storage
+  "$SNAP/microk8s-enable.wrapper" hostpath-storage
   # Allow some time for the apiserver to start
   sleep 5
   ${SNAP}/microk8s-status.wrapper --wait-ready --timeout 30 >/dev/null
