@@ -39,10 +39,10 @@ Usage:
 
 Flags:
     -d         enable debug prints
-    -v string  install a specific helm chart version (default to $VERSION)
-    -u string  the URL of the helm repo to fetch the charts from (default "$HELM_VERSION")
-    -n string  the name of the helm repo name to add (default "$HELM_REPO_NAME") 
-    -w int     amount of time in seconds to wait for sosivio to become active (default "$WAIT_SECONDS")       
+    -v string  install a specific helm chart version (default to $HELM_VERSION)
+    -u string  the URL of the helm repo to fetch the charts from (default "$HELM_REPO_URL")
+    -n string  the name of the helm repo name to add (default "$HELM_REPO_NAME")
+    -w int     amount of time in seconds to wait for sosivio to become active (default "$WAIT_SECONDS")
 '
 }
 
@@ -78,7 +78,6 @@ add_helm_repo () {
   $HELM repo add $HELM_REPO_NAME $HELM_REPO_URL > /dev/null 2>&1
   print_debug "updating repo..."
   $HELM repo update $HELM_REPO_NAME > /dev/null 2>&1
-  
 }
 
 install_soivio () {
@@ -179,7 +178,7 @@ echo "Sosivio Version $HELM_VERSION"
 echo "hint: use -v flag to set a different version. (ex - microk8s enable sosivio -v x.y.z)"
 sleep 3
 
-if [ $DEBUG -eq 1 ]; then 
+if [ $DEBUG -eq 1 ]; then
   echo "debug flag set" >&2
   echo "repo url is set to $HELM_REPO_URL"
   echo "repo name is set to $HELM_REPO_NAME"
@@ -190,4 +189,3 @@ add_helm_repo
 install_soivio
 wait_for_sosivio
 print_finished
-
