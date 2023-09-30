@@ -163,7 +163,7 @@ microk8s-addons:
 
     - name: "sosivio"
       description: "Kubernetes Predictive Troubleshooting, Observability, and Resource Optimization"
-      version: "1.0.0"
+      version: "1.7.1"
       check_status: "deployment.apps/sosivio-dashboard"
       supported_architectures:
         - amd64
