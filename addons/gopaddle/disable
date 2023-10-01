@@ -7,18 +7,16 @@ source $SNAP/actions/common/utils.sh
 KUBECTL="$SNAP/microk8s-kubectl.wrapper"
 HELM="$SNAP/microk8s-helm3.wrapper"
 
-echo "Disabling gopaddle lite"
-#uninstall rabbitmq
-$HELM delete gp-rabbitmq-4-2  -n gp-lite
+echo "Disabling gopaddle"
 
-#uninstall gopaddle lite
-$HELM delete gp-core-4-2 -n gp-lite
+#uninstall gopaddle
+$HELM delete gopaddle -n gopaddle
 
 # delete namespace
-$KUBECTL delete ns gp-lite
+$KUBECTL delete ns gopaddle
 
 #remove gopaddle helm folder
-rm -rf "$SNAP_DATA/tmp/gopaddle-lite"
+rm -rf "$SNAP_DATA/tmp/gopaddle"
 
 #remove gopaddle addons
 if $KUBECTL get ns gopaddle-servers >/dev/null 2>&1
@@ -60,6 +58,6 @@ done
 
 
 # remove helm repo
-$HELM repo remove gp-lite
+$HELM repo remove gopaddle
 
-echo "Disabled gopaddle lite"
+echo "Disabled gopaddle"
