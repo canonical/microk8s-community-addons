@@ -87,7 +87,7 @@ microk8s-addons:
       description: "Portainer UI for your Kubernetes cluster"
       version: "2.0.0"
       check_status: "pod/portainer"
-      regex_check_status: "^pod\/portainer(?!-agent).*$"
+      regex_check_status: "pod\/portainer(?!-agent)"
       supported_architectures:
         - arm64
         - amd64
