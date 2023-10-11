@@ -225,3 +225,11 @@ microk8s-addons:
       supported_architectures:
         - amd64
         - arm64
+        
+    - name: "falco"
+      description: "Cloud-native runtime threat detection tool for Linux and K8s"
+      version: "3.7.1"
+      check_status: "daemonset.apps/falco"
+      supported_architectures:
+        - amd64
+        - arm64
