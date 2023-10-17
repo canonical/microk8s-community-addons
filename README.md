@@ -44,12 +44,6 @@ microk8s-addons:
       # resource exists.
       check_status: "deployment.apps/addon1"
 
-      # From MicroK8s v2.19 and onwards, the `regex_check_status` (optional) is an extension of the the `check_status` field.
-      # While `check_status` looks for a partial match, `regex_check_status` searches for a full match using a regular expression.
-      # For testing, compare your regular expression with the output of `kubectl get all -A` to ensure there is a match.
-      # For example, if the `check_status` field is set to `deployment.apps/addon1`, the `regex_check_status` field can be set to `deployment.apps/addon1(?!-1)` to ensure that the addon is enabled only when the `addon1` deployment is found and not when the `addon1-1` deployment is found.
-      regex_check_status: "deployment.apps/addon1$"
-
       # List of architectures supported by this addon.
       # MicroK8s supports "amd64", "arm64" and "s390x".
       supported_architectures:
