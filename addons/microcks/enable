@@ -8,7 +8,6 @@ HELM="${SNAP}/microk8s-helm3.wrapper"
 MICROK8S_CONFIG="${SNAP}/microk8s-config.wrapper"
 
 NAMESPACE="microcks"
-MICROCKS_CHART_VERSION="1.7.1"
 
 # Retrieve microk8s cluster IP to nip.io setup
 IP=`"${MICROK8S_CONFIG}" | grep "server: https:" | sed "s/\/\// /" | awk -F ':' '{print $3}' | sed "s/ //"`
@@ -30,6 +29,8 @@ get_microcks () {
 
         # Always update the chart repo first (do not miss minor versions...), add repo if it does not exists
         "${HELM}" repo update microcks || "${HELM}" repo add microcks https://microcks.io/helm
+	# Set the latest version, always up to date
+	MICROCKS_CHART_VERSION=`"${HELM}" search repo microcks | awk '$2 != "CHART" {print $2}'`
 	# Install the helm chart
 	"${HELM}" upgrade --install --create-namespace microcks microcks/microcks -n "${NAMESPACE}" --version "${MICROCKS_CHART_VERSION}" --set microcks.url=microcks."${IP}".nip.io --set keycloak.url=keycloak."${IP}".nip.io
 
