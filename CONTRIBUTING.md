@@ -6,7 +6,7 @@ MicroK8s is open source ([Apache License 2.0](./LICENSE)) and actively seeks any
 
 MicroK8s has been created under the [Apache License 2.0](./LICENSE), which will cover any contributions you may make to this project. Please familiarise yourself with the terms of the license.
 
-Additionally, MicroK8s uses the Harmony CLA agreement.  It’s the easiest way for you to give us permission to use your contributions. In effect, you’re giving us a licence, but you still own the copyright — so you retain the right to modify your code and use it in other projects. Please [sign the CLA here](https://ubuntu.com/legal/contributors/agreement) before making any contributions.
+Additionally, MicroK8s uses the Harmony CLA agreement. It’s the easiest way for you to give us permission to use your contributions. In effect, you’re giving us a licence, but you still own the copyright — so you retain the right to modify your code and use it in other projects. Please [sign the CLA here](https://ubuntu.com/legal/contributors/agreement) before making any contributions.
 
 ## Code of conduct
 

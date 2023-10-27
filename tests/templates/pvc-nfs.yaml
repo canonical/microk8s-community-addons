@@ -1,4 +1,3 @@
-
 # PVC for the customer
 ---
 kind: PersistentVolumeClaim
@@ -28,14 +27,15 @@ spec:
   containers:
     - name: busybox-pvc-nfs1
       image: busybox
-      command: ["/bin/sh", "-c", "while true; do date >> /mount/dates1; sleep 2; done"]
+      command:
+        ["/bin/sh", "-c", "while true; do date >> /mount/dates1; sleep 2; done"]
       volumeMounts:
         - name: volume
           mountPath: /mount
   volumes:
     - name: volume
       persistentVolumeClaim:
-        claimName: pvc-nfs        
+        claimName: pvc-nfs
 
 ---
 kind: Pod
@@ -49,11 +49,12 @@ spec:
   containers:
     - name: busybox-pvc-nfs2
       image: busybox
-      command: ["/bin/sh", "-c", "while true; do date >> /mount/dates2; sleep 2; done"]
+      command:
+        ["/bin/sh", "-c", "while true; do date >> /mount/dates2; sleep 2; done"]
       volumeMounts:
         - name: volume
           mountPath: /mount
   volumes:
     - name: volume
       persistentVolumeClaim:
-        claimName: pvc-nfs        
+        claimName: pvc-nfs

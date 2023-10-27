@@ -12,8 +12,8 @@ spec:
   template:
     spec:
       containers:
-      - image: wasmedge/example-wasi:latest
-        name: wasm-test
+        - image: wasmedge/example-wasi:latest
+          name: wasm-test
       restartPolicy: Never
       runtimeClassName: wasmedge
   backoffLimit: 1
