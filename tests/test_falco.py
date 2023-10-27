@@ -8,6 +8,7 @@ from utils import (
     wait_for_pod_state,
 )
 
+
 class TestFalco(object):
     @pytest.mark.skipif(
         platform.machine() != "x86_64",
