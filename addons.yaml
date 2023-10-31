@@ -86,7 +86,7 @@ microk8s-addons:
     - name: "portainer"
       description: "Portainer UI for your Kubernetes cluster"
       version: "2.0.0"
-      check_status: "pod/portainer"
+      check_status: "deployment.apps/portainer "
       supported_architectures:
         - arm64
         - amd64
@@ -102,7 +102,7 @@ microk8s-addons:
 
     - name: "keda"
       description: "Kubernetes-based Event Driven Autoscaling"
-      version: "2.11.1"
+      version: "2.12.0"
       check_status: "pod/keda-operator"
       supported_architectures:
         - amd64
@@ -222,6 +222,14 @@ microk8s-addons:
       version: "0.10.2"
       check_status: "daemonset.apps/kubearmor"
       confinement: "classic"
+      supported_architectures:
+        - amd64
+        - arm64
+
+    - name: "falco"
+      description: "Cloud-native runtime threat detection tool for Linux and K8s"
+      version: "3.7.1"
+      check_status: "daemonset.apps/falco"
       supported_architectures:
         - amd64
         - arm64

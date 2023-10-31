@@ -15,7 +15,7 @@ do_prerequisites() {
 
 
 get_keda () {
-  KEDA_VERSION="v2.11.1"
+  KEDA_VERSION="v2.12.0"
   KEDA_ERSION=$(echo $KEDA_VERSION | sed 's/v//g')
   echo "Fetching keda version $KEDA_ERSION."
   fetch_as https://github.com/kedacore/keda/releases/download/${KEDA_VERSION}/keda-${KEDA_ERSION}.yaml "$SNAP_DATA/keda/keda.yaml"
