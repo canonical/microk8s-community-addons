@@ -22,7 +22,7 @@ DASHBOARD_SERVICE="dashboard-lb"
 HELM_REPO_URL="https://helm.sosiv.io"
 HELM_REPO_NAME="sosivio"
 HELM_VERSION="1.7.1"
-WAIT_SECONDS=300
+WAIT_SECONDS=600
 DEBUG=0
 
 usage () {
@@ -106,7 +106,7 @@ wait_for_sosivio () {
   start_time=$(date +'%s')
   until $WATCH deploy -n ${NAMESPACE_SOSIVIO} sosivio-dashboard --watch > /dev/null 2>&1
   do
-    if [ $(( $start_time + $WAIT_SECONDS )) -lt $(date +'%s') ] ; 
+    if [ $(( $start_time + $WAIT_SECONDS )) -lt $(date +'%s') ] ;
     then
         echo "sosivio wait time exceeded ($WAIT_SECONDS seconds)"
         echo "please check your internet connection or run again with '-w' flag."
