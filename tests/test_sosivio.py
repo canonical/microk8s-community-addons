@@ -1,6 +1,8 @@
-import pytest
+import multiprocessing
 import os
 import platform
+
+import pytest
 
 from utils import (
     microk8s_disable,
@@ -17,6 +19,10 @@ class TestSosivio(object):
     @pytest.mark.skipif(
         os.environ.get("UNDER_TIME_PRESSURE") == "True",
         reason="Skipping Sosivio tests as we are under time pressure",
+    )
+    @pytest.mark.skipif(
+        multiprocessing.cpu_count() < 4,
+        reason="Sosivio tests require at least 4 CPU cores to run",
     )
     def test_sosivio(self):
         """
