@@ -225,3 +225,11 @@ microk8s-addons:
       supported_architectures:
         - amd64
         - arm64
+
+    - name: "cloudnative-pg"
+      description: "PostgreSQL operator CloudNativePG"
+      version: "0.0.1"
+      check_status: "deployment.apps/cnpg-controller-manager"
+      supported_architectures:
+        - arm64
+        - amd64
