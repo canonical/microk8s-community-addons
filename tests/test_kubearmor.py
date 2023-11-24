@@ -24,6 +24,10 @@ class TestKubearmor(object):
         is_container(), reason="Kubearmor tests are skipped in containers"
     )
     @pytest.mark.skipif(platform.machine() == "s390x", reason="Not available on s390x")
+    @pytest.mark.skipif(
+        os.environ.get("UNDER_TIME_PRESSURE") == None,
+        reason="Skipping test, expected to be tested when under time pressure",
+    )
     def test_kubearmor(self):
         """
         Sets up and validates kubearmor.

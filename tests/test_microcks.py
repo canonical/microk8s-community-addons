@@ -1,3 +1,4 @@
+import os
 import pytest
 import platform
 
@@ -10,6 +11,10 @@ from utils import (
 
 class TestMicrocks(object):
     @pytest.mark.skipif(platform.machine() == "s390x", reason="Not available on s390x")
+    @pytest.mark.skipif(
+        os.environ.get("UNDER_TIME_PRESSURE") == None,
+        reason="Skipping test, expected to be tested when under time pressure",
+    )
     def test_microcks(self):
         """
         Sets up and validates microcks.
