@@ -13,6 +13,10 @@ class TestGoPaddleLite(object):
         platform.machine() == "s390x",
         reason="gopaddle tests are only relevant in x86 and arm64 architectures",
     )
+    @pytest.mark.skipif(
+        os.environ.get("UNDER_TIME_PRESSURE") == None,
+        reason="Skipping test, expected to be tested when under time pressure",
+    )
     def test_gopaddle_lite(self):
         """
         Sets up and validates gopaddle.
