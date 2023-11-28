@@ -15,6 +15,12 @@ class TestCloudNativePG(object):
         platform.machine() not in ["x86_64", "arm64"],
         reason="CloudNativePg tests are only relevant in x86 architectures",
     )
+    @pytest.mark.skipif(
+        os.environ.get("STRICT") == "yes",
+        reason=(
+            "Skipping CloudNativePg tests in strict confinement as they are expected to fail"
+        ),
+    )
     def test_cloudnative_pg(self):
         """
         Sets up and validate CloudNativePG.
