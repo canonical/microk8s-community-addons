@@ -1,0 +1,107 @@
+#!/usr/bin/env bash
+set -e
+
+CNPG_VERSION="1.21.1"
+
+KUBECTL="${SNAP}/microk8s-kubectl.wrapper"
+# shellcheck source=/dev/null
+source "${SNAP}"/actions/common/utils.sh
+
+if [[ "$(arch)" == "aarch64" ]]; then
+	ARCH="arm64"
+else
+	ARCH=$(uname -m)
+fi
+
+cnpg_check_local_plugin() {
+	if [ -f "${SNAP_DATA}/bin/kubectl-cnpg" ]; then
+		version=$("${SNAP_DATA}/bin/kubectl-cnpg" version | sed 's/.*:\(.*\).*Commit.*/\1/' | tr -d ' ')
+		echo "${version}"
+	else
+		echo ""
+	fi
+}
+
+cnpg_install_plugin() {
+	local cnpg_version=$1; shift
+	echo "Installing kubectl cnpg version ${cnpg_version}"
+	run_with_sudo mkdir "${SNAP_DATA}/tmp/cloudnative-pg"
+
+	fetch_as "https://github.com/cloudnative-pg/cloudnative-pg/releases/download/v${cnpg_version}/kubectl-cnpg_${cnpg_version}_linux_${ARCH}.tar.gz" "${SNAP_DATA}/tmp/cloudnative-pg/kubectl-cnpg.tar.gz"
+	run_with_sudo tar -C "${SNAP_DATA}/tmp/cloudnative-pg/" -xvf "${SNAP_DATA}/tmp/cloudnative-pg/kubectl-cnpg.tar.gz" kubectl-cnpg
+	run_with_sudo mkdir -p "${SNAP_DATA}/bin"
+	run_with_sudo mv "${SNAP_DATA}/tmp/cloudnative-pg/kubectl-cnpg" "${SNAP_DATA}/bin/"
+	run_with_sudo chmod +x "${SNAP_DATA}/bin/kubectl-cnpg"
+	run_with_sudo rm -fr "${SNAP_DATA}/tmp/cloudnative-pg"
+}
+
+cnpg_apply_manifest() {
+	apply_wait=$("${SNAP_DATA}"/bin/kubectl-cnpg install generate | $KUBECTL apply -f - > /dev/null)
+
+	# If the apply isn't successful we stop and exit
+	if [[ "${apply_wait}" -ne 0 ]]; then
+		echo "$?"
+	fi
+
+	# We wait for the Deployment to be ready
+	echo "Waiting 120 seconds for CloudNativePG Pod to be ready..."
+	wait_output=$(cnpg_wait_for)
+
+	echo "${wait_output}"
+}
+
+cnpg_wait_for() {
+	$KUBECTL wait pods -n cnpg-system --for condition=Ready --timeout=120s -l app.kubernetes.io/name=cloudnative-pg
+
+	echo "$?"
+}
+
+cnpg_show_first_cluster() {
+  # Show a cluster example creation
+  echo "
+cat <<EOF | kubectl apply -f -
+# Example of PostgreSQL cluster
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: cluster-example
+spec:
+  instances: 3
+  storage:
+    size: 1Gi
+EOF
+"
+}
+
+cnpg_more_information() {
+	local cnpg_version=$1; shift;
+	version=${cnpg_version#v}
+	short_version=${version%.*}
+
+	# Show documentation URL and helper information
+	echo "
+For more information please visit the official documentation site:
+https://cloudnative-pg.io/documentation/${short_version}/
+"
+}
+
+cnpg_enable() {
+	echo "Checking if the plugin exists"
+	if [ ! -f "${SNAP_DATA}/bin/kubectl-cnpg" ]; then
+	  echo "Plugin not found, installing"
+	  cnpg_install_plugin "${CNPG_VERSION}"
+	fi
+
+	cnpg_apply_manifest
+	if [[ $? -ne 0 ]]; then
+	 echo "CloudNativePG not installed"
+	 exit 1
+	fi
+
+	cnpg_show_first_cluster
+	cnpg_more_information "$cnpg_version"
+
+	echo "CloudNativePG installed"
+}
+
+cnpg_enable

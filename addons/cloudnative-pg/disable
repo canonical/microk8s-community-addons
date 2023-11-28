@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+set -e
+
+
+cnpg_delete_manifest() {
+	kubectl="$SNAP/microk8s-kubectl.wrapper"
+
+	"${SNAP_DATA}/bin/kubectl-cnpg" install generate | $kubectl delete -f - > /dev/null
+
+	echo "$?"
+}
+
+cnpg_disable() {
+  echo "Uninstalling CloudNativePG"
+	apply_result=$(cnpg_delete_manifest)
+
+	if [[ $apply_result -ne 0 ]]; then
+		echo "CloudNativePG wasn't uninstalled"
+		exit 1
+	fi
+
+	echo "CloudNativePG uninstalled"
+}
+
+cnpg_disable
