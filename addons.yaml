@@ -234,3 +234,10 @@ microk8s-addons:
       supported_architectures:
         - arm64
         - amd64
+
+    - name: "sriov-device-plugin"
+      description: "SR-IOV Network Device Plugin."
+      version: "3.3"
+      check_status: "daemonset.apps/kube-sriov-device-plugin"
+      supported_architectures:
+        - amd64
