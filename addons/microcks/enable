@@ -8,7 +8,7 @@ HELM="${SNAP}/microk8s-helm3.wrapper"
 MICROK8S_CONFIG="${SNAP}/microk8s-config.wrapper"
 
 NAMESPACE="microcks"
-MICROCKS_CHART_VERSION="1.7.1"
+MICROCKS_CHART_VERSION="1.8.0"
 
 # Retrieve microk8s cluster IP to nip.io setup
 IP=`"${MICROK8S_CONFIG}" | grep "server: https:" | sed "s/\/\// /" | awk -F ':' '{print $3}' | sed "s/ //"`
