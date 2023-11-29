@@ -10,10 +10,11 @@ class TestSRIOVDevicePlugin(object):
     """SR-IOV Network Device Plugin relies on availability of given PCI devices, so we can only
     test for the exception being raised.
     """
+
     @pytest.mark.skipif(
         platform.machine() != "x86_64",
         reason="SR-IOV Network Device Plugin tests are only relevant in x86 architectures",
-        )
+    )
     @pytest.mark.skipif(
         os.environ.get("STRICT") == "yes",
         reason="Skipping sriov-device-plugin tests in strict confinement as they are expected to fail",  # noqa: E501
