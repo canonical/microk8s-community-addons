@@ -39,11 +39,6 @@ done
 
 set -- "${POSITIONAL_ARGS[@]}" # restore positional parameters
 
-echo "NAMESPACE  = ${NAMESPACE}"
-echo "AUTHTOKEN     = ${NGROK_AUTHTOKEN}"
-echo "API_KEY         = ${NGROK_API_KEY}"
-echo "SECRET_NAME     = ${SECRET_NAME}"
-
 echo "Enabling ngrok ingress controller"
 
 "${HELM}" repo update ngrok || "${HELM}" repo add ngrok https://ngrok.github.io/kubernetes-ingress-controller
