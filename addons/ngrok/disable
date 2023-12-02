@@ -26,8 +26,8 @@ done
 set -- "${POSITIONAL_ARGS[@]}" # restore positional parameters
 
 if [ -z "$NAMESPACE" ]; then
-  echo "Namespace (--namespace) was not specified. Defaulting to ngrok-ingress namespace."
-  NAMESPACE="ngrok-ingress"
+  echo "Namespace (--namespace) was not specified. Defaulting to ngrok-ingress-controller namespace."
+  NAMESPACE="ngrok-ingress-controller"
 fi
 
 echo "Disabling ngrok Ingress controller in ${NAMESPACE} namespace"
