@@ -39,7 +39,19 @@ done
 
 set -- "${POSITIONAL_ARGS[@]}" # restore positional parameters
 
-echo "Enabling ngrok ingress controller"
+if [ -z "$NAMESPACE" ]; then
+  echo "Namespace (--namespace) was not specified. Defaulting to ngrok-ingress namespace."
+  NAMESPACE="ngrok-ingress"
+fi
+
+if [ -z "$SECRET_NAME" ]; then
+  if [ -z "$NGROK_AUTHTOKEN" ] || [ -z "$NGROK_API_KEY" ]; then
+    echo "Either --secret-name or both --authtoken and --api-key must be specified. Please see https://github.com/ngrok/kubernetes-ingress-controller#installation for more information."
+    exit 1
+  fi
+fi
+
+echo "Enabling ngrok ingress controller in {$NAMESPACE} namespace"
 
 "${HELM}" repo update ngrok || "${HELM}" repo add ngrok https://ngrok.github.io/kubernetes-ingress-controller
 
@@ -49,8 +61,14 @@ else
   "${HELM}" upgrade --install --create-namespace ngrok-ingress-controller ngrok/kubernetes-ingress-controller --namespace "${NAMESPACE}" --set credentials.apiKey="${NGROK_API_KEY}" --set credentials.authtoken="${NGROK_AUTHTOKEN}"
 fi
 
-echo "
+echo "---"
+echo ""
+echo "The ngrok Ingress controller has been successfully installed in the ${NAMESPACE} namespace."
+echo ""
 
-ngrok Ingress controller has been installed in "${NAMESPACE}" namespace. Next, you can start
-creating Ingress resources to access your services.
-"
+if [ -n "$SECRET_NAME" ]; then
+    echo "You specified a secret named ${SECRET_NAME}. Please ensure that secret exists in your cluster. For help, please see https://github.com/ngrok/kubernetes-ingress-controller/blob/main/docs/deployment-guide/credentials.md#creating-the-secret"
+    echo ""
+fi
+
+echo "Next, you can start creating Ingress resources to access your services through ngrok. Please check out https://github.com/ngrok/kubernetes-ingress-controller for examples."
