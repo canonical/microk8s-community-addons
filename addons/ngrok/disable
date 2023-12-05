@@ -1,0 +1,34 @@
+#!/bin/bash -e
+set -e
+
+HELM="${SNAP}/microk8s-helm.wrapper"
+
+POSITIONAL_ARGS=()
+
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --namespace)
+      NAMESPACE="$2"
+      shift # past argument
+      shift # past value
+      ;;
+    -*|--*)
+      echo "Unknown option $1"
+      exit 1
+      ;;
+    *)
+      POSITIONAL_ARGS+=("$1") # save positional arg
+      shift # past argument
+      ;;
+  esac
+done
+
+set -- "${POSITIONAL_ARGS[@]}" # restore positional parameters
+
+echo "NAMESPACE  = ${NAMESPACE}"
+
+echo "Disabling ngrok Ingress controller"
+
+"${HELM}" uninstall ngrok-ingress-controller --namespace "${NAMESPACE}"
+
+echo "Disabled ngrok Ingress controller"

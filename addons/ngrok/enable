@@ -1,0 +1,61 @@
+#!/bin/bash -e
+
+HELM="${SNAP}/microk8s-helm.wrapper"
+
+POSITIONAL_ARGS=()
+
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --namespace)
+      NAMESPACE="$2"
+      shift # past argument
+      shift # past value
+      ;;
+    --authtoken)
+      NGROK_AUTHTOKEN="$2"
+      shift # past argument
+      shift # past value
+      ;;
+    --api-key)
+      NGROK_API_KEY="$2"
+      shift # past argument
+      shift # past value
+      ;;
+    --secret-name)
+      SECRET_NAME="$2"
+      shift # past argument
+      shift # past value
+      ;;
+    -*|--*)
+      echo "Unknown option $1"
+      exit 1
+      ;;
+    *)
+      POSITIONAL_ARGS+=("$1") # save positional arg
+      shift # past argument
+      ;;
+  esac
+done
+
+set -- "${POSITIONAL_ARGS[@]}" # restore positional parameters
+
+echo "NAMESPACE  = ${NAMESPACE}"
+echo "AUTHTOKEN     = ${NGROK_AUTHTOKEN}"
+echo "API_KEY         = ${NGROK_API_KEY}"
+echo "SECRET_NAME     = ${SECRET_NAME}"
+
+echo "Enabling ngrok ingress controller"
+
+"${HELM}" repo update ngrok || "${HELM}" repo add ngrok https://ngrok.github.io/kubernetes-ingress-controller
+
+if [ -n "$SECRET_NAME" ]; then
+  "${HELM}" upgrade --install --create-namespace ngrok-ingress-controller ngrok/kubernetes-ingress-controller --namespace "${NAMESPACE}" --set credentials.secret.name="${SECRET_NAME}"
+else
+  "${HELM}" upgrade --install --create-namespace ngrok-ingress-controller ngrok/kubernetes-ingress-controller --namespace "${NAMESPACE}" --set credentials.apiKey="${NGROK_API_KEY}" --set credentials.authtoken="${NGROK_AUTHTOKEN}"
+fi
+
+echo "
+
+ngrok Ingress controller has been installed in "${NAMESPACE}" namespace. Next, you can start
+creating Ingress resources to access your services.
+"
