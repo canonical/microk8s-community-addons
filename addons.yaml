@@ -234,7 +234,7 @@ microk8s-addons:
       supported_architectures:
         - arm64
         - amd64
-    
+
     - name: "ngrok"
       description: "ngrok Ingress Controller instantly adds connectivity, load balancing, authentication, and observability to your services"
       version: "0.0.1"
