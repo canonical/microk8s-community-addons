@@ -22,7 +22,7 @@ class TestNgrok(object):
         print("Enabling ngrok")
         microk8s_enable(
             addon="ngrok",
-            optional_args="--namespace ngrok-ingress --secret_name test",
+            optional_args="--namespace ngrok-ingress --secret-name test",
         )
         print("Validating ngrok")
         self.validate_ngrok()
