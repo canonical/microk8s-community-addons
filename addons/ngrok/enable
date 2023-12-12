@@ -1,6 +1,7 @@
 #!/bin/bash -e
 
 HELM="${SNAP}/microk8s-helm.wrapper"
+VERSION=0.12.1
 
 POSITIONAL_ARGS=()
 
@@ -56,9 +57,9 @@ echo "Enabling ngrok ingress controller in {$NAMESPACE} namespace"
 "${HELM}" repo update ngrok || "${HELM}" repo add ngrok https://ngrok.github.io/kubernetes-ingress-controller
 
 if [ -n "$SECRET_NAME" ]; then
-  "${HELM}" upgrade --install --create-namespace ngrok-ingress-controller ngrok/kubernetes-ingress-controller --namespace "${NAMESPACE}" --set credentials.secret.name="${SECRET_NAME}"
+  "${HELM}" upgrade --install --create-namespace ngrok-ingress-controller ngrok/kubernetes-ingress-controller --namespace "${NAMESPACE}" --set credentials.secret.name="${SECRET_NAME}" --version=${VERSION}
 else
-  "${HELM}" upgrade --install --create-namespace ngrok-ingress-controller ngrok/kubernetes-ingress-controller --namespace "${NAMESPACE}" --set credentials.apiKey="${NGROK_API_KEY}" --set credentials.authtoken="${NGROK_AUTHTOKEN}"
+  "${HELM}" upgrade --install --create-namespace ngrok-ingress-controller ngrok/kubernetes-ingress-controller --namespace "${NAMESPACE}" --set credentials.apiKey="${NGROK_API_KEY}" --set credentials.authtoken="${NGROK_AUTHTOKEN}" --version=${VERSION}
 fi
 
 echo "---"

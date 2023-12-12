@@ -3,9 +3,9 @@ import pytest
 import platform
 
 from utils import (
+    kubectl_get,
     microk8s_disable,
     microk8s_enable,
-    wait_for_pod_state,
 )
 
 
@@ -22,7 +22,7 @@ class TestNgrok(object):
         print("Enabling ngrok")
         microk8s_enable(
             addon="ngrok",
-            optional_args="--namespace ngrok-ingress --secret-name test",
+            optional_args="--namespace ngrok-ingress-controller --secret-name test",
         )
         print("Validating ngrok")
         self.validate_ngrok()
@@ -35,5 +35,5 @@ class TestNgrok(object):
         """
         kubectl_get(
             "deployment ngrok-ingress-controller-kubernetes-ingress-controller-manager"
-            " -n ngrok-ingress"
+            " -n ngrok-ingress-controller"
         )
