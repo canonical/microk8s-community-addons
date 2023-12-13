@@ -12,6 +12,10 @@ from utils import (
 class TestNgrok(object):
     @pytest.mark.skipif(platform.machine() == "s390x", reason="Not available on s390x")
     @pytest.mark.skipif(
+        os.environ.get("STRICT") == "yes",
+        reason="Skipping kata tests in strict confinement as they are expected to fail",
+    )
+    @pytest.mark.skipif(
         os.environ.get("UNDER_TIME_PRESSURE") == None,
         reason="Skipping test, expected to be tested when under time pressure",
     )
