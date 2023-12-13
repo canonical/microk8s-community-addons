@@ -1,0 +1,75 @@
+#!/bin/bash -e
+
+HELM="${SNAP}/microk8s-helm.wrapper"
+VERSION=0.12.1
+
+POSITIONAL_ARGS=()
+
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --namespace)
+      NAMESPACE="$2"
+      shift # past argument
+      shift # past value
+      ;;
+    --authtoken)
+      NGROK_AUTHTOKEN="$2"
+      shift # past argument
+      shift # past value
+      ;;
+    --api-key)
+      NGROK_API_KEY="$2"
+      shift # past argument
+      shift # past value
+      ;;
+    --secret-name)
+      SECRET_NAME="$2"
+      shift # past argument
+      shift # past value
+      ;;
+    -*|--*)
+      echo "Unknown option $1"
+      exit 1
+      ;;
+    *)
+      POSITIONAL_ARGS+=("$1") # save positional arg
+      shift # past argument
+      ;;
+  esac
+done
+
+set -- "${POSITIONAL_ARGS[@]}" # restore positional parameters
+
+if [ -z "$NAMESPACE" ]; then
+  echo "Namespace (--namespace) was not specified. Defaulting to ngrok-ingress-controller namespace."
+  NAMESPACE="ngrok-ingress-controller"
+fi
+
+if [ -z "$SECRET_NAME" ]; then
+  if [ -z "$NGROK_AUTHTOKEN" ] || [ -z "$NGROK_API_KEY" ]; then
+    echo "Either --secret-name or both --authtoken and --api-key must be specified. Please see https://github.com/ngrok/kubernetes-ingress-controller#installation for more information."
+    exit 1
+  fi
+fi
+
+echo "Enabling ngrok ingress controller in {$NAMESPACE} namespace"
+
+"${HELM}" repo update ngrok || "${HELM}" repo add ngrok https://ngrok.github.io/kubernetes-ingress-controller
+
+if [ -n "$SECRET_NAME" ]; then
+  "${HELM}" upgrade --install --create-namespace ngrok-ingress-controller ngrok/kubernetes-ingress-controller --namespace "${NAMESPACE}" --set credentials.secret.name="${SECRET_NAME}" --version=${VERSION}
+else
+  "${HELM}" upgrade --install --create-namespace ngrok-ingress-controller ngrok/kubernetes-ingress-controller --namespace "${NAMESPACE}" --set credentials.apiKey="${NGROK_API_KEY}" --set credentials.authtoken="${NGROK_AUTHTOKEN}" --version=${VERSION}
+fi
+
+echo "---"
+echo ""
+echo "The ngrok Ingress controller has been successfully installed in the ${NAMESPACE} namespace."
+echo ""
+
+if [ -n "$SECRET_NAME" ]; then
+    echo "You specified a secret named ${SECRET_NAME}. Please ensure that secret exists in your cluster. For help, please see https://github.com/ngrok/kubernetes-ingress-controller/blob/main/docs/deployment-guide/credentials.md#creating-the-secret"
+    echo ""
+fi
+
+echo "Next, you can start creating Ingress resources to access your services through ngrok. Please check out https://github.com/ngrok/kubernetes-ingress-controller for examples."
