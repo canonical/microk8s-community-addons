@@ -87,13 +87,16 @@ The `disable` script is called when running `microk8s disable demo-nginx`.
 # addons/demo-nginx/disable
 
 import click
+import os
 import subprocess
+
+KUBECTL = os.path.expandvars("$SNAP/microk8s-kubectl.wrapper")
 
 @click.command()
 def main():
     click.echo("Disabling demo-nginx")
     subprocess.check_call([
-        "microk8s", "kubectl", "delete", "deploy", "demo-nginx"
+        KUBECTL, "delete", "deploy", "demo-nginx"
     ])
     click.echo("Disabled demo-nginx")
 

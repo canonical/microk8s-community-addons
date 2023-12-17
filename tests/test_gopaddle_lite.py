@@ -1,3 +1,4 @@
+import os
 import pytest
 import platform
 
@@ -10,22 +11,26 @@ from utils import (
 
 class TestGoPaddleLite(object):
     @pytest.mark.skipif(
-        platform.machine() != "x86_64",
-        reason="gopaddle-lite tests are only relevant in x86 architectures",
+        platform.machine() == "s390x",
+        reason="gopaddle tests are only relevant in x86 and arm64 architectures",
+    )
+    @pytest.mark.skipif(
+        os.environ.get("UNDER_TIME_PRESSURE") == None,
+        reason="Skipping test, expected to be tested when under time pressure",
     )
     def test_gopaddle_lite(self):
         """
-        Sets up and validates gopaddle-lite.
+        Sets up and validates gopaddle.
         """
-        print("Enabling gopaddle-lite")
-        microk8s_enable("gopaddle-lite")
-        print("Validating gopaddle-lite")
+        print("Enabling gopaddle")
+        microk8s_enable("gopaddle")
+        print("Validating gopaddle")
         self.validate_gopaddle_lite()
-        print("Disabling gopaddle-lite")
-        microk8s_disable("gopaddle-lite")
+        print("Disabling gopaddle")
+        microk8s_disable("gopaddle")
 
     def validate_gopaddle_lite(self):
         """
-        Validate gopaddle-lite
+        Validate gopaddle
         """
-        wait_for_pod_state("", "gp-lite", "running", label="released-by=gopaddle")
+        wait_for_pod_state("", "gopaddle", "running", label="released-by=gopaddle")

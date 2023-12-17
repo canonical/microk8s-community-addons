@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+
+set -e
+
+source $SNAP/actions/common/utils.sh
+
+HELM="${SNAP}/microk8s-helm3.wrapper"
+MICROK8S_CONFIG="${SNAP}/microk8s-config.wrapper"
+
+NAMESPACE="microcks"
+MICROCKS_CHART_VERSION="1.8.0"
+
+# Retrieve microk8s cluster IP to nip.io setup
+IP=`"${MICROK8S_CONFIG}" | grep "server: https:" | sed "s/\/\// /" | awk -F ':' '{print $3}' | sed "s/ //"`
+
+# Ensure all prerequisites services are enabled
+do_prerequisites() {
+        # Enable dns service
+        "$SNAP/microk8s-enable.wrapper" dns
+        # Enable ingress service
+        "$SNAP/microk8s-enable.wrapper" ingress
+        # Enable hostpath-storage service (storage is deprecated)
+        "$SNAP/microk8s-enable.wrapper" hostpath-storage
+	# Allow some time for the apiserver to start and be responsive
+	${SNAP}/microk8s-status.wrapper --wait-ready --timeout 30 >/dev/null
+}
+
+get_microcks () {
+	echo "Enabling Microcks"
+
+        # Always update the chart repo first (do not miss minor versions...), add repo if it does not exists
+        "${HELM}" repo update microcks || "${HELM}" repo add microcks https://microcks.io/helm
+	# Install the helm chart
+	"${HELM}" upgrade --install --create-namespace microcks microcks/microcks -n "${NAMESPACE}" --version "${MICROCKS_CHART_VERSION}" --set microcks.url=microcks."${IP}".nip.io --set keycloak.url=keycloak."${IP}".nip.io
+
+	# Final comment and information
+	echo ""
+	echo "Microcks ${MICROCKS_CHART_VERSION} has been installed and enabled."
+	echo "Happy API(s) Mocking and Testing -> https://microcks."${IP}".nip.io"
+	echo ""
+	echo "Getting started -> https://microcks.io/documentation/getting-started/"
+	echo ""
+	echo "Useful commands:"
+	echo ""
+	echo "- Retrieve all Microcks' URLs of the created ingress:"
+	echo ""
+	echo "$ microk8s kubectl get ingress -n microcks"
+	echo ""
+}
+
+do_prerequisites
+get_microcks

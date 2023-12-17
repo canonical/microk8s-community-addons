@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+set -e
+
+CURRENT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
+
+curl -sfL http://get.kubearmor.io/ | sudo sh -s -- -b "$SNAP_COMMON/bin"
+
+cp "$CURRENT_DIR/karmor" "$SNAP_COMMON/plugins"
+
+chmod +x "$SNAP_COMMON/plugins/karmor"
+
+sudo microk8s karmor install --image=kubearmor/kubearmor:v0.10.2

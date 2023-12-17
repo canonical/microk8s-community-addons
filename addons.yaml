@@ -1,6 +1,14 @@
 microk8s-addons:
   description: "List of all addons included in Microk8s."
   addons:
+    - name: "microcks"
+      description: "Open source Kubernetes Native tool for API Mocking and Testing"
+      version: "1.7.1"
+      check_status: "deployment.apps/microcks"
+      supported_architectures:
+        - arm64
+        - amd64
+
     - name: "dashboard-ingress"
       description: "Ingress definition for Kubernetes dashboard"
       version: "1.0.0"
@@ -11,7 +19,7 @@ microk8s-addons:
 
     - name: "istio"
       description: "Core Istio service mesh services"
-      version: "1.15.3"
+      version: "1.18.2"
       check_status: "${SNAP_DATA}/bin/istioctl"
       supported_architectures:
         - arm64
@@ -44,7 +52,7 @@ microk8s-addons:
 
     - name: "linkerd"
       description: "Linkerd is a service mesh for Kubernetes and other frameworks"
-      version: "2.11.3"
+      version: "2.14.3"
       check_status: "pod/linkerd-destination"
       supported_architectures:
         - amd64
@@ -52,7 +60,7 @@ microk8s-addons:
 
     - name: "cilium"
       description: "SDN, fast with full network policy"
-      version: "1.11.12"
+      version: "1.13.4"
       check_status: "pod/cilium"
       confinement: "classic"
       supported_architectures:
@@ -79,7 +87,7 @@ microk8s-addons:
     - name: "portainer"
       description: "Portainer UI for your Kubernetes cluster"
       version: "2.0.0"
-      check_status: "pod/portainer"
+      check_status: "deployment.apps/portainer "
       supported_architectures:
         - arm64
         - amd64
@@ -95,7 +103,7 @@ microk8s-addons:
 
     - name: "keda"
       description: "Kubernetes-based Event Driven Autoscaling"
-      version: "2.6.1"
+      version: "2.12.0"
       check_status: "pod/keda-operator"
       supported_architectures:
         - amd64
@@ -132,7 +140,7 @@ microk8s-addons:
 
     - name: "trivy"
       description: "Kubernetes-native security scanner"
-      version: "0.2.0"
+      version: "0.15.1"
       check_status: "deployment.apps/trivy-operator"
       supported_architectures:
         - arm64
@@ -140,9 +148,10 @@ microk8s-addons:
 
     - name: "argocd"
       description: "Argo CD is a declarative continuous deployment for Kubernetes."
-      version: "2.3.3"
+      version: "2.7.2"
       check_status: "deployment.apps/argo-cd-argocd-server"
       supported_architectures:
+        - arm64
         - amd64
 
     - name: "osm-edge"
@@ -155,7 +164,7 @@ microk8s-addons:
 
     - name: "sosivio"
       description: "Kubernetes Predictive Troubleshooting, Observability, and Resource Optimization"
-      version: "1.0.0"
+      version: "1.7.1"
       check_status: "deployment.apps/sosivio-dashboard"
       supported_architectures:
         - amd64
@@ -169,20 +178,13 @@ microk8s-addons:
         - amd64
         - arm64
 
-    - name: "gopaddle-lite"
-      description: "Cheapest, fastest and simplest way to modernize your applications"
-      version: "4.2.5"
+    - name: "gopaddle"
+      description: "DevSecOps and Multi-Cloud Kubernetes Platform"
+      version: "4.2.9"
       check_status: "deployment.apps/gateway"
       supported_architectures:
         - amd64
-
-    - name: "ondat"
-      description: "Ondat is a software-defined, cloud native storage platform for Kubernetes."
-      version: "latest"
-      check_status: "deployment.apps/storageos-cli"
-      confinement: "classic"
-      supported_architectures:
-        - amd64
+        - arm64
 
     - name: "parking"
       description: "Static webserver to park a domain. Works with EasyHAProxy."
@@ -207,3 +209,38 @@ microk8s-addons:
       supported_architectures:
         - amd64
         - arm64
+
+    - name: "kubearmor"
+      description: "Cloud-native runtime security enforcement system for k8s"
+      version: "0.10.2"
+      check_status: "daemonset.apps/kubearmor"
+      confinement: "classic"
+      supported_architectures:
+        - amd64
+        - arm64
+
+    - name: "falco"
+      description: "Cloud-native runtime threat detection tool for Linux and K8s"
+      version: "3.7.1"
+      check_status: "daemonset.apps/falco"
+      supported_architectures:
+        - amd64
+        - arm64
+
+    - name: "cloudnative-pg"
+      description: "PostgreSQL operator CloudNativePG"
+      version: "0.0.1"
+      check_status: "deployment.apps/cnpg-controller-manager"
+      confinement: "classic"
+      supported_architectures:
+        - arm64
+        - amd64
+
+    - name: "ngrok"
+      description: "ngrok Ingress Controller instantly adds connectivity, load balancing, authentication, and observability to your services"
+      version: "0.0.1"
+      check_status: "deployment.apps/ngrok-ingress-controller-kubernetes-ingress-controller-manager"
+      confinement: "classic"
+      supported_architectures:
+        - arm64
+        - amd64
