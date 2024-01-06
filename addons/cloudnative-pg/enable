@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 set -e
 
-CNPG_VERSION="1.21.1"
+CNPG_VERSION="$1"
+if [ -z "$1" ]; then
+        CNPG_VERSION="1.22.0"
+fi
 
 KUBECTL="${SNAP}/microk8s-kubectl.wrapper"
 # shellcheck source=/dev/null
