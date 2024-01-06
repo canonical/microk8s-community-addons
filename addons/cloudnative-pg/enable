@@ -98,11 +98,12 @@ cnpg_enable() {
 	cnpg_apply_manifest
 	if [[ $? -ne 0 ]]; then
 	 echo "CloudNativePG not installed"
+         run_with_sudo rm -f "${SNAP_DATA}/bin/kubectl-cnpg"
 	 exit 1
 	fi
 
 	cnpg_show_first_cluster
-	cnpg_more_information "$cnpg_version"
+	cnpg_more_information "${CNPG_VERSION}"
 
 	echo "CloudNativePG installed"
 }
