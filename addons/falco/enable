@@ -6,7 +6,7 @@ source $SNAP/actions/common/utils.sh
 
 NAMESPACE_FALCO="falco"
 
-FALCO_HELM_VERSION="3.7.1"
+FALCO_HELM_VERSION="3.8.5"
 
 KUBECTL="$SNAP/microk8s-kubectl.wrapper"
 HELM="$SNAP/microk8s-helm3.wrapper"
@@ -75,6 +75,10 @@ get_falco() {
 
   echo "Falco is installed"
   echo "The default username/password for the Falcosidekick UI is admin/admin"
+  echo "The Falcosidekick UI is exposed by the falco-falcosidekick-ui service in the falco Namespace"
+  echo "This is a ClusterIP Service by default, so you can either access it via a kubectl port-forward,"
+  echo "or you can edit the service to be another type you can reach (e.g. NodePort or LoadBalancer),"
+  echo "or (if you have enabled an Ingress controller) you can put an Ingress in front of this service."
 }
 
 do_prerequisites
