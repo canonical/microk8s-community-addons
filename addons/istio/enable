@@ -10,7 +10,7 @@ source $SNAP/actions/common/utils.sh
 
 ISTIO_LATEST=$(curl https://api.github.com/repos/istio/istio/tags 2>/dev/null | jq '.[0].name' | sed 's/"//g')
 
-#Takes one parameter to chek if the version exists
+#Takes one parameter to check if the version exists
 check_version() { 
     local version="$1"
     local versions=$(curl https://api.github.com/repos/istio/istio/tags 2>/dev/null | jq '.[].name')
