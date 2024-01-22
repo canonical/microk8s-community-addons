@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-
 echo "Removing kubearmor from k8s cluster"
 
 microk8s.helm uninstall kubearmor-operator -n kubearmor
