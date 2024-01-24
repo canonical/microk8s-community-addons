@@ -1,10 +1,16 @@
 #!/usr/bin/env bash
-echo To view policy violation logs use karmor logs --gRPC 127.0.0.1:32767
 
 set -e
-microk8s.helm repo add kubearmor https://kubearmor.github.io/charts
-microk8s.helm repo update kubearmor
-microk8s.helm upgrade --install kubearmor-operator kubearmor/kubearmor-operator -n kubearmor --set autoDeploy=true --create-namespace
+
+source $SNAP/actions/common/utils.sh
+
+"$SNAP/microk8s-enable.wrapper" helm3
+
+echo "To view policy violation logs use karmor logs --gRPC 127.0.0.1:32767"
+
+${SNAP}/microk8s-helm3.wrapper repo add kubearmor https://kubearmor.github.io/charts
+${SNAP}/microk8s-helm3.wrapper repo update kubearmor
+${SNAP}/microk8s-helm3.wrapper upgrade --install kubearmor-operator kubearmor/kubearmor-operator -n kubearmor --set autoDeploy=true --create-namespace
 
 CURRENT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
 curl -sfL http://get.kubearmor.io/ | sudo sh -s -- -b "$SNAP_COMMON/bin"
