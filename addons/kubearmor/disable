@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 
-echo "Removing kubearmor from k8s cluster"
+set -e
 
-microk8s.helm uninstall kubearmor-operator -n kubearmor
+source $SNAP/actions/common/utils.sh
+
+"$SNAP/microk8s-helm.wrapper" uninstall kubearmor-operator -n kubearmor
 
 if [[ -f "$SNAP_COMMON/plugins/karmor" ]]; then
     sudo rm "$SNAP_COMMON/plugins/karmor"
