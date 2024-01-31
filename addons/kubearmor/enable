@@ -2,12 +2,18 @@
 
 set -e
 
+source $SNAP/actions/common/utils.sh
+
+"$SNAP/microk8s-enable.wrapper" helm3
+
+echo "To view policy violation logs use karmor logs --gRPC 127.0.0.1:32767"
+
+${SNAP}/microk8s-helm3.wrapper repo add kubearmor https://kubearmor.github.io/charts
+${SNAP}/microk8s-helm3.wrapper repo update kubearmor
+${SNAP}/microk8s-helm3.wrapper upgrade --install kubearmor-operator kubearmor/kubearmor-operator -n kubearmor  --set kubearmorConfig.kubearmorImage.image=kubearmor/kubearmor:v1.2.0 --create-namespace
+
 CURRENT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
-
 curl -sfL http://get.kubearmor.io/ | sudo sh -s -- -b "$SNAP_COMMON/bin"
-
 cp "$CURRENT_DIR/karmor" "$SNAP_COMMON/plugins"
-
 chmod +x "$SNAP_COMMON/plugins/karmor"
 
-sudo microk8s karmor install --image=kubearmor/kubearmor:v0.10.2
