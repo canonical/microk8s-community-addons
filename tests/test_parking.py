@@ -9,6 +9,7 @@ from utils import (
 
 
 class TestParking(object):
+    @pytest.mark.skip(reason="Due to https://github.com/byjg/byjg.github.io/issues/5")
     @pytest.mark.skipif(platform.machine() == "s390x", reason="Not available on s390x")
     def test_parking(self):
         """
