@@ -1,10 +1,8 @@
 #!/bin/bash
-
 if [ "$EUID" -ne 0 ]
 then echo "Elevated permissions are needed for this command. Please use sudo."
     exit 1
 fi
-
 export KUBECONFIG=$SNAP_DATA/credentials/client.config
 
 ${SNAP_COMMON}/bin/karmor $*
