@@ -243,3 +243,11 @@ microk8s-addons:
       supported_architectures:
         - arm64
         - amd64
+
+    - name: "stunner"
+      description: "A Kubernetes media gateway for WebRTC"
+      version: "0.0.1"
+      check_status: "deployment.apps/stunner-gateway-operator-controller-manager"
+      supported_architectures:
+        - arm64
+        - amd64
