@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+set -e
+
+"$SNAP/microk8s-enable.wrapper" helm3
+
+KUBECTL="$SNAP/microk8s-kubectl.wrapper"
+HELM="$SNAP/microk8s-helm3.wrapper"
+NAMESPACE_STUNNER_SYSTEM="stunner-system"
+
+echo "Disabling STUNner..."
+
+$HELM uninstall stunner-gateway-operator --namespace $NAMESPACE_STUNNER_SYSTEM
+$KUBECTL delete namespace $NAMESPACE_STUNNER_SYSTEM
+
+echo "STUNner is disabled."
