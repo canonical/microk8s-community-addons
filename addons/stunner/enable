@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+set -e
+
+"$SNAP/microk8s-enable.wrapper" dns
+"$SNAP/microk8s-enable.wrapper" helm3
+
+HELM="$SNAP/microk8s-helm3.wrapper"
+NAMESPACE_STUNNER_SYSTEM="stunner-system"
+VERSION_STUNNER_SYSTEM="0.18.0"
+
+echo "Enabling STUNner..."
+
+$HELM repo add stunner https://l7mp.io/stunner
+$HELM repo update
+
+$HELM upgrade --install stunner-gateway-operator stunner/stunner-gateway-operator \
+    --create-namespace --namespace $NAMESPACE_STUNNER_SYSTEM --version $VERSION_STUNNER_SYSTEM
+
+echo "STUNner is enabled."
