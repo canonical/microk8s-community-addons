@@ -57,6 +57,9 @@ fi
 
 if [ -z "$STORAGECLASS" ]
 then
+    # enable hostpath-storage if storageclass is not supplied
+    "$SNAP/microk8s-enable.wrapper" hostpath-storage
+    
     $KUBECTL apply -f $CURRENT_DIR/storageclass-retain.yaml
     STORAGECLASS="microk8s-hostpath-gp-retain"
 fi
@@ -67,9 +70,6 @@ do_prerequisites() {
     #restart_service kubelet
     # enable helm3
     "$SNAP/microk8s-enable.wrapper" helm3
-    
-    # enable storage
-    "$SNAP/microk8s-enable.wrapper" hostpath-storage
     
     # enable dns
     "$SNAP/microk8s-enable.wrapper" dns
