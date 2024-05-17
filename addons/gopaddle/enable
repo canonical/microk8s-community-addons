@@ -31,6 +31,9 @@ while true; do
         -v|--version)
             HELM_VERSION="$2"
         shift 2;;
+        -s|--storageclass)
+            STORAGECLASS="$2"
+        shift 2;;
         --)
         break;;
     esac
