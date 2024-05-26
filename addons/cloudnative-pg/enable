@@ -39,7 +39,7 @@ cnpg_install_plugin() {
 }
 
 cnpg_apply_manifest() {
-	apply_wait=$("${SNAP_DATA}"/bin/kubectl-cnpg install generate | $KUBECTL apply -f - > /dev/null)
+	apply_wait=$("${SNAP_DATA}"/bin/kubectl-cnpg install generate | $KUBECTL apply --server-side -f - > /dev/null)
 
 	# If the apply isn't successful we stop and exit
 	if [[ "${apply_wait}" -ne 0 ]]; then
