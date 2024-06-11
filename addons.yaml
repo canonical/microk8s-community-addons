@@ -178,9 +178,9 @@ microk8s-addons:
         - arm64
 
     - name: "gopaddle"
-      description: "DevSecOps and Multi-Cloud Kubernetes Platform"
-      version: "4.2.9"
-      check_status: "deployment.apps/gateway"
+      description: "AI Assisted Low-Code Kubernetes IDE."
+      version: "5.0"
+      check_status: "deployment.apps/gopaddle"
       supported_architectures:
         - amd64
         - arm64
