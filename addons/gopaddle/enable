@@ -57,14 +57,6 @@ enable_gopaddle_lite() {
         $HELM install gopaddle gopaddle/gopaddle --create-namespace -n gopaddle --version $HELM_VERSION
     fi
 
-    # echo ""
-    echo ""
-    echo "gopaddle is enabled. Please wait for 10 seconds for gopaddle services to move to READY state."
-    # echo ""
-    echo "You can wait for the services to move to READY state by running the command 'microk8s.kubectl wait --for=condition=ready pod -l released-by=gopaddle -n gopaddle'."
-    # echo ""
-    echo "Once the services are ready, you can access the gopaddle endpoint at http://<PublicIP>:30003"
-    echo ""
 }
 
 
