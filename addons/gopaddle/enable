@@ -16,7 +16,7 @@ eval set -- "$ARGS"
 while true; do
     case "$1" in
         -v|--version)
-            HELM_VERSION="$1"
+            HELM_VERSION="$2"
         shift 2;;
         --)
         break;;
