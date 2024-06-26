@@ -9,7 +9,6 @@ HELM="$SNAP/microk8s-helm3.wrapper"
 
 CURRENT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
 HELM_VERSION="5.0"
-# ARGS=$(getopt -a --options i:v:s: --longoptions "ip:,version:,storageclass:" -- "$@")
 ARGS=$(getopt -a --options v: --longoptions "version:" -- "$@")
 eval set -- "$ARGS"
 
@@ -25,25 +24,16 @@ done
 
 
 do_prerequisites() {
-    #refresh_opt_in_config "authentication-token-webhook" "true" kubelet
-    #restart_service kubelet
     # enable helm3
     "$SNAP/microk8s-enable.wrapper" helm3
     
-    # enable storage
-    # "$SNAP/microk8s-enable.wrapper" hostpath-storage
-    
     # enable dns
     "$SNAP/microk8s-enable.wrapper" dns
-    
-    # enable metrics-server
-    # "$SNAP/microk8s-enable.wrapper" metrics-server
 }
 
 enable_gopaddle_lite() {
     
     echo "Enabling gopaddle"
-    # download gopaddle-lite helm
     
     # add helm repo
     $HELM repo add gopaddle https://gopaddle-io.github.io/gopaddle-lite

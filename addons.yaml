@@ -178,7 +178,7 @@ microk8s-addons:
         - arm64
 
     - name: "gopaddle"
-      description: "AI Assisted Low-Code Kubernetes IDE."
+      description: "Low-Code Kubernetes IDE with AI Co-pilot"
       version: "5.0"
       check_status: "deployment.apps/gopaddle"
       supported_architectures:
