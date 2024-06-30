@@ -6,7 +6,7 @@ source $SNAP/actions/common/utils.sh
 
 NAMESPACE_FALCO="falco"
 
-FALCO_HELM_VERSION="3.8.5"
+FALCO_HELM_VERSION="4.5.1"
 
 KUBECTL="$SNAP/microk8s-kubectl.wrapper"
 HELM="$SNAP/microk8s-helm3.wrapper"
@@ -59,7 +59,7 @@ get_falco() {
         --namespace "$NAMESPACE_FALCO" \
         --create-namespace \
         --version $FALCO_HELM_VERSION \
-        --set driver.kind="modern-bpf" \
+        --set driver.kind="modern_ebpf" \
         --set collectors.containerd.socket="/var/snap/microk8s/common/run/containerd.sock" \
         --set falcosidekick.enabled=true \
         --set falcosidekick.replicaCount=1 \
