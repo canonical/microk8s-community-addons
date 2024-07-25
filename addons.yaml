@@ -250,6 +250,7 @@ microk8s-addons:
       check_status: "deployment.apps/stunner-gateway-operator-controller-manager"
       supported_architectures:
         - arm64
+        - amd64
 
     - name: "sriov-device-plugin"
       description: "SR-IOV Network Device Plugin."
