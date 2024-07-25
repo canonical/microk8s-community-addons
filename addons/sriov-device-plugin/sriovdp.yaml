@@ -34,16 +34,26 @@ spec:
       serviceAccountName: sriov-device-plugin
       containers:
         - name: kube-sriovdp
-          image: nfvpe/sriov-device-plugin:v3.3
+          image: ghcr.io/k8snetworkplumbingwg/sriov-network-device-plugin:v3.7.0
           imagePullPolicy: IfNotPresent
           args:
             - --log-dir=sriovdp
             - --log-level=10
           securityContext:
             privileged: true
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "40Mi"
+            limits:
+              cpu: 1
+              memory: "200Mi"
           volumeMounts:
             - name: devicesock
-              mountPath: /var/lib/kubelet/
+              mountPath: /var/lib/kubelet/device-plugins
+              readOnly: false
+            - name: plugins-registry
+              mountPath: /var/lib/kubelet/plugins_registry
               readOnly: false
             - name: log
               mountPath: /var/log
@@ -54,7 +64,10 @@ spec:
       volumes:
         - name: devicesock
           hostPath:
-            path: /var/lib/kubelet/
+            path: /var/lib/kubelet/device-plugins
+        - name: plugins-registry
+          hostPath:
+            path: /var/lib/kubelet/plugins_registry
         - name: log
           hostPath:
             path: /var/log
