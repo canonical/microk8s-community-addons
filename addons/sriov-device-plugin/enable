@@ -69,7 +69,7 @@ def _pci_address_is_valid(pci_address: str) -> bool:
         bool: True if given PCI address is valid
     """
     get_pci_device_cmd = ["lspci", "-s", pci_address]
-    if subprocess.check_output(get_pci_device_cmd):
+    if subprocess.check_output(get_pci_device_cmd, text=True):
         return True
     return False
 
@@ -155,8 +155,7 @@ def _get_sriov_allocatable_resources() -> dict:
         dict: Kubernetes allocatable resources
     """
     node_details = subprocess.check_output(
-        [KUBECTL, "get", "node", "-o", "json"]
-    ).decode("utf-8")
+        [KUBECTL, "get", "node", "-o", "json"], text=True)
     allocatable_resources = json.loads(node_details).get("items")[0].get("status").get(
         "allocatable"
     )
