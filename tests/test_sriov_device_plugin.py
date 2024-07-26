@@ -11,16 +11,17 @@ from unittest import mock
 from subprocess import CalledProcessError, run
 from utils import microk8s_disable
 
+KUBECTL = os.path.expandvars("$SNAP/microk8s-kubectl.wrapper")
+sriov_addon_path = (
+    pathlib.Path(os.path.dirname(__file__)).parent.absolute()
+    / "addons"
+    / "sriov-device-plugin"
+)
 spec = spec_from_loader(
     "enable",
     SourceFileLoader(
         "enable",
-        str(
-            pathlib.Path(os.path.dirname(__file__)).parent.absolute()
-            / "addons"
-            / "sriov-device-plugin"
-            / "enable"
-        ),
+        str(sriov_addon_path / "enable"),
     ),
 )
 enable = module_from_spec(spec)
@@ -31,6 +32,16 @@ class TestSRIOVDevicePlugin(unittest.TestCase):
     """SR-IOV Network Device Plugin relies on availability of given PCI devices, so we can only
     test for the exception being raised.
     """
+
+    script_path = os.path.abspath(os.path.dirname(__file__))
+    resources_file_name = "sriov-device-plugin-test-resources-valid.json"
+    resource_file = os.path.join(script_path, "resources", resources_file_name)
+    with open(resource_file, "r") as f:
+        resources = json.load(f)
+    config_name = "tmp-config"
+    test_args = enable._TestArgs(
+        enabled=True, resources=resources, config_name=config_name
+    )
 
     @pytest.mark.skipif(
         platform.machine() != "x86_64",
@@ -70,11 +81,18 @@ class TestSRIOVDevicePlugin(unittest.TestCase):
         microk8s_disable("sriov-device-plugin")
 
     def mock_check_output(self, command, text=True):
-        KUBECTL = os.path.expandvars("$SNAP/microk8s-kubectl.wrapper")
-
         if command == ["lspci", "-s", "0000:00:06.0"]:
             return "something"
         elif command == ["lspci", "-s", "0000:00:07.0"]:
+            return "something"
+        elif command == [
+            KUBECTL,
+            "apply",
+            "-f",
+            os.path.join(sriov_addon_path, "sriovdp.yaml"),
+        ]:
+            return "something"
+        elif command == [KUBECTL, "apply", "-f", self.config_name]:
             return "something"
         elif command == [KUBECTL, "get", "node", "-o", "json"]:
             return """{
@@ -91,20 +109,46 @@ class TestSRIOVDevicePlugin(unittest.TestCase):
 }"""
         raise ValueError(f"Unmocked command: {command}")
 
+    @pytest.mark.skipif(
+        platform.machine() != "x86_64",
+        reason="SR-IOV Network Device Plugin tests are only relevant in x86 architectures",
+    )
+    @pytest.mark.skipif(
+        os.environ.get("STRICT") == "yes",
+        reason="Skipping sriov-device-plugin tests in strict confinement as they are expected to fail",  # noqa: E501
+    )
     def test_sriov_device_plugin_works_correctly(self):
         """
         Make sure plugin enables and disables successfully.
         """
-        script_path = os.path.abspath(os.path.dirname(__file__))
-        resources_file_name = "sriov-device-plugin-test-resources-valid.json"
-        resource_file = os.path.join(script_path, "resources", resources_file_name)
         print("Enabling SR-IOV Network Device Plugin")
 
-        with open(resource_file, "r") as f:
-            resources = json.load(f)
-            with mock.patch("subprocess.check_output") as mocked_subprocess:
-                mocked_subprocess.side_effect = self.mock_check_output
-                enable.main(testing=True, resources=resources)
+        with mock.patch("subprocess.check_output") as mocked_subprocess:
+            mocked_subprocess.side_effect = self.mock_check_output
+            enable.main(test_args=self.test_args)
+
+            mocked_subprocess.assert_any_call(
+                ["lspci", "-s", "0000:00:06.0"], text=True
+            )
+            mocked_subprocess.assert_any_call(
+                ["lspci", "-s", "0000:00:07.0"], text=True
+            )
+            mocked_subprocess.assert_any_call(
+                [
+                    KUBECTL,
+                    "apply",
+                    "-f",
+                    os.path.join(sriov_addon_path, "sriovdp.yaml"),
+                ],
+                text=True,
+            )
+            mocked_subprocess.assert_any_call(
+                [KUBECTL, "apply", "-f", self.config_name], text=True
+            )
+            mocked_subprocess.assert_any_call(
+                [KUBECTL, "get", "node", "-o", "json"], text=True
+            )
+            assert len(mocked_subprocess.call_args_list) == 6
 
         print("Disabling SR-IOV Network Device Plugin")
         microk8s_disable("sriov-device-plugin")

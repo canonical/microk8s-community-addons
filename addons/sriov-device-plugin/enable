@@ -12,8 +12,18 @@ KUBECTL = os.path.expandvars("$SNAP/microk8s-kubectl.wrapper")
 SCRIPT_PATH = os.path.abspath(os.path.dirname(__file__))
 sys.tracebacklimit = 0
 
-def main(testing: bool = False, resources: dict = {}):
-    if not testing:
+class _TestArgs:
+    def __init__(self, 
+                enabled: bool = False,
+                resources: dict = {},
+                config_name: str = "",
+    ):
+        self.enabled = enabled
+        self.resources = resources
+        self.config_name = config_name
+
+def main(test_args: _TestArgs = _TestArgs()):
+    if not test_args.enabled:
         parser = argparse.ArgumentParser()
         parser.add_argument(
             "-r",
@@ -26,7 +36,9 @@ def main(testing: bool = False, resources: dict = {}):
         args = parser.parse_args()
 
         with open(args.resources_file, "r") as resources_mapping:
-            resources = json.loads(resources_mapping.read())
+            resources: dict = json.loads(resources_mapping.read())
+    else:
+        resources = test_args.resources
 
     if not _pci_addresses_are_valid(resources):
         raise ValueError("Invalid device PCI address!")
@@ -34,7 +46,7 @@ def main(testing: bool = False, resources: dict = {}):
     sriovdp_config_manifest = _get_sriovdp_config_manifest(resources)
 
     print("Enabling SR-IOV Network Device Plugin...")
-    _create_sriovdp_config(sriovdp_config_manifest)
+    _create_sriovdp_config(sriovdp_config_manifest, test_args.config_name)
     _enable_sriovdp(resources)
     print(
         "SR-IOV Network Device Plugin is now enabled.\n"
@@ -106,7 +118,7 @@ data:
 """
 
 
-def _create_sriovdp_config(sriovdp_config_manifest: str) -> None:
+def _create_sriovdp_config(sriovdp_config_manifest: str, test_config_name: str = "") -> None:
     """Creates SR-IOV Network Device Plugin's config in Kubernetes.
 
     Args:
@@ -116,7 +128,10 @@ def _create_sriovdp_config(sriovdp_config_manifest: str) -> None:
         sriovdp_config.write(sriovdp_config_manifest)
         sriovdp_config.flush()
 
-        subprocess.check_call([KUBECTL, "apply", "-f", sriovdp_config.name])
+        sriovdp_config_name = sriovdp_config.name
+        if test_config_name != "":
+            sriovdp_config_name = test_config_name
+        subprocess.check_output([KUBECTL, "apply", "-f", sriovdp_config_name], text=True)
 
 
 def _enable_sriovdp(resources: dict) -> None:
@@ -125,7 +140,7 @@ def _enable_sriovdp(resources: dict) -> None:
     Args:
         resources (dict): SR-IOV resources mappings
     """
-    subprocess.check_call([KUBECTL, "apply", "-f", os.path.join(SCRIPT_PATH, "sriovdp.yaml")])
+    subprocess.check_output([KUBECTL, "apply", "-f", os.path.join(SCRIPT_PATH, "sriovdp.yaml")], text=True)
 
     now = time.time()
     timeout = 300 # seconds
