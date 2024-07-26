@@ -12,21 +12,21 @@ KUBECTL = os.path.expandvars("$SNAP/microk8s-kubectl.wrapper")
 SCRIPT_PATH = os.path.abspath(os.path.dirname(__file__))
 sys.tracebacklimit = 0
 
+def main(testing: bool = False, resources: dict = {}):
+    if not testing:
+        parser = argparse.ArgumentParser()
+        parser.add_argument(
+            "-r",
+            "--resources-file",
+            dest="resources_file",
+            required=True,
+            help="Path to JSON file which contains SR-IOV resources mappings, i.e.\n"
+                "{\"RESOURCE_NAME\": [\"DEVICE_PCI_ADDRESS\"]}",
+        )
+        args = parser.parse_args()
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "-r",
-        "--resources-file",
-        dest="resources_file",
-        required=True,
-        help="Path to JSON file which contains SR-IOV resources mappings, i.e.\n"
-             "{\"RESOURCE_NAME\": [\"DEVICE_PCI_ADDRESS\"]}",
-    )
-    args = parser.parse_args()
-
-    with open(args.resources_file, "r") as resources_mapping:
-        resources = json.loads(resources_mapping.read())
+        with open(args.resources_file, "r") as resources_mapping:
+            resources = json.loads(resources_mapping.read())
 
     if not _pci_addresses_are_valid(resources):
         raise ValueError("Invalid device PCI address!")
