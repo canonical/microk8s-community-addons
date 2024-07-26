@@ -70,11 +70,13 @@ class TestSRIOVDevicePlugin(unittest.TestCase):
         microk8s_disable("sriov-device-plugin")
 
     def mock_check_output(self, command, text=True):
+        KUBECTL = os.path.expandvars("$SNAP/microk8s-kubectl.wrapper")
+
         if command == ["lspci", "-s", "0000:00:06.0"]:
             return "something"
         elif command == ["lspci", "-s", "0000:00:07.0"]:
             return "something"
-        elif command == ["sudo", "microk8s", "kubectl", "get", "node", "-o", "json"]:
+        elif command == [KUBECTL, "get", "node", "-o", "json"]:
             return """{
    "items": [
       {
