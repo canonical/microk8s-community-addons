@@ -4,16 +4,28 @@ import json
 import pytest
 import platform
 from importlib.util import spec_from_loader, module_from_spec
-from importlib.machinery import SourceFileLoader 
+from importlib.machinery import SourceFileLoader
 import pathlib
 from unittest import mock
 
 from subprocess import CalledProcessError, run
 from utils import microk8s_disable
 
-spec = spec_from_loader("enable", SourceFileLoader("enable", str( pathlib.Path(os.path.dirname(__file__)).parent.absolute() / "addons" / "sriov-device-plugin" / "enable")))
+spec = spec_from_loader(
+    "enable",
+    SourceFileLoader(
+        "enable",
+        str(
+            pathlib.Path(os.path.dirname(__file__)).parent.absolute()
+            / "addons"
+            / "sriov-device-plugin"
+            / "enable"
+        ),
+    ),
+)
 enable = module_from_spec(spec)
 spec.loader.exec_module(enable)
+
 
 class TestSRIOVDevicePlugin(unittest.TestCase):
     """SR-IOV Network Device Plugin relies on availability of given PCI devices, so we can only
@@ -58,8 +70,6 @@ class TestSRIOVDevicePlugin(unittest.TestCase):
         microk8s_disable("sriov-device-plugin")
 
     def mock_check_output(self, command, text=True):
-        # KUBECTL = os.path.expandvars("$SNAP/microk8s-kubectl.wrapper")
-
         if command == ["lspci", "-s", "0000:00:06.0"]:
             return "something"
         elif command == ["lspci", "-s", "0000:00:07.0"]:
@@ -84,21 +94,15 @@ class TestSRIOVDevicePlugin(unittest.TestCase):
         Make sure plugin enables and disables successfully.
         """
         script_path = os.path.abspath(os.path.dirname(__file__))
-        resources_file_name = (
-            "sriov-device-plugin-test-resources-valid.json"
-        )
-        resource_file = os.path.join(
-            script_path,
-            "resources",
-            resources_file_name
-        )
+        resources_file_name = "sriov-device-plugin-test-resources-valid.json"
+        resource_file = os.path.join(script_path, "resources", resources_file_name)
         print("Enabling SR-IOV Network Device Plugin")
 
         with open(resource_file, "r") as f:
             resources = json.load(f)
             with mock.patch("subprocess.check_output") as mocked_subprocess:
                 mocked_subprocess.side_effect = self.mock_check_output
-                enable.main(testing=True, resources=resources) 
+                enable.main(testing=True, resources=resources)
 
         print("Disabling SR-IOV Network Device Plugin")
         microk8s_disable("sriov-device-plugin")
