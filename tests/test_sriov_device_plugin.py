@@ -9,7 +9,7 @@ import pathlib
 from unittest import mock
 
 from subprocess import CalledProcessError, run
-from utils import microk8s_disable
+from utils import kubectl, microk8s_disable, wait_for_pod_state
 
 KUBECTL = os.path.expandvars("$SNAP/microk8s-kubectl.wrapper")
 sriov_addon_path = (
@@ -38,10 +38,7 @@ class TestSRIOVDevicePlugin(unittest.TestCase):
     resource_file = os.path.join(script_path, "resources", resources_file_name)
     with open(resource_file, "r") as f:
         resources = json.load(f)
-    config_name = "tmp-config"
-    test_args = enable._TestArgs(
-        enabled=True, resources=resources, config_name=config_name
-    )
+    test_args = enable._TestArgs(enabled=True, resources=resources)
 
     @pytest.mark.skipif(
         platform.machine() != "x86_64",
@@ -85,15 +82,17 @@ class TestSRIOVDevicePlugin(unittest.TestCase):
             return "something"
         elif command == ["lspci", "-s", "0000:00:07.0"]:
             return "something"
-        elif command == [
+        elif command[:3] == [
             KUBECTL,
             "apply",
             "-f",
-            os.path.join(sriov_addon_path, "sriovdp.yaml"),
         ]:
-            return "something"
-        elif command == [KUBECTL, "apply", "-f", self.config_name]:
-            return "something"
+            if command[3] == os.path.join(sriov_addon_path, "sriovdp.yaml"):
+                cmd = " ".join(command[1:])
+                return kubectl(cmd)
+            elif command[3].startswith("/tmp/tmp"):
+                cmd = " ".join(command[1:])
+                return kubectl(cmd)
         elif command == [KUBECTL, "get", "node", "-o", "json"]:
             return """{
    "items": [
@@ -143,12 +142,15 @@ class TestSRIOVDevicePlugin(unittest.TestCase):
                 text=True,
             )
             mocked_subprocess.assert_any_call(
-                [KUBECTL, "apply", "-f", self.config_name], text=True
-            )
-            mocked_subprocess.assert_any_call(
                 [KUBECTL, "get", "node", "-o", "json"], text=True
             )
-            assert len(mocked_subprocess.call_args_list) == 6
+            assert (
+                len(mocked_subprocess.call_args_list) == 6
+            ), f"wrong number of `subprocess.check_output` calls, expected {6}, got {len(mocked_subprocess.call_args_list)}"
+
+        wait_for_pod_state(
+            "", "kube-system", label="name=sriov-device-plugin", desired_state="running"
+        )
 
         print("Disabling SR-IOV Network Device Plugin")
         microk8s_disable("sriov-device-plugin")

@@ -16,11 +16,9 @@ class _TestArgs:
     def __init__(self, 
                 enabled: bool = False,
                 resources: dict = {},
-                config_name: str = "",
     ):
         self.enabled = enabled
         self.resources = resources
-        self.config_name = config_name
 
 def main(test_args: _TestArgs = _TestArgs()):
     if not test_args.enabled:
@@ -46,7 +44,7 @@ def main(test_args: _TestArgs = _TestArgs()):
     sriovdp_config_manifest = _get_sriovdp_config_manifest(resources)
 
     print("Enabling SR-IOV Network Device Plugin...")
-    _create_sriovdp_config(sriovdp_config_manifest, test_args.config_name)
+    _create_sriovdp_config(sriovdp_config_manifest)
     _enable_sriovdp(resources)
     print(
         "SR-IOV Network Device Plugin is now enabled.\n"
@@ -118,7 +116,7 @@ data:
 """
 
 
-def _create_sriovdp_config(sriovdp_config_manifest: str, test_config_name: str = "") -> None:
+def _create_sriovdp_config(sriovdp_config_manifest: str) -> None:
     """Creates SR-IOV Network Device Plugin's config in Kubernetes.
 
     Args:
@@ -127,11 +125,7 @@ def _create_sriovdp_config(sriovdp_config_manifest: str, test_config_name: str =
     with tempfile.NamedTemporaryFile(mode="w+") as sriovdp_config:
         sriovdp_config.write(sriovdp_config_manifest)
         sriovdp_config.flush()
-
-        sriovdp_config_name = sriovdp_config.name
-        if test_config_name != "":
-            sriovdp_config_name = test_config_name
-        subprocess.check_output([KUBECTL, "apply", "-f", sriovdp_config_name], text=True)
+        subprocess.check_output([KUBECTL, "apply", "-f", sriovdp_config.name], text=True)
 
 
 def _enable_sriovdp(resources: dict) -> None:
