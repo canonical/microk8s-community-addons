@@ -1,0 +1,178 @@
+#!/usr/bin/env python3
+
+import argparse
+import json
+import os
+import subprocess
+import sys
+import time
+import tempfile
+
+KUBECTL = os.path.expandvars("$SNAP/microk8s-kubectl.wrapper")
+SCRIPT_PATH = os.path.abspath(os.path.dirname(__file__))
+sys.tracebacklimit = 0
+
+class _TestArgs:
+    def __init__(self, 
+                enabled: bool = False,
+                resources: dict = {},
+    ):
+        self.enabled = enabled
+        self.resources = resources
+
+def main(test_args: _TestArgs = _TestArgs()):
+    if not test_args.enabled:
+        parser = argparse.ArgumentParser()
+        parser.add_argument(
+            "-r",
+            "--resources-file",
+            dest="resources_file",
+            required=True,
+            help="Path to JSON file which contains SR-IOV resources mappings, i.e.\n"
+                "{\"RESOURCE_NAME\": [\"DEVICE_PCI_ADDRESS\"]}",
+        )
+        args = parser.parse_args()
+
+        with open(args.resources_file, "r") as resources_mapping:
+            resources: dict = json.loads(resources_mapping.read())
+    else:
+        resources = test_args.resources
+
+    if not _pci_addresses_are_valid(resources):
+        raise ValueError("Invalid device PCI address!")
+
+    sriovdp_config_manifest = _get_sriovdp_config_manifest(resources)
+
+    print("Enabling SR-IOV Network Device Plugin...")
+    _create_sriovdp_config(sriovdp_config_manifest)
+    _enable_sriovdp(resources)
+    print(
+        "SR-IOV Network Device Plugin is now enabled.\n"
+        "New allocatable resources exposed to the cluster:\n"
+        f"{_get_sriov_allocatable_resources()}"
+    )
+
+
+def _pci_addresses_are_valid(resources: dict) -> bool:
+    """Checks whether device PCI addresses given in the config are valid.
+
+    Args:
+        resources (dict): SR-IOV resources mappings
+
+    Returns:
+        bool: True if all given PCI addresses are valid
+    """
+    for _, pci_addresses in resources.items():
+        for pci_address in pci_addresses:
+            if not _pci_address_is_valid(pci_address):
+                return False
+    return True
+
+
+def _pci_address_is_valid(pci_address: str) -> bool:
+    """Checks whether given device PCI address is valid.
+
+    Args:
+        pci_address (str): Device PCI address
+
+    Returns:
+        bool: True if given PCI address is valid
+    """
+    get_pci_device_cmd = ["lspci", "-s", pci_address]
+    if subprocess.check_output(get_pci_device_cmd, text=True):
+        return True
+    return False
+
+
+def _get_sriovdp_config_manifest(resources: dict) -> str:
+    """Generates a ConfigMap for SR-IOV Network Device Plugin.
+
+    Args:
+        resources (dict): SR-IOV resources mappings
+
+    Returns:
+        str: ConfigMap for SR-IOV Network Device Plugin
+    """
+    resources_list = {
+        "resourceList": [
+            {
+                "resourceName": resource_name,
+                "selectors": {
+                    "pciAddresses": pci_addresses
+                }
+            }
+            for resource_name, pci_addresses in resources.items()
+        ]
+    }
+
+    return f"""apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sriovdp-config
+  namespace: kube-system
+data:
+  config.json: |
+    {json.dumps(resources_list)}
+"""
+
+
+def _create_sriovdp_config(sriovdp_config_manifest: str) -> None:
+    """Creates SR-IOV Network Device Plugin's config in Kubernetes.
+
+    Args:
+        sriovdp_config_manifest (str): ConfigMap for SR-IOV Network Device Plugin
+    """
+    with tempfile.NamedTemporaryFile(mode="w+") as sriovdp_config:
+        sriovdp_config.write(sriovdp_config_manifest)
+        sriovdp_config.flush()
+        subprocess.check_output([KUBECTL, "apply", "-f", sriovdp_config.name], text=True)
+
+
+def _enable_sriovdp(resources: dict) -> None:
+    """Enables SR-IOV Network Device Plugin in Kubernetes.
+
+    Args:
+        resources (dict): SR-IOV resources mappings
+    """
+    subprocess.check_output([KUBECTL, "apply", "-f", os.path.join(SCRIPT_PATH, "sriovdp.yaml")], text=True)
+
+    now = time.time()
+    timeout = 300 # seconds
+    print(f"Waiting for the SR-IOV Network Device Plugin to be ready (timeout: {timeout}s)...")
+    while time.time() - now <= timeout:
+        sriov_allocatable_resources = _get_sriov_allocatable_resources()
+
+        for resource, pci_addresses in resources.items():
+            if sriov_allocatable_resources[f"intel.com/{resource}"] != str(len(pci_addresses)):
+                print("SR-IOV Network Device Plugin not ready, " +
+                    f"intel.com/{resource} does not have enough allocatable resources.")
+                break
+        else:
+            return
+
+        wait = 5
+        print(f"Waiting {wait}s for SR-IOV Network Device Plugin to be ready...")
+        time.sleep(wait)
+
+    raise TimeoutError("Unable to start SR-IOV Network Device Plugin. Operation timed out!")
+
+
+def _get_sriov_allocatable_resources() -> dict:
+    """Returns allocatable resources of a Kubernetes cluster.
+
+    Returns:
+        dict: Kubernetes allocatable resources
+    """
+    node_details = subprocess.check_output(
+        [KUBECTL, "get", "node", "-o", "json"], text=True)
+    allocatable_resources = json.loads(node_details).get("items")[0].get("status").get(
+        "allocatable"
+    )
+    return {
+        resource: value for resource, value in allocatable_resources.items()
+        if "intel.com" in resource
+    }
+
+
+if __name__ == "__main__":
+    main()
