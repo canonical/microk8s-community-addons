@@ -3,7 +3,7 @@ set -e
 
 CNPG_VERSION="$1"
 if [ -z "$1" ]; then
-        CNPG_VERSION="1.23.1"
+        CNPG_VERSION="1.23.3"
 fi
 
 KUBECTL="${SNAP}/microk8s-kubectl.wrapper"
