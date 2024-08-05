@@ -61,7 +61,7 @@ echo "Enabling Cilium"
 
 # Cilium Supports Arm beginning v1.11.12 and greater
 if [ -z "$CILIUM_VERSION" ]; then
-  CILIUM_VERSION="v1.13.4"
+  CILIUM_VERSION="v1.15.2"
 fi
 CILIUM_ERSION=$(echo $CILIUM_VERSION | sed 's/v//g')
 
@@ -108,7 +108,7 @@ else
       --set daemon.runPath="/var/snap/microk8s/current/var/run/cilium" \
       --set operator.replicas=1 \
       --set keepDeprecatedLabels=true \
-      --set ipam.operator.clusterPoolIPv4PodCIDR="${IPv4_CLUSTER_CIDR}" \
+      --set ipam.operator.clusterPoolIPv4PodCIDRList="${IPv4_CLUSTER_CIDR}" \
       --set nodePort.enabled=true
   )
 
