@@ -155,7 +155,6 @@ def _enable_sriovdp(resources: dict) -> None:
             print("Waiting for SR-IOV Network Device Plugin to be ready...")
 
         wait = 5
-        print(f"Waiting {wait}s for SR-IOV Network Device Plugin to be ready...")
         time.sleep(wait)
 
     raise TimeoutError("Unable to start SR-IOV Network Device Plugin. Operation timed out!")
