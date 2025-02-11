@@ -60,7 +60,7 @@ echo "Enabling Cilium"
 
 # Cilium Supports Arm beginning v1.11.12 and greater
 if [ -z "$CILIUM_VERSION" ]; then
-  CILIUM_VERSION="v1.15.2"
+  CILIUM_VERSION="v1.17.0"
 fi
 CILIUM_ERSION=$(echo $CILIUM_VERSION | sed 's/v//g')
 
