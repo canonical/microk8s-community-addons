@@ -161,13 +161,6 @@ microk8s-addons:
         - amd64
         - arm64
 
-    - name: "sosivio"
-      description: "Kubernetes Predictive Troubleshooting, Observability, and Resource Optimization"
-      version: "1.7.1"
-      check_status: "deployment.apps/sosivio-dashboard"
-      supported_architectures:
-        - amd64
-
     - name: "kwasm"
       description: "WebAssembly support for WasmEdge (Docker Wasm) and Spin (Azure AKS WASI)"
       version: "0.2.0"
