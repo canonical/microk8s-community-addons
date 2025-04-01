@@ -28,6 +28,10 @@ class TestSosivio(object):
         """
         Sets up and validates Sosivio.
         """
+        pytest.xfail(
+            "The Sosivio test is currently failing as https://helm.sosiv.io is down."
+        )
+
         print("Enabling sosivio")
         microk8s_enable("sosivio")
         print("Validating sosivio")
