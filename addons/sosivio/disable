@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+set -e
+
+source $SNAP/actions/common/utils.sh
+HELM="$SNAP/microk8s-helm3.wrapper"
+KUBECTL="$SNAP/microk8s-kubectl.wrapper"
+
+NAMESPACE_SOSIVIO="sosivio"
+
+RED='\033[0;31m'
+NC='\033[0m' # No Color
+
+echo -e "${RED}Disabling Sosivio${NC}"
+
+
+echo "It may take up to 2 minutes..."
+
+$HELM delete sosivio -n ${NAMESPACE_SOSIVIO} --wait > /dev/null 2>&1 || true
+$KUBECTL delete --grace-period=60 ns ${NAMESPACE_SOSIVIO} > /dev/null 2>&1 || true
+
+echo -e "${RED}Sosivio disabled${NC}"
