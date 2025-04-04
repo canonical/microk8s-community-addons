@@ -124,11 +124,14 @@ microk8s-addons:
 
     - name: "kata"
       description: "Kata Containers is a secure runtime with lightweight VMS"
-      version: "latest/stable"
-      check_status: "${SNAP_DATA}/var/lock/kata.enabled"
+      version: "3.15.0"
+      check_status: "daemonset.apps/kata-deploy"
       confinement: "classic"
       supported_architectures:
+        - arm64
         - amd64
+        - s390x
+        - ppc64le
 
     - name: "inaccel"
       description: "Simplifying FPGA management in Kubernetes"
