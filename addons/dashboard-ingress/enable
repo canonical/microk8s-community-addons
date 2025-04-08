@@ -115,7 +115,7 @@ def dashboard_ingress(hostname, allow, auth, auth_user, password):
         "kind": "Ingress",
         "metadata": {
             "name": "kubernetes-dashboard-ingress",
-            "namespace": "kube-system",
+            "namespace": "kubernetes-dashboard",
             "annotations": {
                 "kubernetes.io/ingress.class": "public",
 
@@ -136,7 +136,7 @@ def dashboard_ingress(hostname, allow, auth, auth_user, password):
                         "pathType": "Prefix",
                         "backend": {
                             "service": {
-                                "name": "kubernetes-dashboard",
+                                "name": "kubernetes-dashboard-kong-proxy",
                                 "port": {"number": 443}
                             }
                         }
@@ -157,7 +157,7 @@ def dashboard_ingress(hostname, allow, auth, auth_user, password):
                 "kind": "Secret",
                 "metadata": {
                     "name": "kubernetes-dashboard-basic-auth",
-                    "namespace": "kube-system"
+                    "namespace": "kubernetes-dashboard"
                 },
                 "data": {"auth": encoded_auth},
                 "type": "Opaque"
