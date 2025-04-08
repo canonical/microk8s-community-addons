@@ -90,7 +90,7 @@ def kubectl_get(target, timeout_insec=300):
 
 
 def wait_for_pod_state(
-    pod, namespace, desired_state, desired_reason=None, label=None, timeout_insec=1200
+    pod, namespace, desired_state, desired_reason=None, label=None, timeout_insec=600
 ):
     """
     Wait for a a pod state. If you do not specify a pod name and you set instead a label
@@ -127,7 +127,7 @@ def wait_for_pod_state(
         time.sleep(3)
 
 
-def wait_for_installation(cluster_nodes=1, timeout_insec=600):
+def wait_for_installation(cluster_nodes=1, timeout_insec=360):
     """
     Wait for kubernetes service to appear.
     """
@@ -152,7 +152,7 @@ def wait_for_installation(cluster_nodes=1, timeout_insec=600):
     time.sleep(30)
 
 
-def wait_for_namespace_termination(namespace, timeout_insec=600):
+def wait_for_namespace_termination(namespace, timeout_insec=360):
     """
     Wait for the termination of the provided namespace.
     """
