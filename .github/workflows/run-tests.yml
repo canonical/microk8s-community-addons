@@ -7,14 +7,12 @@ on:
     branches: [main]
 
 jobs:
-  run-tests:
-    name: Run tests
+  run-tests-classic:
+    name: Run tests (classic)
     runs-on: ubuntu-latest
-
     steps:
       - name: Check out code
         uses: actions/checkout@v4
-
       - name: Install dependencies
         run: |
           sudo apt-get update
@@ -42,6 +40,19 @@ jobs:
           export SKIP_PROMETHEUS="False"
           sudo -E pytest -s -ra ./tests/
           sudo snap remove microk8s --purge
+
+  run-tests-strict:
+    name: Run tests (strict)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-setuptools nfs-common
+          sudo pip3 install --ignore-installed --upgrade pip
+          sudo pip3 install -r tests/requirements.txt
       - name: Running addons tests on strict
         run: |
           set -x
