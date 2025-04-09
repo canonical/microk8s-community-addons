@@ -25,8 +25,16 @@ jobs:
           sudo snap install microk8s --classic --channel=latest/edge
           sudo microk8s status --wait-ready --timeout 600
 
+          if sudo microk8s addons repo list | grep community
+          then
+            sudo microk8s addons repo remove community
+          fi
+          if sudo microk8s addons repo list | grep core
+          then
+            sudo microk8s addons repo remove core
+          fi
           sudo microk8s addons repo add community .
-          sudo microk8s addons repo update core
+          sudo microk8s addons repo add core https://github.com/canonical/microk8s-core-addons
 
           export UNDER_TIME_PRESSURE="True"
           export SKIP_PROMETHEUS="False"
@@ -51,8 +59,16 @@ jobs:
           sudo snap install microk8s --channel=latest/edge/strict
           sudo microk8s status --wait-ready --timeout 600
 
+          if sudo microk8s addons repo list | grep community
+          then
+            sudo microk8s addons repo remove community
+          fi
+          if sudo microk8s addons repo list | grep core
+          then
+            sudo microk8s addons repo remove core
+          fi
           sudo microk8s addons repo add community .
-          sudo microk8s addons repo update core
+          sudo microk8s addons repo add core https://github.com/canonical/microk8s-core-addons
 
           export UNDER_TIME_PRESSURE="True"
           export SKIP_PROMETHEUS="False"
