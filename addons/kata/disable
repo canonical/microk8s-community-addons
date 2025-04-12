@@ -3,10 +3,10 @@
 set -e
 
 HELM="${SNAP}/microk8s-helm.wrapper"
-NAMESPACE="kata-containers"
+KATA_NAMESPACE="kata-containers"
 
 echo "Disabling kata addon"
 
-"${HELM}" uninstall kata-deploy -n "${NAMESPACE}" "$@"
+"${HELM}" uninstall kata-deploy -n "${KATA_NAMESPACE}"
 
 echo "Disabled kata addon"
