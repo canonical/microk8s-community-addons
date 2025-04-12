@@ -4,94 +4,84 @@ set -e
 
 . "${SNAP}/actions/common/utils.sh"
 
-debug="false"
-shims="clh cloud-hypervisor dragonball fc qemu qemu-coco-dev qemu-runtime-rs qemu-sev qemu-snp qemu-tdx stratovirt qemu-nvidia-gpu qemu-nvidia-gpu-snp qemu-nvidia-gpu-tdx"
-defaultShim="qemu"
-createRuntimeClasses="true"
-createDefaultRuntimeClass="true"
-k8sDistribution="microk8s"
-VERSION="3.15.0"
-NAMESPACE="kata-containers"
-KATA_DEPLOY_URL=https://github.com/kata-containers/kata-containers/releases/download/${VERSION}/kata-deploy-${VERSION}.tgz
-HELM_OPTS=
+KATA_VERSION="3.15.0"
+KATA_NAMESPACE="kata-containers"
+VALUES=
 
-# Enable dependencies
-MICROK8S_ENABLE="${SNAP}/microk8s-enable.wrapper"
-"${MICROK8S_ENABLE}" helm3
+function do_prerequisites {
+  "$SNAP/microk8s-enable.wrapper" helm3
+}
 
 function usage {
   echo "Usage: microk8s enable kata [OPTIONS]"
   echo ""
   echo "Enable the kata addon."
   echo ""
+  echo "OPTIONS:"
   echo "   -h                   Print this help message"
-  echo "   -n NAMESPACE         Use specified namespace (default: ${NAMESPACE})"
-  echo "   -v VERSION           Kata-deploy version (default: ${VERSION})"
-  echo "   --shims SHIMLIST     List of shims to install (default: \"${shims}\")"
-  echo "   --defaultShim SHIM   Default shim to use with the kata RuntimeClass (default: ${defaultShim})"
+  echo "   -v VERSION           Specify kata-deploy version (default: ${VERSION})"
+  echo "   -f values.yaml       Use values.yaml file instead of addon default values"
+  echo "    See https://github.com/kata-containers/kata-containers/blob/main/tools/packaging/kata-deploy/helm-chart/kata-deploy/values.yaml for more information about the values"
 }
 
-while [ $# -ge 1 ]; do
-  case $1 in
-    -h|-?|--help)
-      usage
-      exit 0
-      ;;
-    -n|--namespace)
-      shift
-      NAMESPACE="${1}"
-      shift
-      ;;
-    -v)
-      shift
-      VERSION="${1}"
-      shift
-      ;;
-    --shims)
-      shift
-      shims="${1}"
-      shift
-      ;;
-    --defaultShim)
-      shift
-      defaultShim="${1}"
-      shift
-      ;;
-    *)      
-      HELM_OPTS+=" ${1}"
-      shift
-      ;;
-  esac
-done
+function parse_params {
+  while getopts ":f:v:h" flag; do
+    case "${flag}" in
+            v) KATA_VERSION=${OPTARG}
+              ;;
+            f) VALUES=${OPTARG}
+              ;;
+            *) usage
+              exit 0
+              ;;
+    esac
+  done
+}
 
-HELM="$SNAP/microk8s-helm3.wrapper"
+function install_kata {
+  HELM="$SNAP/microk8s-helm3.wrapper"
+  KATA_DEPLOY_URL=https://github.com/kata-containers/kata-containers/releases/download/${KATA_VERSION}/kata-deploy-${KATA_VERSION}.tgz
 
-echo "Installing kata-containers"
+  echo "Installing kata-containers"
 
-$HELM upgrade --install kata-deploy "${KATA_DEPLOY_URL}" \
-  --create-namespace --namespace "${NAMESPACE}" \
-  --set "k8sDistribution=${k8sDistribution}" \
-  --set "env.debug=${debug}" \
-  --set "env.shims=${shims}" \
-  --set "env.defaultShim=${defaultShim}" \
-  --set "env.createRuntimeClasses=${createRuntimeClasses}" \
-  --set "env.createDefaultRuntimeClass=${createDefaultRuntimeClass}" \
-  --wait \
-  ${HELM_OPTS}
+  if [ -z "$VALUES" ]
+  then
+    $HELM upgrade --install kata-deploy "${KATA_DEPLOY_URL}" \
+      --create-namespace --namespace "${KATA_NAMESPACE}" \
+      --set "k8sDistribution=microk8s" \
+      --set "env.debug=false" \
+      --set "env.shims=clh cloud-hypervisor dragonball fc qemu qemu-coco-dev qemu-runtime-rs qemu-sev qemu-snp qemu-tdx stratovirt qemu-nvidia-gpu qemu-nvidia-gpu-snp qemu-nvidia-gpu-tdx" \
+      --set "env.defaultShim=qemu" \
+      --set "env.createRuntimeClasses=true" \
+      --set "env.createDefaultRuntimeClass=true" \
+      --wait
+  else
+    echo "Using values file: ${VALUES}"
+    $HELM upgrade --install kata-deploy "${KATA_DEPLOY_URL}" \
+      --create-namespace --namespace "${KATA_NAMESPACE}" \
+      --set "k8sDistribution=microk8s" \
+      -f "${VALUES}" \
+      --wait
+  fi
 
-echo "================================"
-echo "Enabled kata addon."
-echo ""
-echo ""
-echo "To use the kata runtime set the 'kata' runtimeClassName, eg:"
-echo ""
-echo "apiVersion: v1"
-echo "kind: Pod"
-echo "metadata:"
-echo "  name: nginx-kata"
-echo "spec:"
-echo "  runtimeClassName: kata"
-echo "  containers:"
-echo "  - name: nginx"
-echo "    image: nginx"
-echo ""
+  echo "================================"
+  echo "Enabled kata addon."
+  echo ""
+  echo ""
+  echo "To use the kata runtime set the 'kata' runtimeClassName, eg:"
+  echo ""
+  echo "apiVersion: v1"
+  echo "kind: Pod"
+  echo "metadata:"
+  echo "  name: nginx-kata"
+  echo "spec:"
+  echo "  runtimeClassName: kata"
+  echo "  containers:"
+  echo "  - name: nginx"
+  echo "    image: nginx"
+  echo ""
+}
+
+do_prerequisites
+parse_params "$@"
+install_kata
