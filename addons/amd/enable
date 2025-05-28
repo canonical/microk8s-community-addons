@@ -1,0 +1,105 @@
+#!/usr/bin/env python3
+
+import os
+import pathlib
+import subprocess
+import click
+import sys
+import re
+from typing import Optional
+
+SNAP = pathlib.Path(os.getenv("SNAP") or "/snap/microk8s/current")
+HELM = SNAP / "microk8s-helm3.wrapper"
+KUBECTL = SNAP / "microk8s-kubectl.wrapper"
+MICROK8S_ENABLE = SNAP / "microk8s-enable.wrapper"
+    
+def cert_manager_install(cert_manager_version, debug): # add cert manager version flag
+    click.echo("Installing cert-manager")
+    subprocess.run([HELM, "repo", "add", "jetstack", "https://charts.jetstack.io", "--force-update"])
+    version = cert_manager_version if cert_manager_version is not None else "v1.15.1"
+    cert_install_args = [
+        "install", 
+        "cert-manager", 
+        "jetstack/cert-manager", 
+        "--namespace", 
+        "cert-manager",
+        "--create-namespace",
+        "--version",
+        version,
+        "--set",
+        "crds.enabled=true"
+    ] 
+
+    if debug:
+        cert_install_args.append("--debug")
+
+    subprocess.run([HELM, *cert_install_args])
+
+def deploy_gpu_operator(
+    helm_set : list,
+    helm_values: Optional[str],
+    version: Optional[str],
+    debug: bool,
+):
+    click.echo("Deploying AMD GPU Operator")
+
+    subprocess.run([HELM, "repo", "add", "rocm", "https://rocm.github.io/gpu-operator"])
+    subprocess.run([HELM, "repo", "update"])
+
+    operator_args = [
+        "install",
+        "amd-gpu-operator",
+        "rocm/gpu-operator-charts",
+        "--namespace",
+        "kube-amd-gpu",
+        "--create-namespace"
+    ]
+
+    if version is not None:
+        operator_args.extend(["--version", version])
+    for set in helm_set:
+        operator_args.extend(["--set", set])
+    if helm_values is not None:
+        operator_args.extend(["-f", helm_values])
+    if debug:
+        operator_args.append("--debug")
+
+    subprocess.run([HELM, *operator_args])
+    
+
+@click.command()
+@click.option("--install-cert-manager", type=bool, default=True)
+@click.option("--gpu-operator-version")
+@click.option("--cert-manager-version")
+@click.option("--gpu-operator-set", multiple=True)
+@click.option("--gpu-operator-values", type=click.Path(exists=True))
+@click.option("--debug", is_flag=True)
+def main(
+    install_cert_manager: bool,
+    gpu_operator_version: Optional[str],
+    cert_manager_version: Optional[str],
+    gpu_operator_set: Optional[list],
+    gpu_operator_values: Optional[str],
+    debug: bool,
+):
+    if gpu_operator_version is not None:
+        version_pattern = r'^v\d+\.\d+\.\d+$'
+        if not bool(re.match(version_pattern, gpu_operator_version)):
+            click.echo(f"ERROR: Invalid version string {gpu_operator_version}", err=True)
+            sys.exit(1)
+
+    subprocess.run([MICROK8S_ENABLE, "core/helm"]) # automatically enabled for newer versions of microk8s
+    if install_cert_manager:
+        cert_manager_install(cert_manager_version, debug)
+    else:
+        click.echo("Skipping cert-manager install")
+    deploy_gpu_operator(
+        helm_set=gpu_operator_set, 
+        helm_values=gpu_operator_values, 
+        version=gpu_operator_version,
+        debug=debug,
+    )
+
+if __name__ == "__main__":
+    main()
+    

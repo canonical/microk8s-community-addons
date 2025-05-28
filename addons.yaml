@@ -258,3 +258,11 @@ microk8s-addons:
       check_status: "daemonset.apps/kube-sriov-device-plugin"
       supported_architectures:
         - amd64
+
+    - name: "amd"
+      version: "1.0.0"
+      description: "AMD hardware support"
+      check_status: "deployment.apps/amd-gpu-operator-gpu-operator-charts-controller-manager"
+      confinement: "classic"
+      supported_architectures:
+        - amd64

@@ -1,0 +1,8 @@
+deviceConfig:
+  spec:
+    selector:
+      unit-test-check: "true"
+    metricsExporter:
+      enable: false
+    testRunner:
+      enable: true
