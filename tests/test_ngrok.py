@@ -10,6 +10,7 @@ from utils import (
 
 
 class TestNgrok(object):
+    @pytest.mark.skip(reason="Ngrok ingress controller is depreciated.")
     @pytest.mark.skipif(platform.machine() == "s390x", reason="Not available on s390x")
     @pytest.mark.skipif(
         os.environ.get("STRICT") == "yes",
