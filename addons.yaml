@@ -236,9 +236,9 @@ microk8s-addons:
         - amd64
 
     - name: "ngrok"
-      description: "ngrok Ingress Controller instantly adds connectivity, load balancing, authentication, and observability to your services"
-      version: "0.0.1"
-      check_status: "deployment.apps/ngrok-ingress-controller-kubernetes-ingress-controller-manager"
+      description: "ngrok's Kubernetes-native operator — bring API gateway power to your cluster with automated connectivity, auth, and observability"
+      version: "0.19.0"
+      check_status: "deployment.apps/ngrok-operator-manager"
       confinement: "classic"
       supported_architectures:
         - arm64
