@@ -8,6 +8,17 @@ KUBECTL="$SNAP/microk8s-kubectl.wrapper"
 
 echo "Enabling Jaeger"
 
+if $KUBECTL get svc -n istio-system istio-ingressgateway > /dev/null 2>&1; then
+    echo "Warning: Istio ingress is already installed."
+    echo "Enabling the 'ingress' addon may cause conflicts with Istio ingress gateway."
+    echo "Continue anyway? [y/N]"
+    read -r CONT
+    if [[ "$CONT" != "y" && "$CONT" != "Y" ]]; then
+        echo "Aborting Jaeger enablement."
+        exit 1
+    fi
+fi
+
 "$SNAP/microk8s-enable.wrapper" dns ingress cert-manager
 
 echo "Waiting for cert-manager to be ready."
@@ -22,7 +33,6 @@ $KUBECTL delete -f ${CURRENT_DIR}/cert-tester.yaml > /dev/null 2>&1 || true
 read -ra ARGUMENTS <<< "$1"
 MANIFESTS_PATH="${CURRENT_DIR}"
 NAMESPACE="default"
-
 
 if [ ! -z "${ARGUMENTS[@]}" ]
 then
@@ -40,4 +50,4 @@ echo "Waiting for Jaeger Operator to be ready"
 $KUBECTL wait pods -n "${NAMESPACE}" -l name=jaeger-operator --for condition=Ready --timeout=90s
 $KUBECTL apply -f "${MANIFESTS_PATH}/simplest.yaml" 
 
-echo "Jaeger is enabled, please allow sometime before the jaeger starts up"
+echo "Jaeger is enabled, please allow some time before the Jaeger UI is accessible."
