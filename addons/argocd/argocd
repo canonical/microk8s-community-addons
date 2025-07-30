@@ -1,0 +1,3 @@
+#!/bin/bash
+
+KUBECONFIG="$SNAP_DATA/credentials/client.config" ${SNAP_DATA}/bin/argocd $*
