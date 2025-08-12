@@ -1,11 +1,10 @@
 name: Run tests
 
 on:
-  push:
-    branches: [main]
   pull_request:
-    branches: [main]
+    branches: [1.33]
 
+# TODO(berkayoz): re-introduce strict tests when 1.33-strict/edge released
 jobs:
   run-tests-classic:
     name: Run tests (classic)
@@ -22,7 +21,7 @@ jobs:
       - name: Running addons tests
         run: |
           set -x
-          sudo snap install microk8s --classic --channel=latest/edge
+          sudo snap install microk8s --classic --channel=1.33/edge
           sudo microk8s status --wait-ready --timeout 600
 
           if sudo microk8s addons repo list | grep community
