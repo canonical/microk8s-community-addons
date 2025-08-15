@@ -14,6 +14,7 @@ from subprocess import CalledProcessError
 
 TEMPLATES = Path(__file__).absolute().parent / "templates"
 
+
 class TestAMD(object):
     @pytest.mark.skipif(
         os.environ.get("STRICT") == "yes",
@@ -49,7 +50,7 @@ class TestAMD(object):
         except CalledProcessError:
             print("Could not disable amd addon")
             return
-    
+
     def validate_amd(self):
         """
         Validate AMD by checking deviceConfig.
@@ -58,10 +59,12 @@ class TestAMD(object):
         if platform.machine() != "x86_64":
             print("GPU tests are only relevant on x86 architectures")
             return
-        
+
         print("Checking deviceconfig")
         namespace = "kube-amd-gpu"
-        device_config_string = kubectl(f"get deviceconfig default -n {namespace} -o yaml")
+        device_config_string = kubectl(
+            f"get deviceconfig default -n {namespace} -o yaml"
+        )
         device_config_spec = yaml.safe_load(device_config_string)["spec"]
 
         selector_passed = device_config_spec["selector"]["unit-test-check"] == "true"
