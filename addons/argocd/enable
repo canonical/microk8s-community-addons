@@ -7,6 +7,7 @@ source $SNAP/actions/common/utils.sh
 NAMESPACE_ARGOCD="argocd"
 
 ARGOCD_HELM_VERSION="5.34.3"
+ARGOCD_VERSION="2.7.2"
 
 "$SNAP/microk8s-enable.wrapper" helm3
 
@@ -16,14 +17,18 @@ HELM="$SNAP/microk8s-helm3.wrapper"
 VALUES=""
 
 # get the options
-while getopts ":v:f:h:" flag; do
+while getopts ":v:c:f:h:" flag; do
   case "${flag}" in
           v) ARGOCD_HELM_VERSION=${OPTARG}
+             ;;
+          c) ARGOCD_VERSION=${OPTARG}
              ;;
           f) VALUES=${OPTARG}
              ;;
           *) echo "Usage: microk8s enable argocd"
              echo ""
+             echo "With custom ArgoCD CLI version: microk8s enable argocd -v 5.34.3"
+             echo "With custom ArgoCD CLI version: microk8s enable argocd -c 2.7.2"
              echo "With overwriting default values: microk8s enable argocd -f values.yaml"
              echo ""
              echo "See https://artifacthub.io/packages/helm/argo/argo-cd for more information about the values"
@@ -33,6 +38,39 @@ while getopts ":v:f:h:" flag; do
              ;;
   esac
 done
+
+# Function to detect and map system architecture
+detect_architecture() {
+  local arch=$(uname -m)
+  case $arch in
+    x86_64)
+      echo "amd64"
+      ;;
+    aarch64|arm64)
+      echo "arm64"
+      ;;
+    *)
+      echo "Unsupported architecture: $arch" >&2
+      echo "Supported architectures: x86_64 (amd64), aarch64/arm64" >&2
+      exit 1
+      ;;
+  esac
+}
+
+# Install the argocd CLI if it is not already installed
+if [ ! -f "${SNAP_DATA}/bin/argocd" ]
+then
+  echo "Fetching argocd CLI version v$ARGOCD_VERSION."
+
+  ARCH=$(detect_architecture)
+  SCRIPT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
+
+  fetch_as https://github.com/argoproj/argo-cd/releases/download/v${ARGOCD_VERSION}/argocd-linux-${ARCH} "$SNAP_DATA/bin/argocd"
+  run_with_sudo chmod +x "$SNAP_DATA/bin/argocd"
+
+  run_with_sudo cp "${SCRIPT_DIR}/argocd" "${SNAP_COMMON}/plugins/argocd"
+  run_with_sudo chmod +x "${SNAP_COMMON}/plugins/argocd"
+fi
 
 echo "Installing ArgoCD (Helm v${ARGOCD_HELM_VERSION})"
 
