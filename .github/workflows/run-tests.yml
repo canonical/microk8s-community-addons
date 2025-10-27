@@ -1,10 +1,8 @@
 name: Run tests
 
 on:
-  push:
-    branches: [main]
   pull_request:
-    branches: [main]
+    branches: [1.34]
 
 jobs:
   run-tests-classic:
@@ -22,7 +20,7 @@ jobs:
       - name: Running addons tests
         run: |
           set -x
-          sudo snap install microk8s --classic --channel=latest/edge
+          sudo snap install microk8s --classic --channel=1.34/edge
           sudo microk8s status --wait-ready --timeout 600
 
           if sudo microk8s addons repo list | grep community
@@ -38,5 +36,38 @@ jobs:
 
           export UNDER_TIME_PRESSURE="True"
           export SKIP_PROMETHEUS="False"
+          sudo -E pytest -s -ra ./tests/
+          sudo snap remove microk8s --purge
+
+  run-tests-strict:
+    name: Run tests (strict)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-setuptools nfs-common
+          sudo pip3 install --ignore-installed --upgrade pip
+          sudo pip3 install -r tests/requirements.txt
+      - name: Running addons tests on strict
+        run: |
+          set -x
+          sudo snap install microk8s --channel=1.34-strict/edge
+          sudo microk8s status --wait-ready --timeout 600
+          if sudo microk8s addons repo list | grep community
+          then
+            sudo microk8s addons repo remove community
+          fi
+          if sudo microk8s addons repo list | grep core
+          then
+            sudo microk8s addons repo remove core
+          fi
+          sudo microk8s addons repo add community .
+          sudo microk8s addons repo add core https://github.com/canonical/microk8s-core-addons
+          export UNDER_TIME_PRESSURE="True"
+          export SKIP_PROMETHEUS="False"
+          export STRICT="yes"
           sudo -E pytest -s -ra ./tests/
           sudo snap remove microk8s --purge
