@@ -266,7 +266,7 @@ microk8s-addons:
       confinement: "classic"
       supported_architectures:
         - amd64
-        
+
     - name: "forgejo"
       description: "Open source git platform"
       version: "1.0.0"
