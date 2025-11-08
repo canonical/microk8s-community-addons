@@ -9,6 +9,7 @@ import shutil
 class Handler:
     def __init__(self):
         """Forgejo HELM REPO: https://code.forgejo.org/forgejo-helm/forgejo-helm"""
+        
         self.REPOSITORY = "oci://code.forgejo.org/forgejo-helm/forgejo"
         self.BASE_DIR = Path(__file__).parent
         self.HELM = os.path.expandvars("$SNAP/microk8s-helm3.wrapper")
