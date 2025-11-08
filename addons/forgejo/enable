@@ -1,0 +1,113 @@
+#!/usr/bin/env python3
+import click
+import os
+import subprocess
+from pathlib import Path
+import shutil
+
+
+class Handler:
+    def __init__(self):
+        """Forgejo HELM REPO: https://code.forgejo.org/forgejo-helm/forgejo-helm"""
+        self.REPOSITORY = "oci://code.forgejo.org/forgejo-helm/forgejo"
+        self.BASE_DIR = Path(__file__).parent
+        self.HELM = os.path.expandvars("$SNAP/microk8s-helm3.wrapper")
+        self.KUBECTL = os.path.expandvars("$SNAP/microk8s-kubectl.wrapper")
+        self.mk8s_enable = os.path.expandvars("$SNAP/microk8s-enable.wrapper")
+        self.mk8s_disable = os.path.expandvars("$SNAP/microk8s-disable.wrapper")
+        self.untarpath = os.path.join("/tmp/helm")
+        self.helmfolder = os.path.join(self.untarpath, "forgejo")
+
+    def create_namespace(self, ns):
+        try:
+            subprocess.check_call([self.KUBECTL, "create", "namespace", ns])
+        except Exception as e:
+            click.echo(e)
+
+    def pull(self, *args, **kwargs):
+        subprocess.check_call(
+            [
+                self.HELM,
+                "pull",
+                self.REPOSITORY,
+                "--untar",
+                "--untardir",
+                self.untarpath,
+            ]
+        )
+
+    def pull_update(self, *args, **kwargs):
+        shutil.rmtree(self.helmfolder)
+        self.pull()
+
+    def enable(self, ns, values, admin, pw, email, *args, **kwargs):
+        """Install addon to kubernetes"""
+        cmd = ["/bin/sh", "-c", f"{self.mk8s_enable} hostpath-storage"]
+        subprocess.check_call(cmd)
+        cmd = [
+            "/bin/sh",
+            "-c",
+            f"""{self.HELM} template forgejo {self.helmfolder} \\
+                -f {values} \\
+                --namespace {ns} \\
+                --set gitea.admin.username={admin} \\
+                --set gitea.admin.password={pw} \\
+                --set gitea.admin.email={email} | {self.KUBECTL} apply -n {ns} -f -
+            """,
+        ]
+        subprocess.check_call(cmd)
+
+
+H = Handler()
+
+
+@click.command()
+@click.option(
+    "--ns", default="forgejo", help="set / create custom kubernetes namespace"
+)
+@click.option("--admin", default="forgejo", help="admin username")
+@click.option("--email", default="forgejo@local.domain", help="admin email")
+@click.option("--pw", default="admin1234", help=f"admin password")
+@click.option(
+    "--values",
+    default=H.BASE_DIR / "values-mk8s.yaml",
+    type=str,
+    help="provide one values file path or url",
+)
+@click.option(
+    "--repo",
+    default=H.REPOSITORY,
+    type=str,
+    help="provide custom helm repo path, use it with --update to pull from repository",
+)
+@click.option(
+    "--update",
+    default=False,
+    is_flag=True,
+    help=f"pull helm if not exists in {H.helmfolder}",
+)
+def main(ns, admin, email, pw, values, repo, update):
+    """CLI options available"""
+
+    click.echo(f"#### Forgejo parameter:")
+    click.echo(f"--ns {ns}")
+    click.echo(f"--admin {admin}")
+    click.echo(f"--pw ...")
+    click.echo(f"--email {email}")
+    click.echo(f"--values {values}")
+    click.echo(f"--repo {repo}")
+    click.echo(f"--update {update}")
+    click.echo("#### enabling forgejo addon")
+
+    if update:
+        H.pull_update(repo)
+
+    elif not os.path.exists(os.path.join(H.helmfolder, "values.yaml")):
+        H.pull(repo)
+
+    H.create_namespace(ns)
+    H.enable(repo=repo, ns=ns, values=values, admin=admin, pw=pw, email=email)
+
+
+if __name__ == "__main__":
+    main()
