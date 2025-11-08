@@ -1,0 +1,32 @@
+#!/usr/bin/env python3
+import click
+import os
+import subprocess
+
+
+class Handler:
+    def __init__(self):
+        self.KUBECTL = os.path.expandvars("$SNAP/microk8s-kubectl.wrapper")
+
+    def disable(self, ns, *args, **kwargs):
+        """Remove addon from kubernetes"""
+        cmd = [
+            "/bin/sh",
+            "-c",
+            f"{self.KUBECTL} get all -n {ns} -o yaml | {self.KUBECTL} delete -f -",
+        ]
+        subprocess.check_call(cmd)
+        cmd = ["/bin/sh", "-c", f"{self.KUBECTL} delete namespace {ns}"]
+        subprocess.check_call(cmd)
+
+
+@click.command()
+@click.option("--ns", default="forgejo", help="delete custom kubernetes namespace")
+def main(ns):
+    click.echo("Disabling Forgejo")
+    H = Handler()
+    H.disable(ns=ns)
+
+
+if __name__ == "__main__":
+    main()
