@@ -37,7 +37,4 @@ class TestNgrok(object):
         """
         Validate ngrok kubernetes operator
         """
-        kubectl_get(
-            "deployment ngrok-operator-manager"
-            " -n ngrok-operator"
-        )
+        kubectl_get("deployment ngrok-operator-manager" " -n ngrok-operator")
