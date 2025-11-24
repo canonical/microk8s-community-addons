@@ -3,7 +3,7 @@
 HELM="${SNAP}/microk8s-helm.wrapper"
 
 NAMESPACE="traefik"
-TRAEFIK_CHART_VERSION="${TRAEFIK_CHART_VERSION:-37.0.0}"
+TRAEFIK_CHART_VERSION="${TRAEFIK_CHART_VERSION:-37.4.0}"
 
 echo "Enabling traefik ingress controller"
 
