@@ -26,12 +26,12 @@ done
 set -- "${POSITIONAL_ARGS[@]}" # restore positional parameters
 
 if [ -z "$NAMESPACE" ]; then
-  echo "Namespace (--namespace) was not specified. Defaulting to ngrok-ingress-controller namespace."
-  NAMESPACE="ngrok-ingress-controller"
+  echo "Namespace (--namespace) was not specified. Defaulting to ngrok-operator namespace."
+  NAMESPACE="ngrok-operator"
 fi
 
-echo "Disabling ngrok Ingress controller in ${NAMESPACE} namespace"
+echo "Disabling ngrok Kubernetes operator in ${NAMESPACE} namespace"
 
-"${HELM}" uninstall ngrok-ingress-controller --namespace "${NAMESPACE}"
+"${HELM}" uninstall ngrok-operator --namespace "${NAMESPACE}"
 
-echo "Disabled ngrok Ingress controller"
+echo "Disabled ngrok Kubernetes operator"
