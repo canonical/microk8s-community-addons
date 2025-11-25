@@ -5,6 +5,7 @@ import subprocess
 
 
 class Handler:
+    """Remove forgejo addon"""
     def __init__(self):
         self.KUBECTL = os.path.expandvars("$SNAP/microk8s-kubectl.wrapper")
 
