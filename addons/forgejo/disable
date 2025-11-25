@@ -24,6 +24,7 @@ class Handler:
 @click.command()
 @click.option("--ns", default="forgejo", help="delete custom kubernetes namespace")
 def main(ns):
+    """Disable Forgejo"""
     click.echo("Disabling Forgejo")
     H = Handler()
     H.disable(ns=ns)
