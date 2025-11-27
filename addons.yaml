@@ -266,3 +266,11 @@ microk8s-addons:
       confinement: "classic"
       supported_architectures:
         - amd64
+
+    - name: "forgejo"
+      description: "Open source git platform. https://forgejo.org/"
+      version: "1.0.0"
+      check_status: "deployment.apps/forgejo"
+      supported_architectures:
+        - arm64
+        - amd64
