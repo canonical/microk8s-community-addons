@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 HELM="${SNAP}/microk8s-helm.wrapper"
-VERSION=0.12.1
+VERSION=0.19.0
 
 POSITIONAL_ARGS=()
 
@@ -41,35 +41,38 @@ done
 set -- "${POSITIONAL_ARGS[@]}" # restore positional parameters
 
 if [ -z "$NAMESPACE" ]; then
-  echo "Namespace (--namespace) was not specified. Defaulting to ngrok-ingress-controller namespace."
-  NAMESPACE="ngrok-ingress-controller"
+  echo "Namespace (--namespace) was not specified. Defaulting to ngrok-operator namespace."
+  NAMESPACE="ngrok-operator"
 fi
 
 if [ -z "$SECRET_NAME" ]; then
   if [ -z "$NGROK_AUTHTOKEN" ] || [ -z "$NGROK_API_KEY" ]; then
-    echo "Either --secret-name or both --authtoken and --api-key must be specified. Please see https://github.com/ngrok/kubernetes-ingress-controller#installation for more information."
+    echo "Either --secret-name or both --authtoken and --api-key must be specified. Please see https://ngrok.com/docs/getting-started/kubernetes/ingress/ for more information."
     exit 1
   fi
 fi
 
-echo "Enabling ngrok ingress controller in {$NAMESPACE} namespace"
+echo "Enabling ngrok Kubernetes operator in ${NAMESPACE} namespace"
 
-"${HELM}" repo update ngrok || "${HELM}" repo add ngrok https://ngrok.github.io/kubernetes-ingress-controller
+"${HELM}" repo update ngrok || "${HELM}" repo add ngrok https://charts.ngrok.com
 
 if [ -n "$SECRET_NAME" ]; then
-  "${HELM}" upgrade --install --create-namespace ngrok-ingress-controller ngrok/kubernetes-ingress-controller --namespace "${NAMESPACE}" --set credentials.secret.name="${SECRET_NAME}" --version=${VERSION}
+  "${HELM}" upgrade --install --create-namespace ngrok-operator ngrok/ngrok-operator --namespace "${NAMESPACE}" --set credentials.secret.name="${SECRET_NAME}" --version=${VERSION}
 else
-  "${HELM}" upgrade --install --create-namespace ngrok-ingress-controller ngrok/kubernetes-ingress-controller --namespace "${NAMESPACE}" --set credentials.apiKey="${NGROK_API_KEY}" --set credentials.authtoken="${NGROK_AUTHTOKEN}" --version=${VERSION}
+  "${HELM}" upgrade --install --create-namespace ngrok-operator ngrok/ngrok-operator --namespace "${NAMESPACE}" --set credentials.apiKey="${NGROK_API_KEY}" --set credentials.authtoken="${NGROK_AUTHTOKEN}" --version=${VERSION}
 fi
 
 echo "---"
 echo ""
-echo "The ngrok Ingress controller has been successfully installed in the ${NAMESPACE} namespace."
+echo "The ngrok Kubernetes operator has been successfully installed in the ${NAMESPACE} namespace."
 echo ""
 
 if [ -n "$SECRET_NAME" ]; then
-    echo "You specified a secret named ${SECRET_NAME}. Please ensure that secret exists in your cluster. For help, please see https://github.com/ngrok/kubernetes-ingress-controller/blob/main/docs/deployment-guide/credentials.md#creating-the-secret"
+    echo "You specified a secret named ${SECRET_NAME}. Please ensure that secret exists in your cluster with the keys 'API_KEY' and 'AUTHTOKEN'."
+    echo "For help creating the secret, see: https://ngrok.com/docs/getting-started/kubernetes/ingress/"
     echo ""
 fi
 
-echo "Next, you can start creating Ingress resources to access your services through ngrok. Please check out https://github.com/ngrok/kubernetes-ingress-controller for examples."
+echo "Now you can create Ingress resources with 'ingressClassName: ngrok' to expose your services through ngrok."
+echo "If you have the Gateway API CRDs installed, you can use those with ngrok too. See https://ngrok.com/docs/getting-started/kubernetes/gateway-api/ for examples."
+echo "For the getting-started guide, see: https://ngrok.com/docs/getting-started/kubernetes/ingress/"
