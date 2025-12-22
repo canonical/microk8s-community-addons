@@ -15,6 +15,9 @@ echo
 NODEPORTS=$($KUBECTL get svc --all-namespaces -o go-template='{{range .items}}{{range.spec.ports}}{{if .nodePort}}{{.nodePort}}{{"\n"}}{{end}}{{end}}{{end}}')
 HOSTPORTS=$($KUBECTL get ds --all-namespaces -o go-template='{{range .items}}{{range .spec.template.spec.containers}}{{range .ports}}{{if .hostPort}}{{.hostPort}}{{"\n"}}{{end}}{{end}}{{end}}{{end}}')
 
+# Get the node name as registered in Kubernetes (lowercase, DNS-safe)
+NODE_NAME=$($KUBECTL get nodes -o jsonpath='{.items[0].metadata.name}')
+
 if [ -z "$1" ]; then
 
     for port in $(echo $NODEPORTS $HOSTPORTS); do
@@ -56,8 +59,8 @@ $KUBECTL create namespace "$NAMESPACE_PTR" > /dev/null 2>&1 || true
 $HELM repo add byjg https://opensource.byjg.com/helm > /dev/null 2>&1
 $HELM repo update > /dev/null 2>&1
 
-$KUBECTL label nodes $(hostname) "easyhaproxy/node=master" --overwrite
-HELM_PACKAGE_VERSION="0.1.5"
+$KUBECTL label nodes "$NODE_NAME" "easyhaproxy/node=master" --overwrite
+HELM_PACKAGE_VERSION="1.0.0"
 
 if [ -z "$1" ]; then
 
@@ -65,7 +68,10 @@ if [ -z "$1" ]; then
         --version $HELM_PACKAGE_VERSION \
         --namespace $NAMESPACE_PTR \
         --set resources.requests.cpu=100m \
-        --set resources.requests.memory=128Mi
+        --set resources.requests.memory=128Mi \
+        --set easyhaproxy.logLevel.easyhaproxy=INFO \
+        --set easyhaproxy.logLevel.haproxy=INFO \
+        --set easyhaproxy.logLevel.certbot=INFO
 
     echo
     echo "Installed as a Daemonset at port 80 and 443"
@@ -82,7 +88,10 @@ elif [ "$1" == "--nodeport" ]; then
         --set service.type=NodePort \
         --set binding.ports.http=30080 \
         --set binding.ports.https=30443 \
-        --set binding.ports.stats=31936
+        --set binding.ports.stats=31936 \
+        --set easyhaproxy.logLevel.easyhaproxy=INFO \
+        --set easyhaproxy.logLevel.haproxy=INFO \
+        --set easyhaproxy.logLevel.certbot=INFO
 
     echo
     echo "Installed as a Nodeport at port 30080 and 30443"
