@@ -1,118 +1,86 @@
-#!/usr/bin/env python3
+#!/usr/bin/env bash
 
-import click
-import os
-import subprocess
-import sys
-from tempfile import mkstemp
-from shutil import move, copymode
-from os import fdopen, remove
+set -e
 
+. "${SNAP}/actions/common/utils.sh"
 
-def mark_kata_enabled():
-    """
-    Mark the kata addon as enabled by creating the kata.enabled
-    """
-    try:
-        snapdata_path = os.environ.get("SNAP_DATA")
-        lock_fname = "{}/var/lock/kata.enabled".format(snapdata_path)
-        subprocess.call(["sudo", "touch", lock_fname])
-    except subprocess.CalledProcessError:
-        print("Failed to mark the kata addon as enabled.")
-        sys.exit(4)
+KATA_VERSION="3.15.0"
+KATA_NAMESPACE="kata-containers"
+VALUES=
 
+function do_prerequisites {
+  "$SNAP/microk8s-enable.wrapper" helm3
+}
 
-def apply_runtime_manifest():
-    """
-    Apply the manifest containing the definition of the kata runtimeClassName
-    """
-    try:
-        snap_path = os.environ.get("SNAP")
-        current_path = os.path.dirname(os.path.realpath(__file__))
-        manifest = "{}/kata/runtime.yaml".format(current_path)
-        subprocess.call(
-            ["{}/microk8s-kubectl.wrapper".format(snap_path), "apply", "-f", manifest]
-        )
-    except subprocess.CalledProcessError:
-        print("Failed to apply the runtime manifest.")
-        sys.exit(5)
+function usage {
+  echo "Usage: microk8s enable kata [OPTIONS]"
+  echo ""
+  echo "Enable the kata addon."
+  echo ""
+  echo "OPTIONS:"
+  echo "   -h                   Print this help message"
+  echo "   -v VERSION           Specify kata-deploy version (default: ${VERSION})"
+  echo "   -f values.yaml       Use values.yaml file instead of addon default values"
+  echo "    See https://github.com/kata-containers/kata-containers/blob/main/tools/packaging/kata-deploy/helm-chart/kata-deploy/values.yaml for more information about the values"
+}
 
+function parse_params {
+  while getopts ":f:v:h" flag; do
+    case "${flag}" in
+            v) KATA_VERSION=${OPTARG}
+              ;;
+            f) VALUES=${OPTARG}
+              ;;
+            *) usage
+              exit 0
+              ;;
+    esac
+  done
+}
 
-def restart_containerd():
-    """
-    Restart the containerd service
-    """
-    try:
-        print("Restarting containerd")
-        subprocess.call(
-            ["sudo", "systemctl", "restart", "snap.microk8s.daemon-containerd"]
-        )
-    except subprocess.CalledProcessError:
-        print(
-            "Failed to restart containerd. Please, yry to 'microk8s stop' and 'microk8s start' manually."
-        )
-        sys.exit(3)
+function install_kata {
+  HELM="$SNAP/microk8s-helm3.wrapper"
+  KATA_DEPLOY_URL=https://github.com/kata-containers/kata-containers/releases/download/${KATA_VERSION}/kata-deploy-${KATA_VERSION}.tgz
 
+  echo "Installing kata-containers"
 
-def configure_containerd(kata_path):
-    """
-    Configure the containerd PATH so it finds the kata runtime binary
-    """
-    snapdata_path = os.environ.get("SNAP_DATA")
-    containerd_env_file = "{}/args/containerd-env".format(snapdata_path)
-    # Create temp file
-    fh, abs_path = mkstemp()
-    with fdopen(fh, "w") as tmp_file:
-        with open(containerd_env_file) as conf_file:
-            for line in conf_file:
-                if "KATA_PATH=" in line:
-                    line = 'KATA_PATH="{}"\n'.format(kata_path)
-                tmp_file.write(line)
+  if [ -z "$VALUES" ]
+  then
+    $HELM upgrade --install kata-deploy "${KATA_DEPLOY_URL}" \
+      --create-namespace --namespace "${KATA_NAMESPACE}" \
+      --set "k8sDistribution=microk8s" \
+      --set "env.createRuntimeClasses=true" \
+      --set "env.createDefaultRuntimeClass=true" \
+      --set "runtimeClasses.enabled=true" \
+      --set "runtimeClasses.createDefault=true" \
+      --wait
+  else
+    echo "Using values file: ${VALUES}"
+    $HELM upgrade --install kata-deploy "${KATA_DEPLOY_URL}" \
+      --create-namespace --namespace "${KATA_NAMESPACE}" \
+      --set "k8sDistribution=microk8s" \
+      -f "${VALUES}" \
+      --wait
+  fi
 
-    copymode(containerd_env_file, abs_path)
-    remove(containerd_env_file)
-    move(abs_path, containerd_env_file)
+  echo "================================"
+  echo "Enabled kata addon."
+  echo ""
+  echo ""
+  echo "To use the kata runtime set the 'kata' runtimeClassName, eg:"
+  echo ""
+  echo "apiVersion: v1"
+  echo "kind: Pod"
+  echo "metadata:"
+  echo "  name: nginx-kata"
+  echo "spec:"
+  echo "  runtimeClassName: kata"
+  echo "  containers:"
+  echo "  - name: nginx"
+  echo "    image: nginx"
+  echo ""
+}
 
-
-def print_next_steps():
-    print()
-    print()
-    print("To use the kata runtime set the 'kata' runtimeClassName, eg:")
-    print()
-    print("apiVersion: v1")
-    print("kind: Pod")
-    print("metadata:")
-    print("  name: nginx-kata")
-    print("spec:")
-    print("  runtimeClassName: kata")
-    print("  containers:")
-    print("  - name: nginx")
-    print("    image: nginx")
-    print()
-
-
-@click.command()
-@click.option(
-    "--runtime-path",
-    default="/opt/kata/bin",
-    help="The path to the kata container runtime binaries.",
-)
-def kata(runtime_path):
-    """
-    Enable the kata runtime. Either snap install the kata binaries or use a path to already deployed
-    kata binaries. Note the kata binary must be called kata-runtime
-    """
-    if not os.path.exists("{}/kata-runtime".format(runtime_path)):
-        print("Kata runtime binaries was not found under {}.".format(runtime_path))
-        print("Use the --runtime-path argument to point to the right location.")
-        sys.exit(2)
-
-    configure_containerd(runtime_path)
-    restart_containerd()
-    apply_runtime_manifest()
-    mark_kata_enabled()
-    print_next_steps()
-
-
-if __name__ == "__main__":
-    kata(prog_name="microk8s enable kata")
+do_prerequisites
+parse_params "$@"
+install_kata
