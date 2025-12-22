@@ -49,11 +49,10 @@ function install_kata {
     $HELM upgrade --install kata-deploy "${KATA_DEPLOY_URL}" \
       --create-namespace --namespace "${KATA_NAMESPACE}" \
       --set "k8sDistribution=microk8s" \
-      --set "env.debug=false" \
-      --set "env.shims=clh cloud-hypervisor dragonball fc qemu qemu-coco-dev qemu-runtime-rs qemu-sev qemu-snp qemu-tdx stratovirt qemu-nvidia-gpu qemu-nvidia-gpu-snp qemu-nvidia-gpu-tdx" \
-      --set "env.defaultShim=qemu" \
       --set "env.createRuntimeClasses=true" \
       --set "env.createDefaultRuntimeClass=true" \
+      --set "runtimeClasses.enabled=true" \
+      --set "runtimeClasses.createDefault=true" \
       --wait
   else
     echo "Using values file: ${VALUES}"
