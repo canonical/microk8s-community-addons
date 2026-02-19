@@ -109,6 +109,59 @@ def dashboard_ingress(hostname, allow, auth, auth_user, password):
     click.echo("Enabling Ingress for Kubernetes Dashboard")
     enable_addons(addons=("ingress", "dashboard"))
 
+    # Create IP whitelist middleware for Traefik
+    click.echo("Applying IP whitelist middleware")
+    ipwhitelist_middleware = {
+        "apiVersion": "traefik.io/v1alpha1",
+        "kind": "Middleware",
+        "metadata": {
+            "name": "ipwhitelist",
+            "namespace": "kubernetes-dashboard"
+        },
+        "spec": {
+            "ipAllowList": {
+                "sourceRange": list(allow)
+            }
+        }
+    }
+
+    with tempfile.NamedTemporaryFile(mode="w+") as f:
+        json.dump(ipwhitelist_middleware, f)
+        f.flush()
+        run("microk8s-kubectl.wrapper", "apply", "-f", f.name)
+
+    # Create ServersTransport to skip TLS verification for backend
+    click.echo("Applying ServersTransport for backend TLS")
+    servers_transport = {
+        "apiVersion": "traefik.io/v1alpha1",
+        "kind": "ServersTransport",
+        "metadata": {
+            "name": "skip-verify",
+            "namespace": "kubernetes-dashboard"
+        },
+        "spec": {
+            "insecureSkipVerify": True
+        }
+    }
+
+    with tempfile.NamedTemporaryFile(mode="w+") as f:
+        json.dump(servers_transport, f)
+        f.flush()
+        run("microk8s-kubectl.wrapper", "apply", "-f", f.name)
+
+    # Annotate the backend service to use HTTPS and skip TLS verification
+    click.echo("Annotating backend service for HTTPS")
+    run(
+        "microk8s-kubectl.wrapper",
+        "annotate",
+        "service",
+        "kubernetes-dashboard-kong-proxy",
+        "-n", "kubernetes-dashboard",
+        "traefik.ingress.kubernetes.io/service.serversscheme=https",
+        "traefik.ingress.kubernetes.io/service.serverstransport=kubernetes-dashboard-skip-verify@kubernetescrd",
+        "--overwrite"
+    )
+
     click.echo("Applying manifest")
     manifest = {
         "apiVersion": "networking.k8s.io/v1",
@@ -117,14 +170,10 @@ def dashboard_ingress(hostname, allow, auth, auth_user, password):
             "name": "kubernetes-dashboard-ingress",
             "namespace": "kubernetes-dashboard",
             "annotations": {
-                "kubernetes.io/ingress.class": "public",
-
                 # restrict to private network scopes
-                "nginx.ingress.kubernetes.io/whitelist-source-range": ",".join(allow),
+                "traefik.ingress.kubernetes.io/router.middlewares": "kubernetes-dashboard-ipwhitelist@kubernetescrd",
 
-                "nginx.ingress.kubernetes.io/force-ssl-redirect": "true",
-                "nginx.ingress.kubernetes.io/ssl-passthrough": "true",
-                "nginx.ingress.kubernetes.io/backend-protocol": "HTTPS"
+                "traefik.ingress.kubernetes.io/router.tls": "true"
             }
         },
         "spec": {
@@ -149,8 +198,11 @@ def dashboard_ingress(hostname, allow, auth, auth_user, password):
 
     if auth:
         click.echo("Configuring authentication")
-        encoded_auth = b64encode(f"{auth_user}:{htpasswd(password)}".encode("utf-8")).decode("utf-8")
 
+        # Traefik > v2.7 uses a secret + middleware for basic auth
+        # - https://doc.traefik.io/traefik/reference/routing-configuration/http/middlewares/basicauth/
+        # - https://stackoverflow.com/questions/50130797/kubernetes-basic-authentication-with-traefik
+        # Create the secret for basic auth
         with tempfile.NamedTemporaryFile(mode="w+") as f:
             json.dump({
                 "apiVersion": "v1",
@@ -159,8 +211,11 @@ def dashboard_ingress(hostname, allow, auth, auth_user, password):
                     "name": "kubernetes-dashboard-basic-auth",
                     "namespace": "kubernetes-dashboard"
                 },
-                "data": {"auth": encoded_auth},
-                "type": "Opaque"
+                "stringData": {
+                    "username": auth_user,
+                    "password": password,
+                },
+                "type": "kubernetes.io/basic-auth"
             }, f)
             f.flush()
 
@@ -173,10 +228,29 @@ def dashboard_ingress(hostname, allow, auth, auth_user, password):
                 stdout=False
             )
 
+        # Create the Traefik BasicAuth middleware
+        basicauth_middleware = {
+            "apiVersion": "traefik.io/v1alpha1",
+            "kind": "Middleware",
+            "metadata": {
+                "name": "basicauth",
+                "namespace": "kubernetes-dashboard"
+            },
+            "spec": {
+                "basicAuth": {
+                    "removeHeader": "true",
+                    "secret": "kubernetes-dashboard-basic-auth"
+                }
+            }
+        }
+
+        with tempfile.NamedTemporaryFile(mode="w+") as f:
+            json.dump(basicauth_middleware, f)
+            f.flush()
+            run("microk8s-kubectl.wrapper", "apply", "-f", f.name)
+
         manifest["metadata"]["annotations"].update({
-            "nginx.ingress.kubernetes.io/auth-type": "basic",
-            "nginx.ingress.kubernetes.io/auth-secret": "kubernetes-dashboard-basic-auth",
-            "nginx.ingress.kubernetes.io/auth-realm": "Authentication Required - Kubernetes Dashboard"
+            "traefik.ingress.kubernetes.io/router.middlewares": "kubernetes-dashboard-basicauth@kubernetescrd,kubernetes-dashboard-ipwhitelist@kubernetescrd"
         })
 
     with tempfile.NamedTemporaryFile(mode="w+") as f:

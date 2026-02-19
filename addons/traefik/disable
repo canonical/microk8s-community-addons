@@ -4,8 +4,17 @@ set -e
 HELM="${SNAP}/microk8s-helm.wrapper"
 NAMESPACE="traefik"
 
-echo "Disabling Traefik Ingress controller"
+echo "Disabling Traefik Ingress controller from ${NAMESPACE} namespace"
 
 "${HELM}" uninstall traefik -n "${NAMESPACE}"
 
 echo "Disabled Traefik Ingress controller"
+
+echo "
+Traefik Ingress controller is now a core addon and this community addon is deprecated.
+Note that the new core addon installs Traefik ingress in the 'ingress' namespace.
+
+    $ microk8s enable ingress
+    $ microk8s disable ingress
+"
+

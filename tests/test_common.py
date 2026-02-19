@@ -220,18 +220,9 @@ class TestCommon(object):
         """
         Validate ingress by creating a ingress rule.
         """
-        daemonset = kubectl("get ds")
-        if "nginx-ingress-microk8s-controller" in daemonset:
-            wait_for_pod_state(
-                "", "default", "running", label="app=default-http-backend"
-            )
-            wait_for_pod_state(
-                "", "default", "running", label="name=nginx-ingress-microk8s"
-            )
-        else:
-            wait_for_pod_state(
-                "", "ingress", "running", label="name=nginx-ingress-microk8s"
-            )
+        wait_for_pod_state(
+            "", "ingress", "running", label="app.kubernetes.io/name=traefik"
+        )
 
         here = os.path.dirname(os.path.abspath(__file__))
         manifest = os.path.join(here, "templates", "ingress.yaml")

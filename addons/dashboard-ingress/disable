@@ -14,14 +14,17 @@ def dashboard_ingress():
 
     resources = [
         "secret/kubernetes-dashboard-basic-auth",
-        "ingress.networking.k8s.io/kubernetes-dashboard-ingress"
+        "ingress.networking.k8s.io/kubernetes-dashboard-ingress",
+        "middleware/ipwhitelist",
+        "middleware/basicauth",
+        "serverstransport/skip-verify",
     ] 
 
     for resource in resources:
         click.echo(f"Destroying {resource}...")
         try:
             subprocess.check_call(
-                ["microk8s-kubectl.wrapper", "delete", "-n", "kube-system", resource],
+                ["microk8s-kubectl.wrapper", "delete", "-n", "kubernetes-dashboard", resource],
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
