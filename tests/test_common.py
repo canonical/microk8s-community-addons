@@ -133,7 +133,7 @@ class TestCommon(object):
             try:
                 resp = requests.get(
                     "https://kubernetes-dashboard.127.0.0.1.nip.io/#/login",
-                    verify=False,
+                    verify=False, # nosec B501
                 )
                 if (
                     resp.status_code == 200
