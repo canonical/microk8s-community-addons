@@ -4,7 +4,7 @@ set -e
 
 . "${SNAP}/actions/common/utils.sh"
 
-KATA_VERSION="3.15.0"
+KATA_VERSION="3.29.0"
 KATA_NAMESPACE="kata-containers"
 VALUES=
 
@@ -19,7 +19,7 @@ function usage {
   echo ""
   echo "OPTIONS:"
   echo "   -h                   Print this help message"
-  echo "   -v VERSION           Specify kata-deploy version (default: ${VERSION})"
+  echo "   -v VERSION           Specify kata-deploy version (default: ${KATA_VERSION})"
   echo "   -f values.yaml       Use values.yaml file instead of addon default values"
   echo "    See https://github.com/kata-containers/kata-containers/blob/main/tools/packaging/kata-deploy/helm-chart/kata-deploy/values.yaml for more information about the values"
 }

@@ -2,7 +2,7 @@
 
 set -e
 
-HELM="${SNAP}/microk8s-helm.wrapper"
+HELM="${SNAP}/microk8s-helm3.wrapper"
 KATA_NAMESPACE="kata-containers"
 
 echo "Disabling kata addon"
