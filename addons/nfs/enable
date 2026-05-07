@@ -11,7 +11,7 @@ CURRENT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
 
 NAMESPACE="nfs-server-provisioner"
 
-CHART_VERSION="1.4.0"
+CHART_VERSION="1.8.0"
 
 KUBECTL="$SNAP/microk8s-kubectl.wrapper"
 "$SNAP/microk8s-enable.wrapper" helm3
