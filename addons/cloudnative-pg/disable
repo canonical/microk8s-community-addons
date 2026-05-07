@@ -5,7 +5,9 @@ set -e
 cnpg_delete_manifest() {
 	kubectl="$SNAP/microk8s-kubectl.wrapper"
 
-	"${SNAP_DATA}/bin/kubectl-cnpg" install generate | $kubectl delete -f - > /dev/null
+	"${SNAP_DATA}/bin/kubectl-cnpg" \
+		--kubeconfig="${SNAP_DATA}/credentials/client.config" \
+		install generate | $kubectl delete -f - > /dev/null
 
 	echo "$?"
 }

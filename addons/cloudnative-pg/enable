@@ -3,14 +3,14 @@ set -e
 
 CNPG_VERSION="$1"
 if [ -z "$1" ]; then
-        CNPG_VERSION="1.23.3"
+        CNPG_VERSION="1.25.4"
 fi
 
 KUBECTL="${SNAP}/microk8s-kubectl.wrapper"
 # shellcheck source=/dev/null
 source "${SNAP}"/actions/common/utils.sh
 
-if [[ "$(arch)" == "aarch64" ]]; then
+if [[  "$(arch)" == "aarch64" ]]; then
 	ARCH="arm64"
 else
 	ARCH=$(uname -m)
@@ -39,7 +39,9 @@ cnpg_install_plugin() {
 }
 
 cnpg_apply_manifest() {
-	apply_wait=$("${SNAP_DATA}"/bin/kubectl-cnpg install generate | $KUBECTL apply --server-side -f - > /dev/null)
+	apply_wait=$("${SNAP_DATA}"/bin/kubectl-cnpg \
+		--kubeconfig="${SNAP_DATA}/credentials/client.config" \
+		install generate | $KUBECTL apply --server-side -f - > /dev/null)
 
 	# If the apply isn't successful we stop and exit
 	if [[ "${apply_wait}" -ne 0 ]]; then
