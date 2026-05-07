@@ -10,11 +10,14 @@ NAMESPACE_PTR="easyhaproxy"
 KUBECTL="$SNAP/microk8s-kubectl.wrapper"
 HELM="$SNAP/microk8s-helm3.wrapper"
 
+# Get the node name as registered in Kubernetes (lowercase, DNS-safe)
+NODE_NAME=$($KUBECTL get nodes -o jsonpath='{.items[0].metadata.name}')
+
 echo "Disabling EasyHAProxy Ingress Controller"
 echo
 
 
-$KUBECTL label nodes $(hostname) "easyhaproxy/node-"
+$KUBECTL label nodes "$NODE_NAME" "easyhaproxy/node-" || true
 
 $HELM uninstall ingress  \
     --namespace $NAMESPACE_PTR
