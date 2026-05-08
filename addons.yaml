@@ -124,8 +124,8 @@ microk8s-addons:
 
     - name: "kata"
       description: "Kata Containers is a secure runtime with lightweight VMS"
-      version: "latest/stable"
-      check_status: "${SNAP_DATA}/var/lock/kata.enabled"
+      version: "3.29.0"
+      check_status: "daemonset.apps/kata-deploy"
       confinement: "classic"
       supported_architectures:
         - amd64
