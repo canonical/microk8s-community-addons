@@ -145,14 +145,6 @@ microk8s-addons:
         - arm64
         - amd64
 
-    - name: "osm-edge"
-      description: "osm-edge is a lightweight SMI compatible service mesh for the edge-computing."
-      version: "1.1.2"
-      check_status: "pod/osm-controller"
-      supported_architectures:
-        - amd64
-        - arm64
-
     - name: "sosivio"
       description: "Kubernetes Predictive Troubleshooting, Observability, and Resource Optimization"
       version: "1.7.1"
