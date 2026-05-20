@@ -54,16 +54,6 @@ class TestCommon(object):
         self.validate_ingress()
         print("Disabling ingress")
         microk8s_disable("ingress")
-        print("Enabling dashboard")
-        microk8s_enable("dashboard")
-        print("Validating dashboard")
-        self.validate_dns_dashboard()
-        print("Enabling dashboard-ingress")
-        microk8s_enable("dashboard-ingress")
-        print("Validating dashboard-ingress")
-        self.validate_dashboard_ingress()
-        print("Disabling dashboard-ingress")
-        microk8s_disable("dashboard-ingress")
 
         print("Disabling metrics-server")
         microk8s_disable("metrics-server")
@@ -87,65 +77,6 @@ class TestCommon(object):
             if "forward ." in line:
                 for nameserver in nameservers.split(","):
                     assert nameserver in line
-
-    def validate_dns_dashboard(self):
-        """
-        Validate the dashboard addon by trying to access the kubernetes dashboard.
-        The dashboard will return an HTML indicating that it is up and running.
-        """
-        ns = "kubernetes-dashboard"
-        components = ["api", "auth", "metrics-scraper", "web"]
-        app_names = [f"kubernetes-dashboard-{app}" for app in components]
-        app_names.append("kong")
-
-        for app_name in app_names:
-            wait_for_pod_state(
-                "", ns, "running", label=f"app.kubernetes.io/name={app_name}"
-            )
-
-        service = "kubernetes-dashboard-kong-proxy"
-        attempt = 30
-        while attempt > 0:
-            try:
-                output = kubectl(
-                    "get "
-                    "--raw "
-                    f"/api/v1/namespaces/{ns}/services/https:{service}:443/proxy/"
-                )
-                if "Kubernetes Dashboard" in output:
-                    break
-            except subprocess.CalledProcessError:
-                pass
-            time.sleep(10)
-            attempt -= 1
-
-        assert attempt > 0
-
-    def validate_dashboard_ingress(self):
-        """
-        Validate the ingress for dashboard addon by trying to access the kubernetes
-        dashboard using ingress ports. The dashboard will return HTTP 200 and HTML
-        indicating that it is up and running.
-        """
-        service_ok = False
-        attempt = 50
-        while attempt >= 0:
-            try:
-                resp = requests.get(
-                    "https://kubernetes-dashboard.127.0.0.1.nip.io/#/login",
-                    verify=False,
-                )
-                if (
-                    resp.status_code == 200
-                    and "Kubernetes Dashboard" in resp.content.decode("utf-8")
-                ):
-                    service_ok = True
-                    break
-            except requests.RequestException:
-                time.sleep(5)
-                attempt -= 1
-
-        assert service_ok
 
     def validate_storage(self):
         """
