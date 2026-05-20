@@ -22,7 +22,7 @@ class TestCommon(object):
     )
     def test_basic_s390x(self):
         """
-        Sets up and tests dashboard, dns, storage, registry, ingress, metrics server.
+        Sets up and tests dns, storage, registry, ingress, metrics server.
 
         """
         ip_ranges = "8.8.8.8,1.1.1.1"
@@ -36,7 +36,7 @@ class TestCommon(object):
     @pytest.mark.skipif(platform.machine() == "s390x", reason="Not available on s390x")
     def test_basic(self):
         """
-        Sets up and tests dashboard, dns, storage, registry, ingress, metrics server.
+        Sets up and tests dns, storage, registry, ingress, metrics server.
 
         """
         ip_ranges = "8.8.8.8,1.1.1.1"
@@ -57,8 +57,6 @@ class TestCommon(object):
 
         print("Disabling metrics-server")
         microk8s_disable("metrics-server")
-        print("Disabling dashboard")
-        microk8s_disable("dashboard")
         """
         We would disable DNS here but this freezes any terminating pods.
         We let microk8s reset to do the cleanup.
