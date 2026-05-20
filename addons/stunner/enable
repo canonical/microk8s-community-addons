@@ -6,15 +6,32 @@ set -e
 "$SNAP/microk8s-enable.wrapper" helm3
 
 HELM="$SNAP/microk8s-helm3.wrapper"
+KUBECTL="$SNAP/microk8s-kubectl.wrapper"
 NAMESPACE_STUNNER_SYSTEM="stunner-system"
-VERSION_STUNNER_SYSTEM="1.1.0"
+VERSION_STUNNER_SYSTEM="1.2.0"
 
 echo "Enabling STUNner..."
 
 $HELM repo add stunner https://l7mp.io/stunner
 $HELM repo update
 
-$HELM upgrade --install stunner-gateway-operator stunner/stunner-gateway-operator \
-    --create-namespace --namespace $NAMESPACE_STUNNER_SYSTEM --version $VERSION_STUNNER_SYSTEM
+# Skip bundled Gateway API CRDs if they are already present in the cluster
+# (e.g. installed by the ingress addon). This avoids conflicts with the
+# ValidatingAdmissionPolicy introduced in Gateway API v1.5.x.
+SKIP_CRDS=""
+if $KUBECTL get crd gatewayclasses.gateway.networking.k8s.io > /dev/null 2>&1; then
+    echo "Gateway API CRDs already present, skipping bundled CRDs"
+    SKIP_CRDS="--skip-crds"
+
+    # Install STUNner's own CRDs manually since --skip-crds skips all CRDs
+    STUNNER_CRD_DIR=$(mktemp -d)
+    $HELM pull stunner/stunner --version $VERSION_STUNNER_SYSTEM --untar --untardir "$STUNNER_CRD_DIR"
+    $KUBECTL apply --server-side -f "$STUNNER_CRD_DIR/stunner/crds/stunner-crds.yaml"
+    rm -rf "$STUNNER_CRD_DIR"
+fi
+
+$HELM upgrade --install stunner-gateway-operator stunner/stunner \
+    --create-namespace --namespace $NAMESPACE_STUNNER_SYSTEM --version $VERSION_STUNNER_SYSTEM \
+    $SKIP_CRDS
 
 echo "STUNner is enabled."
