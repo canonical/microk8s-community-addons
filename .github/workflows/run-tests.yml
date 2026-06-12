@@ -17,8 +17,6 @@ jobs:
           sudo apt-get install -y python3-setuptools nfs-common
           sudo pip3 install --ignore-installed --upgrade pip
           sudo pip3 install -r tests/requirements.txt
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
       - name: Running addons tests
         run: |
           set -x
