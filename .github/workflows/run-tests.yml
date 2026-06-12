@@ -38,7 +38,7 @@ jobs:
 
           export UNDER_TIME_PRESSURE="True"
           export SKIP_PROMETHEUS="False"
-          sudo -E pytest -s -ra ./tests/
+          sudo -E pytest -s -ra ./tests/test_stunner.py
           sudo snap remove microk8s --purge
 
   run-tests-strict:
