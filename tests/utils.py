@@ -5,7 +5,6 @@ import yaml
 import platform
 from subprocess import check_output, CalledProcessError, check_call
 
-
 arch_translate = {"aarch64": "arm64", "x86_64": "amd64"}
 
 

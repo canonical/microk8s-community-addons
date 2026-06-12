@@ -9,6 +9,9 @@ from utils import (
 
 
 class TestSTUNner(object):
+    @pytest.mark.skip(
+        reason="Skipping test, new version causing issues with GH API on old k8s",
+    )
     @pytest.mark.skipif(platform.machine() == "s390x", reason="Not available on s390x")
     def test_stunner(self):
         """
