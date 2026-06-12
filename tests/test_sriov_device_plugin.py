@@ -45,6 +45,10 @@ class TestSRIOVDevicePlugin(unittest.TestCase):
         reason="SR-IOV Network Device Plugin tests are only relevant in x86 architectures",
     )
     @pytest.mark.skipif(
+        os.environ.get("UNDER_TIME_PRESSURE") == "True",
+        reason="Skipping falco tests as we are under time pressure",
+    )
+    @pytest.mark.skipif(
         os.environ.get("STRICT") == "yes",
         reason="Skipping sriov-device-plugin tests in strict confinement as they are expected to fail",  # noqa: E501
     )

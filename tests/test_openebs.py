@@ -17,7 +17,7 @@ class TestOpenebs(object):
         platform.machine() == "s390x", reason="OpenEBS is not available on s390x"
     )
     @pytest.mark.skipif(
-        os.environ.get("UNDER_TIME_PRESSURE") == None,
+        os.environ.get("UNDER_TIME_PRESSURE") == True,
         reason="Skipping test, expected to be tested when under time pressure",
     )
     def test_openebs(self):
