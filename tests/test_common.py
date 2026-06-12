@@ -20,10 +20,6 @@ class TestCommon(object):
         platform.machine() != "s390x",
         reason="This test is for the limited set of addons s390x has",
     )
-    @pytest.mark.skipif(
-        os.environ.get("UNDER_TIME_PRESSURE") == "True",
-        reason="Skipping falco tests as we are under time pressure",
-    )
     def test_basic_s390x(self):
         """
         Sets up and tests dashboard, dns, storage, registry, ingress, metrics server.
