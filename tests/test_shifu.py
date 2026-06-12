@@ -12,7 +12,7 @@ from utils import (
 class Testshifu(object):
     @pytest.mark.skipif(platform.machine() == "s390x", reason="Not available on s390x")
     @pytest.mark.skipif(
-        os.environ.get("UNDER_TIME_PRESSURE") == True,
+        os.environ.get("UNDER_TIME_PRESSURE") == "True",
         reason="Skipping test, expected to be tested when under time pressure",
     )
     def test_shifu(self):
