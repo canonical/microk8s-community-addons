@@ -1,5 +1,8 @@
 name: cla-check
-on: [pull_request]
+
+on:
+  pull_request:
+    branches: [1.36]
 
 jobs:
   cla-check:

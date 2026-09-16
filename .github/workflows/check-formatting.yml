@@ -1,8 +1,8 @@
 name: Lint Code
 
 on:
-  - push
-  - pull_request
+  pull_request:
+    branches: [1.36]
 
 jobs:
   check-formatting:
