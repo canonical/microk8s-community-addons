@@ -100,7 +100,7 @@ spec:
             failureThreshold: 10
           volumeMounts:
             - name: elasticsearch-logging
-              mountPath: /data
+              mountPath: /usr/share/elasticsearch/data
           env:
             - name: ES_JAVA_OPTS
               value: "-Dlog4j2.formatMsgNoLookups=true"
