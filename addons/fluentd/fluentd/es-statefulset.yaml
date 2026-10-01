@@ -51,7 +51,7 @@ metadata:
   namespace: kube-system
   labels:
     k8s-app: elasticsearch-logging
-    version: v7.4.3
+    version: v9.5.4
     addonmanager.kubernetes.io/mode: Reconcile
 spec:
   serviceName: elasticsearch-logging
@@ -59,16 +59,16 @@ spec:
   selector:
     matchLabels:
       k8s-app: elasticsearch-logging
-      version: v7.4.3
+      version: v9.5.4
   template:
     metadata:
       labels:
         k8s-app: elasticsearch-logging
-        version: v7.4.3
+        version: v9.5.4
     spec:
       serviceAccountName: elasticsearch-logging
       containers:
-        - image: quay.io/fluentd_elasticsearch/elasticsearch:v7.10.2
+        - image: docker.elastic.co/elasticsearch/elasticsearch:9.5.4
           name: elasticsearch-logging
           imagePullPolicy: Always
           resources:
@@ -100,7 +100,7 @@ spec:
             failureThreshold: 10
           volumeMounts:
             - name: elasticsearch-logging
-              mountPath: /data
+              mountPath: /usr/share/elasticsearch/data
           env:
             - name: ES_JAVA_OPTS
               value: "-Dlog4j2.formatMsgNoLookups=true"
@@ -108,8 +108,10 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.namespace
-            - name: "MINIMUM_MASTER_NODES"
-              value: "1"
+            - name: discovery.type
+              value: "single-node"
+            - name: xpack.security.enabled
+              value: "false"
       volumes:
         - name: elasticsearch-logging
           emptyDir: {}

@@ -13,6 +13,7 @@ KUBECTL="$SNAP/microk8s-kubectl.wrapper"
 $KUBECTL -n kube-system delete cm fluentd-es-config-v0.1.5 > /dev/null 2>&1 || true
 $KUBECTL -n kube-system delete daemonset fluentd-es-v2.2.0 > /dev/null 2>&1 || true
 $KUBECTL -n kube-system delete daemonset fluentd-es-v3.0.2 > /dev/null 2>&1 || true
+$KUBECTL -n kube-system delete daemonset fluentd-es-v3.1.0 > /dev/null 2>&1 || true
 
 NODENAME="$($KUBECTL get no -o yaml | grep " name:"| awk '{print $2}')"
 
