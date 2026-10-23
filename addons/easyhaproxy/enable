@@ -21,7 +21,7 @@ NODE_NAME=$($KUBECTL get nodes -o jsonpath='{.items[0].metadata.name}')
 if [ -z "$1" ]; then
 
     for port in $(echo $NODEPORTS $HOSTPORTS); do
-        if [[ "$port" == "80" || "$port" == "443" || "$port" == "1936" ]]; then
+        if [[ "$port" == "80" || "$port" == "443" ]]; then
             echo "Port $port is already in use. Please disable the ingress controller or use the --nodeport option."
             exit 1
         fi
@@ -31,7 +31,7 @@ if [ -z "$1" ]; then
 elif [ "$1" == "--nodeport" ]; then
 
     for port in $(echo $NODEPORTS $HOSTPORTS); do
-        if [[ "$port" == "30080" || "$port" == "30443" || "$port" == "31936" ]]; then
+        if [[ "$port" == "30080" || "$port" == "30443" ]]; then
             echo "Port $port is already in use. Please disable the component is using port $port."
             exit 1
         fi
@@ -60,7 +60,7 @@ $HELM repo add byjg https://opensource.byjg.com/helm > /dev/null 2>&1
 $HELM repo update > /dev/null 2>&1
 
 $KUBECTL label nodes "$NODE_NAME" "easyhaproxy/node=master" --overwrite
-HELM_PACKAGE_VERSION="2.0.0"
+HELM_PACKAGE_VERSION="2.0.9"
 
 if [ -z "$1" ]; then
 
@@ -69,6 +69,7 @@ if [ -z "$1" ]; then
         --namespace $NAMESPACE_PTR \
         --set resources.requests.cpu=100m \
         --set resources.requests.memory=128Mi \
+        --set easyhaproxy.stats.enabled=false \
         --set easyhaproxy.logLevel.easyhaproxy=INFO \
         --set easyhaproxy.logLevel.haproxy=INFO \
         --set easyhaproxy.logLevel.certbot=INFO
@@ -86,9 +87,9 @@ elif [ "$1" == "--nodeport" ]; then
         --set resources.requests.memory=128Mi \
         --set service.create=true \
         --set service.type=NodePort \
-        --set binding.ports.http=30080 \
-        --set binding.ports.https=30443 \
-        --set binding.ports.stats=31936 \
+        --set binding.nodePorts.http=30080 \
+        --set binding.nodePorts.https=30443 \
+        --set easyhaproxy.stats.enabled=false \
         --set easyhaproxy.logLevel.easyhaproxy=INFO \
         --set easyhaproxy.logLevel.haproxy=INFO \
         --set easyhaproxy.logLevel.certbot=INFO
